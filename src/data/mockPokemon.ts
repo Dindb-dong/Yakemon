@@ -1,0 +1,226 @@
+export const mockPokemons = [
+  {
+    id: 3,
+    name: '이상해꽃',
+    types: ['풀', '독'],
+    moves: [
+      {
+        name: '기가드레인',
+        type: '풀',
+        category: '특수',
+        power: 75,
+        pp: 15,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 1, heal: 0.5 }
+      },
+      {
+        name: '오물폭탄',
+        type: '독',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: '폭탄',
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 0.1, status: '독' },
+      },
+      {
+        name: '대지의힘',
+        type: '땅',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 0.1,
+          statChange: {
+            target: 'opponent',
+            stat: '특수방어',
+            change: -1
+          }
+        },
+      },
+      {
+        name: '수면가루',
+        type: '풀',
+        category: '변화',
+        power: 0,
+        pp: 15,
+        isTouch: false,
+        affiliation: '가루',
+        accuracy: 75,
+        criticalRate: 0,
+        effects: { chance: 1, status: '잠듦' }
+      }
+    ],
+    sex: 'male',
+    ability:
+    {
+      id: 1,
+      name: '엽록소',
+      offensive: 'weather_specific',
+    },
+
+    hp: 80,
+    attack: 82,
+    spAttack: 100,
+    defense: 83,
+    spDefense: 100,
+    speed: 80,
+    level: 50,
+  },
+  {
+    id: 6,
+    name: '리자몽',
+    types: ['불', '비행'],
+    moves: [
+      {
+        name: '에어슬래시',
+        type: '비행',
+        category: '특수',
+        power: 75,
+        pp: 15,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 0.3, status: '풀죽음' }
+      },
+      {
+        name: '불대문자',
+        type: '불',
+        category: '특수',
+        power: 110,
+        pp: 5,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 85,
+        criticalRate: 0,
+        effects: { chance: 0.1, status: '화상' },
+      },
+      {
+        name: '열사의대지',
+        type: '땅',
+        category: '특수',
+        power: 70,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 0.1,
+          status: '화상',
+        },
+      },
+      {
+        name: '솔라빔',
+        type: '풀',
+        category: '특수',
+        power: 120,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 0.1, status: '화상' }
+      }
+    ],
+    sex: 'male',
+    ability:
+    {
+      id: 2,
+      name: '선파워',
+      offensive: 'weather_specific',
+    },
+
+    hp: 78,
+    attack: 84,
+    spAttack: 109,
+    defense: 78,
+    spDefense: 85,
+    speed: 100,
+    level: 50,
+  },
+  {
+    id: 9,
+    name: '거북왕',
+    types: ['물'],
+    moves: [
+      {
+        name: '하이드로펌프',
+        type: '물',
+        category: '특수',
+        power: 110,
+        pp: 5,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 80,
+        criticalRate: 0,
+      },
+      {
+        name: '냉동빔',
+        type: '얼음',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 0.1, status: '얼음' },
+      },
+      {
+        name: '껍질깨기',
+        type: '노말',
+        category: '변화',
+        power: 0,
+        pp: 20,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          statChange: {
+            target: 'self',
+            stat: '방어',
+            change: 1
+          }
+        },
+      },
+      {
+        name: '대타출동',
+        type: '노말',
+        category: '변화',
+        power: 0,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+      },
+    ],
+    sex: 'male',
+    ability: [
+      {
+        id: 3,
+        name: '급류',
+        offensive: 'hp_low_trigger',
+      },
+    ],
+    hp: 79,
+    attack: 83,
+    spAttack: 85,
+    defense: 100,
+    spDefense: 105,
+    speed: 78,
+    level: 50,
+  }
+]

@@ -1,0 +1,1 @@
+export type FiledType = 'electric' | 'grass' | 'mistic' | 'psychic' | undefined;
