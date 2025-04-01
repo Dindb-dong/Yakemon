@@ -5,8 +5,9 @@ import { StatusState } from "../../models/Status";
 // 체력 변화
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
   const newHp = Math.max(0, pokemon.currentHp + amount);
-  return { ...pokemon, currentHp: newHp };
   // TODO: 체력 0 이하 되면 0으로 만들기. 이후 기절 처리 
+  return { ...pokemon, currentHp: newHp };
+
 }
 
 // 랭크 변경
@@ -25,8 +26,14 @@ export function changeRank(
 export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
   const has = pokemon.status.includes(status);
   if (!has && status !== null) { // 중복된 상태이상 아닐 경우 추가 
-    // TODO: 마비, 독, 얼음, 화상, 잠듦은 중복되지 않음. 
-    return { ...pokemon, status: [...pokemon.status, status] };
+    // 마비, 독, 얼음, 화상, 잠듦은 다른 상태이상과 중복되지 않음. 
+    if (!(status === '마비') &&
+      !(status === '독') &&
+      !(status === '맹독') &&
+      !(status === '얼음') &&
+      !(status === '잠듦')) {
+      return { ...pokemon, status: [...pokemon.status, status] };
+    }
   }
   return pokemon;
 }
@@ -41,7 +48,7 @@ export function removeStatus(pokemon: BattlePokemon, status: StatusState): Battl
 
 // 기술 사용 시 PP 차감
 export function useMovePP(pokemon: BattlePokemon, moveName: string, pressure?: boolean): BattlePokemon {
-  const newPP = { ...pokemon.pp };
+  let newPP = { ...pokemon.pp };
   if (newPP[moveName] > 0) {
     if (!pressure) {
       newPP[moveName] -= 1;
@@ -49,6 +56,9 @@ export function useMovePP(pokemon: BattlePokemon, moveName: string, pressure?: b
       newPP[moveName] -= 2; // 프레셔 있을 경우 -2 
       // TODO: pp가 -1이 되면 0으로 클램핑. 
     }
+  }
+  if (newPP[moveName] < 0) {
+    newPP[moveName] += 1;
   }
   return { ...pokemon, pp: newPP };
 }

@@ -1,22 +1,22 @@
 type appearanceAbility = 'rank_change' | // 등장 시 또는 특정 조건 달성 시 랭크 상태 변화, 1회성 (예: 불요의검, 감미로운꿀, 위협, 고대활성, 기묘한약, 다운로드 등)
-  'field_change' | // 필드 바꾸는 특성 (예: 일렉트릭메이커, 그래스메이커, 사이코메이커, 미스틱메이커 등)
+  'field_change' | // 필드 바꾸는 특성 (예: 일렉트릭메이커, 그래스메이커, 사이코메이커, 미스트메이커 등)
   'aura_change' | // 오라 적용 (예: 다크오라, 페어리오라 등)
-  'weather_change' | // 날씨 변화 (예: 가뭄, 잔비, 끝의대지, 눈퍼뜨리기, 델타스트림, 모래바람 등)
+  'weather_change' | // 날씨 변화 (예: 가뭄, 잔비, 끝의대지, 눈퍼뜨리기, 델타스트림, 모래날림 등)
   'heal' | // 회복시키는 특성 (예: 대접 등)
-  'ability_change' | // 특성 변화 (예: 리시버)
+  'ability_change' | // 특성 변화 (예: 리시버, 트레이스 등)
+  'disaster' | // 재앙 특성들 (예: 재앙의구슬, 재앙의그릇 등)
   'form_change'; // 등장 시 변화 (예: 괴짜, 기분파, 일루전 등)
 
 type offensive_BeforeAbility =
   // 아래는 데미지 계산 전 발동하는 특성
   'damage_buff' | // 특정 조건에서 기술 위력 증가 (예: 철주먹, 단단한발톱, 적응력, 테크니션, 
   // 심록, 급류, 맹화, 벌레의알림, 강철술사, 강철정신, 스나이퍼, 근성, 메가런처, 적응력, 모래의힘 등)
-  'demerit' | // 특정 조건에서 능력치 감소 또는 디메리트 (예: 무기력, 슬로스타트, 게으름 등)
+  'demerit' | // 특정 조건에서 능력치 감소 또는 디메리트 (예: 무기력)
   'ability_nullification' | // 특성 무효화 (예: 틀깨기, 터보블레이즈, 테라볼티지, 균사의힘 등)
   'type_nullification' | // 방어 상성 무효화 (예: 배짱, 심안 등)
-  'type_change' | // 사용하는 기술 타입이나 본인 타입 변화 (예: 노말스킨, 스카이스킨, 리베로, 변환자재 등 )
-  'weeken_enemy' | // 상대 약화 (예: 재앙의구슬)
+  'type_change' | // 사용하는 기술 타입이나 본인 타입 변화 (예: 노말스킨, 스카이스킨, 리베로, 변환자재 등 ) -> updatePokemon 함수 호출하자. 
   'rank_buff' | // 랭크 버프 특성, 랭크업과 별도로 중첩 가능 (예: 선파워, 독폭주, 열폭주, 마이너스, 플러스 등)
-  'crack'; // 상대의 어떠한 것을 무시 (예: 보이지않는주먹, 틈새포착 등)
+  'crack'; // 상대의 어떠한 것을 무시 (예: 보이지않는주먹, 틈새포착 등) -> updateEnv 쓰기. 
 
 type offensive_AfterAbility =
   // 아래는 데미지 계산 후 발동하는 특성
@@ -26,8 +26,9 @@ type offensive_AfterAbility =
 
 type defensive_BeforeAbility =
   // 데미지 계산 전 발동하는 특성
-  'damage_nullification' | // 데미지 무효화 (예: 부유, 저수, 흙먹기, 초식, 건조피부, 노릇노릇바디, 마중물 등)
-  'damage_reduction' | // 데미지 감소 (예: 퍼코트, 복슬복슬, 필터, 하드록, 두꺼운지방, 내열, 멀티스케일 등 )
+  'type_nullification' | // 타입 상성 무효화 (예: 부유, 저수, 흙먹기, 초식, 건조피부, 노릇노릇바디, 마중물, 타오르는불꽃, 피뢰침, 전기엔진)
+  'damage_nullification' | // 데미지 무효화 (예: 방탄, 방진 등)
+  'damage_reduction' | // 데미지 감소 (예: 퍼코트, 복슬복슬, 필터, 하드록, 두꺼운지방, 내열, 수포, 멀티스케일, 스펙터가드 등 )
   'critical_nullification'; // 급소 무효화 (예: 조가비갑옷, 전투무장 등)
 
 type defensive_AfterAbility =
@@ -59,6 +60,7 @@ type utilAbility =
   'damage' | // 데미지 주는 특성 (예: 나이트메어 등)
   'restrict_enemy' | // 상대를 제한하는 특성 (예: 개미지옥, 그림자밟기, 긴장감 등)
   'certainly' | // 반드시 ~~하는 특성 (예: 노가드, 무모한행동, 불가사의부적 등 )
+  'demerit' | // 디메리트 특성. (예: 슬로스타트, 게으름 등)
   'etc'; // 짬통 (예: 멸망의바디)
 
 export type AbilityInfo = {

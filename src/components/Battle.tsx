@@ -4,9 +4,12 @@ import Result from './Result';
 function Battle({ player1, player2 }) {
   const [p1, setP1] = useState({ ...player1 });
   const [p2, setP2] = useState({ ...player2 });
+  // 포켓몬 고르는 로직도 변경해야 함. AI는 처음부터 정해져 있고(mockPokemon에서 랜덤으로 3마리 가져옴), 나만 고를 수 있게끔. 
+  // 내가 포켓몬 다 고르면, 그에 맞춰 createBattlePokemon 실행. (ai도 마찬가지)
   const [selectedMove, setSelectedMove] = useState(null);
   const [log, setLog] = useState<string[]>([]);
   const [turn, setTurn] = useState(1);
+  // 교체 선택지도 추가해야 함. 
 
   const isGameOver = p1.currentHp <= 0 || p2.currentHp <= 0;
 
@@ -25,6 +28,10 @@ function Battle({ player1, player2 }) {
 
     // Sort by speed descending
     actions.sort((a, b) => b.user.speed - a.user.speed);
+    // 기술이 우선도를 가지고 있는지, 트릭룸이 있는지에 따라 달라져야 하므로 이 로직 말고
+    // calculateOrder(playerMove, aiMove) 함수를 사용할 것. 
+    // 근데 그 함수는 battleSequence 함수 안에 있으므로, 여기에 넘길 것.
+    // battleSequence 함수는 인풋으로 액션을 받음. 즉, 기술도 교체도 모두 넣을 수 있어야 함. 
 
     const newLog: string[] = [];
     let newP1 = { ...p1 };

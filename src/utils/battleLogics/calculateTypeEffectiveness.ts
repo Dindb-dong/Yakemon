@@ -25,7 +25,7 @@ export function calculateTypeEffectivenessWithAbility(
 }
 
 // 무효화되는 타입 조합 정의 (예시)
-function isTypeImmune(targetType: string, moveType: string): boolean {
+export function isTypeImmune(targetType: string, moveType: string): boolean {
   const immunityMap: Record<string, string[]> = {
     '노말': ['고스트'],
     '격투': ['고스트'],

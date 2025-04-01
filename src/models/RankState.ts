@@ -3,6 +3,7 @@ export type RankState = {
   spAttack: number;
   defense: number;
   spDefense: number;
+  speed: number;
   accuracy: number;
   dodge: number;
   critical: number;
@@ -63,6 +64,7 @@ export class RankManager {
       spAttack: clamp(state.spAttack),
       defense: clamp(state.defense),
       spDefense: clamp(state.spDefense),
+      speed: clamp(state.speed),
       accuracy: clamp(state.accuracy),
       dodge: clamp(state.dodge),
       critical: Math.min(4, state.critical), // 급소율은 0~4
@@ -75,6 +77,7 @@ const initialState: RankState = {
   spAttack: 3,
   defense: 6,
   spDefense: 2,
+  speed: 1,
   accuracy: 5,
   dodge: 7,
   critical: 1,

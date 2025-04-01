@@ -13,7 +13,10 @@ type MoveEffect = {
   recoil?: number; // 반동, 0.1 ~ 1
   heal?: number; // 흡혈, 0.1 ~ 1 
   statChange?: StatChange[];
-  multiHit?: boolean; // 다중타격 여부
+  multiHit?: boolean; // 2~5회 타격 여부 (isAlwaysHit), 명중 여부는 초기에 계산 
+  doubleHit?: boolean; // 2회 타격 (isAlwaysHit)
+  tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
+  priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
 }
 
 export type MoveInfo = {
@@ -28,6 +31,8 @@ export type MoveInfo = {
   criticalRate: number; // 급소율. 랭크로 나타냄. 0은 6.25프로, ..4는 50프로. 
   effects?: MoveEffect;
 };
+
+// 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.
 
 let movesCache: MoveInfo[] | null = null; // 캐시를 저장할 변수
 const movesFilePath = path.resolve(__dirname, "../data/moves.json"); // 경로 문제 방지

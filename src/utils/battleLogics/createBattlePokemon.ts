@@ -9,6 +9,7 @@ const defaultRank: RankState = {
   spAttack: 0,
   defense: 0,
   spDefense: 0,
+  speed: 0,
   accuracy: 0,
   dodge: 0,
   critical: 0,

@@ -1,27 +1,26 @@
 import { create } from "zustand";
 import { BattlePokemon } from "./BattlePokemon";
-import { BattleEnvironment } from "./BattleEnvironment";
+import { PublicBattleEnvironment, IndividualBattleEnvironment } from "./BattleEnvironment";
 
 type BattleStore = {
   myTeam: BattlePokemon[];
   enemyTeam: BattlePokemon[];
   activeMy: number;
   activeEnemy: number;
-  env: BattleEnvironment;
+  publicEnv: PublicBattleEnvironment;
+  myEnv: IndividualBattleEnvironment;
+  enemyEnv: IndividualBattleEnvironment;
   turn: number;
   logs: string[];
 
-  // 업데이트 함수들
   setMyTeam: (team: BattlePokemon[]) => void;
   setEnemyTeam: (team: BattlePokemon[]) => void;
   setActiveMy: (index: number) => void;
   setActiveEnemy: (index: number) => void;
-  setEnvironment: (env: Partial<BattleEnvironment>) => void;
-  updatePokemon: (
-    side: "my" | "enemy",
-    index: number,
-    update: Partial<BattlePokemon>
-  ) => void;
+  setPublicEnv: (env: Partial<PublicBattleEnvironment>) => void;
+  setMyEnv: (env: Partial<IndividualBattleEnvironment>) => void;
+  setEnemyEnv: (env: Partial<IndividualBattleEnvironment>) => void;
+  updatePokemon: (side: "my" | "enemy", index: number, update: Partial<BattlePokemon>) => void;
   addLog: (log: string) => void;
 };
 
@@ -30,12 +29,18 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   enemyTeam: [],
   activeMy: 0,
   activeEnemy: 0,
-  env: {
+  publicEnv: {
     weather: null,
     field: null,
-    aura: null,
+    room: null,
+    aura: [],
+    disaster: [],
+  },
+  myEnv: {
     trap: [],
-    disaster: null,
+  },
+  enemyEnv: {
+    trap: [],
   },
   turn: 1,
   logs: [],
@@ -44,8 +49,15 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   setEnemyTeam: (team) => set({ enemyTeam: team }),
   setActiveMy: (i) => set({ activeMy: i }),
   setActiveEnemy: (i) => set({ activeEnemy: i }),
-  setEnvironment: (envUpdate) =>
-    set((state) => ({ env: { ...state.env, ...envUpdate } })),
+  setPublicEnv: (envUpdate) => set((state) => ({
+    publicEnv: { ...state.publicEnv, ...envUpdate }
+  })),
+  setMyEnv: (envUpdate) => set((state) => ({
+    myEnv: { ...state.myEnv, ...envUpdate }
+  })),
+  setEnemyEnv: (envUpdate) => set((state) => ({
+    enemyEnv: { ...state.enemyEnv, ...envUpdate }
+  })),
   updatePokemon: (side, index, update) =>
     set((state) => {
       const teamKey = side === "my" ? "myTeam" : "enemyTeam";
@@ -55,10 +67,3 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     }),
   addLog: (log) => set((state) => ({ logs: [...state.logs, log] })),
 }));
-
-// Example:
-// const { myTeam, updatePokemon } = useBattleStore();
-
-// updatePokemon("my", 0, { currentHp: myTeam[0].currentHp - 40 });
-
-// setEnvironment({ weather: "모래바람", field: "일렉트릭필드" });
