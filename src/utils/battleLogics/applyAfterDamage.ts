@@ -8,9 +8,11 @@ import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
 import { addStatus, changeHp, changeRank } from "./updateBattlePokemon";
 import { RankState } from "../../models/RankState";
+import { applyStatusWithDuration } from "./applyStatusWithDuration";
+import { applyConfusionStatus } from "./applyConfusionStatus";
 
 
-// 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
+// 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
 export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
   applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage);
 }
@@ -26,7 +28,7 @@ function applyOffensiveAbilityEffectAfrerDamage() {
 function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
   const { updatePokemon, addLog, activeEnemy, activeMy } = useBattleStore.getState();
   const effect = usedMove.effects;
-  const opponentSide = side === 'my' ? 'enemy' : 'enemy';
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   if (effect && Math.random() < effect.chance) {
@@ -56,13 +58,20 @@ function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemo
       // 상태이상 적용
       // 아니 여기 원래 attacker가 아니라 deffender여야 하는데 이거 왜이러냐 이거?
       const status = effect.status;
-      if (status === '화상' && deffender.base.types.includes('불')) return;
-      if (status === '마비' && deffender.base.types.includes('전기')) return;
-      if (status === '얼음' && deffender.base.types.includes('얼음')) return;
-      if (status === '독' && deffender.base.types.includes('독')) return;
-      if (status === '맹독' && deffender.base.types.includes('독')) return;
-      updatePokemon(opponentSide, activeOpponent, (deffender) => addStatus(deffender, status));
+      if (status === '화상' && deffender.base.types.includes('불')) { };
+      if (status === '마비' && deffender.base.types.includes('전기')) { };
+      if (status === '얼음' && deffender.base.types.includes('얼음')) { };
+      if (status === '독' && deffender.base.types.includes('독')) { };
+      if (status === '맹독' && deffender.base.types.includes('독')) { };
+      if (status === '풀죽음' || status === '도발' || status === '앵콜') {
+        applyStatusWithDuration(opponentSide, activeOpponent, status);
+      } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
+        applyConfusionStatus(opponentSide, activeOpponent);
+      } else {
+        updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
+      }
       addLog(`${deffender.base.name}은/는 ${status}상태가 되었다!`)
+      console.log(`${deffender.base.name}은/는 ${status}상태가 되었다!`)
     }
     if (effect.recoil && appliedDameage) {
       // 반동 데미지 적용

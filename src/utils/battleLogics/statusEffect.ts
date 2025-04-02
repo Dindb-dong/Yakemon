@@ -14,6 +14,20 @@ export function applyStatusEffectBefore(
     } else {
       return { rate: currentRate, isHit: false };
     }
-  } // TODO: 헤롱헤롱, 풀죽음, 얼음, 잠듦 등 추가 
+  } else if (status.includes('풀죽음')) {
+    return { rate: currentRate, isHit: false }
+  } else if (status.includes('얼음')) {
+    if (Math.random() > 0.1) {
+      return { rate: currentRate, isHit: true };
+    } else {
+      return { rate: currentRate, isHit: false };
+    }
+  } else if (status.includes('헤롱헤롱')) {
+    if (Math.random() > 0.5) {
+      return { rate: currentRate, isHit: true };
+    } else {
+      return { rate: currentRate, isHit: false };
+    }
+  }
   return { rate: currentRate, isHit: true };
 }

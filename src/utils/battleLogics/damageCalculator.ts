@@ -168,7 +168,9 @@ export async function calculateMoveDamage({
   if (myPokeStatus) {
     const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo);
     rate = statusResult.rate; // 화상 적용 
-    isHit = statusResult.isHit; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
+    if (!statusResult.isHit) {
+      return { success: false }; // 바로 함수 종료 
+    }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
   }
 
   // 9. 명중률 계산
@@ -179,7 +181,6 @@ export async function calculateMoveDamage({
     if (!hitSuccess) {
       isHit = false;
       console.log(side + '의 공격은 빗나갔다!')
-      return { success: false, message: '공격이 빗나갔다!' };
     } else {
       isHit = true;
     }
@@ -202,23 +203,32 @@ export async function calculateMoveDamage({
   }
 
   // 13. 데미지 계산
-
+  // 공격자가 천진일 때: 상대 방어 랭크 무시, 
+  // 피격자가 천진일 때; 공격자 공격 랭크 무시 
   // 랭크 적용 
   if (myPokeRank.attack > 0 && moveInfo.category === '물리') {
-    attackStat *= calculateRankEffect(myPokeRank.attack);
-    addLog(`${attacker.base.name}의 공격 랭크업이 적용되었다!`)
+    if (!(deffender.base.ability?.name === '천진')) {
+      attackStat *= calculateRankEffect(myPokeRank.attack);
+      addLog(`${attacker.base.name}의 공격 랭크업이 적용되었다!`)
+    }
   }
   if (myPokeRank.spAttack > 0 && moveInfo.category === '특수') {
-    attackStat *= calculateRankEffect(myPokeRank.spAttack);
-    addLog(`${attacker.base.name}의 특수공격 랭크업이 적용되었다!`)
+    if (!(deffender.base.ability?.name === '천진')) {
+      attackStat *= calculateRankEffect(myPokeRank.spAttack);
+      addLog(`${attacker.base.name}의 특수공격 랭크업이 적용되었다!`)
+    }
   }
   if (opPokeRank.defense > 0 && moveInfo.category === '물리') {
-    attackStat *= calculateRankEffect(myPokeRank.defense);
-    addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
+    if (!(attacker.base.ability?.name === '천진')) {
+      attackStat *= calculateRankEffect(myPokeRank.defense);
+      addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
+    }
   }
   if (opPokeRank.spDefense > 0 && moveInfo.category === '특수') {
-    attackStat *= calculateRankEffect(myPokeRank.spDefense);
-    addLog(`${attacker.base.name}의 특수방어 랭크업이 적용되었다!`)
+    if (!(attacker.base.ability?.name === '천진')) {
+      attackStat *= calculateRankEffect(myPokeRank.spDefense);
+      addLog(`${attacker.base.name}의 특수방어 랭크업이 적용되었다!`)
+    }
   }
   // 내구력 계산
   const durability = (defenseStat * (opponentPokemon.hp)) / 0.411;
@@ -239,9 +249,6 @@ export async function calculateMoveDamage({
   // •	최종 데미지 = 2.5 × 100 = 250
 
   // 14. 최종적으로 데미지 줬는지 여부 계산
-  if (types === 0 || rate === 0) {
-    return { success: false, message: '효과가 없었다!' }
-  }
 
   if (!isHit) {
     addLog(`${attacker.base.name}의 공격은 빗나갔다!`);
@@ -250,7 +257,7 @@ export async function calculateMoveDamage({
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
       addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
     }
-    return { success: false }
+    return;
   }
 
   if (wasNull) {
@@ -260,7 +267,7 @@ export async function calculateMoveDamage({
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
       addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
     }
-    return { success: false }
+    return;
   }
 
   // 15. 데미지 적용 및 이후 함수 적용

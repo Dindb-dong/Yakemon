@@ -220,7 +220,7 @@ export const mockPokemon: PokemonInfo[] = [
         name: '악의파동',
         type: '악',
         category: '특수',
-        power: 0,
+        power: 80,
         pp: 15,
         isTouch: false,
         affiliation: null,

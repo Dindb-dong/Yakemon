@@ -11,6 +11,7 @@ type ActionPanelParams = {
 }
 
 function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }: ActionPanelParams) {
+  const isFainted = myPokemon.currentHp <= 0;
   return (
     <div className="action-panel">
       <div className="move-grid">
@@ -19,7 +20,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }
             key={move.name}
             className="move-button"
             onClick={() => onAction(move)}
-            disabled={isTurnProcessing}
+            disabled={isTurnProcessing || isFainted}
           >
             <span className="move-name">{move.name}</span>
             <span className="move-pp">PP: {myPokemon.pp[move.name]}</span>

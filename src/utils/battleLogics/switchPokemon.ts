@@ -2,7 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
-import { addStatus, resetRank, setActive } from "./updateBattlePokemon";
+import { addStatus, removeStatus, resetRank, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
 export function switchPokemon(side: "my" | "enemy", newIndex: number) {
@@ -18,7 +18,8 @@ export function switchPokemon(side: "my" | "enemy", newIndex: number) {
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
-
+  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜'];
+  const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
   const env = side === "my" ? myEnv : enemyEnv;
@@ -40,6 +41,15 @@ export function switchPokemon(side: "my" | "enemy", newIndex: number) {
 
   // 2. 랭크업 초기화
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
+  // 비메이저 상태이상 제거
+  for (const status in unMainStatusCondition) {
+    updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
+  }
+  if (switchingPokemon.base.ability?.name === '자연회복') {
+    for (const status in mainStatusCondition) {
+      updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
+    }
+  }
 
   if (side === "my") {
     setActiveMy(newIndex);
