@@ -44,7 +44,7 @@ export const mockPokemon: PokemonInfo[] = [
           chance: 0.1,
           statChange: [{
             target: 'opponent',
-            stat: '특수방어',
+            stat: 'spDefense',
             change: -1
           }],
         },
@@ -193,24 +193,24 @@ export const mockPokemon: PokemonInfo[] = [
           chance: 1,
           statChange: [{
             target: 'self',
-            stat: '방어',
+            stat: 'defense',
             change: -1
           }, {
             target: 'self',
-            stat: '특수방어',
+            stat: 'spDefense',
             change: -1
           }, {
             target: 'self',
-            stat: '공격',
+            stat: 'attack',
             change: 2
           },
           {
             target: 'self',
-            stat: '특수공격',
+            stat: 'spAttack',
             change: 2,
           }, {
             target: 'self',
-            stat: '스피드',
+            stat: 'speed',
             change: 2
           }
           ]
@@ -471,7 +471,7 @@ export const mockPokemon: PokemonInfo[] = [
         criticalRate: 0,
         effects: {
           chance: 1,
-          statChange: [{ target: 'self', stat: '공격', change: 2 }]
+          statChange: [{ target: 'self', stat: 'attack', change: 2 }]
         }
       }
     ],
@@ -531,7 +531,7 @@ export const mockPokemon: PokemonInfo[] = [
         criticalRate: 0,
         effects: {
           chance: 1,
-          statChange: [{ target: 'self', stat: '공격', change: 2 }]
+          statChange: [{ target: 'self', stat: 'attack', change: 2 }]
         }
       }
     ],
@@ -557,8 +557,7 @@ export const mockPokemon: PokemonInfo[] = [
         effects: {
           chance: 1,
           statChange: [
-            { target: 'self', stat: '특수공격', change: 1 },
-            { target: 'self', stat: '특수방어', change: 1 }
+            { target: 'self', stat: 'critical', change: 2 },
           ]
         }
       },
@@ -597,7 +596,7 @@ export const mockPokemon: PokemonInfo[] = [
         criticalRate: 0,
         effects: {
           chance: 0.2,
-          statChange: [{ target: 'opponent', stat: '특수방어', change: -1 }]
+          statChange: [{ target: 'opponent', stat: 'spDefense', change: -1 }]
         }
       }
     ],
@@ -635,7 +634,7 @@ export const mockPokemon: PokemonInfo[] = [
         effects: {
           chance: 1,
           statChange: [
-            { target: 'self', stat: '특수공격', change: 1 },
+            { target: 'self', stat: 'spAttack', change: 1 },
           ],
         },
       },
@@ -652,7 +651,7 @@ export const mockPokemon: PokemonInfo[] = [
         effects: {
           chance: 0.2,
           statChange: [
-            { target: 'opponent', stat: '특수방어', change: -1 },
+            { target: 'opponent', stat: 'spDefense', change: -1 },
           ],
         },
       },
@@ -725,7 +724,7 @@ export const mockPokemon: PokemonInfo[] = [
         effects: {
           chance: 0.1,
           statChange: [
-            { target: 'opponent', stat: '특수공격', change: -1 },
+            { target: 'opponent', stat: 'spAttack', change: -1 },
           ],
         },
       },
@@ -752,7 +751,7 @@ export const mockPokemon: PokemonInfo[] = [
         effects: {
           chance: 1,
           statChange: [
-            { target: 'self', stat: '스피드', change: 1 },
+            { target: 'self', stat: 'speed', change: 1 },
           ],
         },
       },
@@ -781,8 +780,8 @@ export const mockPokemon: PokemonInfo[] = [
         effects: {
           chance: 1,
           statChange: [
-            { target: 'self', stat: '방어', change: -1 },
-            { target: 'self', stat: '특수방어', change: -1 },
+            { target: 'self', stat: 'defense', change: -1 },
+            { target: 'self', stat: 'spDefense', change: -1 },
           ],
         },
       },

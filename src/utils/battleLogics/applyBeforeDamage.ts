@@ -12,7 +12,7 @@ import { changeHp, setTypes } from "./updateBattlePokemon";
 export function applyDefensiveAbilityEffectBeforeDamage(
   usedMove: MoveInfo, side: 'my' | 'enemy'): number {
 
-  const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon } = useBattleStore.getState();
+  const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon, addLog } = useBattleStore.getState();
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = deffender.base.ability; // 상대 포켓몬의 특성

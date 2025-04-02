@@ -8,7 +8,7 @@ import { addStatus } from "./updateBattlePokemon";
 export function applyStatusWithDuration(
   side: "my" | "enemy",
   index: number,
-  status: "도발" | "앵콜" | "풀죽음"
+  status: "도발" | "앵콜" | "풀죽음" | "잠듦"
 ) {
   const { updatePokemon } = useBattleStore.getState();
   const { addEffect } = useDurationStore.getState();
@@ -21,6 +21,7 @@ export function applyStatusWithDuration(
     도발: 3,
     앵콜: 3,
     풀죽음: 1,
+    잠듦: 3,
   };
 
   addEffect(side, {

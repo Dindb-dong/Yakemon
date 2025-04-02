@@ -26,11 +26,12 @@ function applyOffensiveAbilityEffectAfrerDamage() {
 }
 
 function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
-  const { updatePokemon, addLog, activeEnemy, activeMy } = useBattleStore.getState();
+  const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
   const effect = usedMove.effects;
   const opponentSide = side === 'my' ? 'enemy' : 'my';
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
+  const opponentTeam = side === 'my' ? enemyTeam : myTeam;
   if (effect && Math.random() < effect.chance) {
     console.log(`${usedMove.name}의 부가효과 발동!`)
     if (effect.statChange) {
@@ -63,15 +64,15 @@ function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemo
       if (status === '얼음' && deffender.base.types.includes('얼음')) { };
       if (status === '독' && deffender.base.types.includes('독')) { };
       if (status === '맹독' && deffender.base.types.includes('독')) { };
-      if (status === '풀죽음' || status === '도발' || status === '앵콜') {
+      if (status === '풀죽음' || status === '도발' || status === '앵콜' || status === '잠듦') {
         applyStatusWithDuration(opponentSide, activeOpponent, status);
       } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
         applyConfusionStatus(opponentSide, activeOpponent);
       } else {
         updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
       }
-      addLog(`${deffender.base.name}은/는 ${status}상태가 되었다!`)
-      console.log(`${deffender.base.name}은/는 ${status}상태가 되었다!`)
+      addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+      console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
     }
     if (effect.recoil && appliedDameage) {
       // 반동 데미지 적용

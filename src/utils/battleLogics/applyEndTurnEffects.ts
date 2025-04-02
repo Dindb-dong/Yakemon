@@ -1,6 +1,7 @@
 import { useBattleStore } from "../../Context/useBattleStore";
 import { useDurationStore } from "../../Context/useDurationContext";
-import { changeHp } from "./updateBattlePokemon";
+import { StatusState } from "../../models/Status";
+import { changeHp, removeStatus } from "./updateBattlePokemon";
 import { setField, setWeather } from "./updateEnvironment";
 
 // 매 턴 종료 시 적용할 모든 효과를 통합적으로 처리
@@ -41,6 +42,17 @@ export function applyEndTurnEffects() {
 
   // === 지속형 효과 턴 감소 처리 ===
   const expired = decrementTurns();
+
+  // ✅ [NEW] '풀죽음', '앵콜', '도발' 등 my/enemy 쪽 효과 만료 처리
+  expired.my.forEach((effectName) => {
+    updatePokemon("my", activeMy, (p) => removeStatus(p, effectName as StatusState));
+    addLog(`내 포켓몬의 ${effectName} 상태가 해제되었다!`);
+  });
+
+  expired.enemy.forEach((effectName) => {
+    updatePokemon("enemy", activeEnemy, (p) => removeStatus(p, effectName as StatusState));
+    addLog(`상대 포켓몬의 ${effectName} 상태가 해제되었다!`);
+  });
 
   if (publicEnv.weather && expired.public.includes(publicEnv.weather)) {
     setWeather(null);

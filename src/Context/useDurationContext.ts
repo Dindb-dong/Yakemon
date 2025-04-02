@@ -68,9 +68,9 @@ export const useDurationStore = create<DurationState>((set, get) => ({
 
     // 날씨 또는 필드 효과 만료 시 BattleStore 상태에서 제거
     expired.public.forEach((effect) => {
-      if (["쾌청", "비", "모래폭풍", "우박"].includes(effect)) {
+      if (["쾌청", "비", "모래바람", "싸라기눈"].includes(effect)) {
         battleStore.setPublicEnv({ weather: null });
-      } else if (["풀밭", "미스트필드", "사이코필드", "일렉트릭필드"].includes(effect)) {
+      } else if (["그래스필드", "미스트필드", "사이코필드", "일렉트릭필드"].includes(effect)) {
         battleStore.setPublicEnv({ field: null });
       }
     });

@@ -166,9 +166,10 @@ export async function calculateMoveDamage({
 
   // 8. 상태이상 확인
   if (myPokeStatus) {
-    const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo);
+    const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo, side);
     rate = statusResult.rate; // 화상 적용 
     if (!statusResult.isHit) {
+      addLog(`${attacker}의 기술은 실패했다!`);
       return { success: false }; // 바로 함수 종료 
     }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
   }
@@ -200,6 +201,7 @@ export async function calculateMoveDamage({
     rate *= 2.25; // 스나이퍼는 급소 데미지 2배
   } else if (isCritical) {
     rate *= 1.5 // 그 외에는 1.5배 
+    addLog(`${moveName}은/는 급소에 맞았다!`)
   }
 
   // 13. 데미지 계산

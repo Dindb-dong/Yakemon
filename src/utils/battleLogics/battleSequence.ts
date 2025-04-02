@@ -193,7 +193,6 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage);
     }
-    await applyAfterDamage(side, attacker, deffender, move, result?.damage); // 주체 
   }
 }
 

@@ -1,9 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
+import { RankState } from "./RankState";
 
 type StatChange = {
   target: 'opponent' | 'self';
-  stat: '공격' | '방어' | '특수공격' | '특수방어' | '스피드' | '명중률' | '회피율' | '급소율';
+  stat: keyof RankState;
   change: -6 | -5 | -4 | -3 | -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
 }
 

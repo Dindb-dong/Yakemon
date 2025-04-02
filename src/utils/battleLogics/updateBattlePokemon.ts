@@ -38,7 +38,7 @@ export function resetRank(pokemon: BattlePokemon): BattlePokemon {
 export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜']
-  const { publicEnv } = useBattleStore();
+  const { publicEnv } = useBattleStore.getState();
   if (status === '독' || status === '맹독' && pokemon.base.ability?.name === '면역') return { ...pokemon };
   if (status === '도발' || status === '헤롱헤롱' && pokemon.base.ability?.name === '둔감') return { ...pokemon };
   if (status === '마비' && pokemon.base.ability?.name === '유연') return { ...pokemon };
