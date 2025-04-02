@@ -9,79 +9,137 @@
 // 만약 multiHit이 true인 기술을 사용했을 경우, calculateMoveDamage와 applyAfterDamage를 랜덤한 횟수만큼 작동시킴 (2~5회)
 // 그리고 마지막으로 applyEndTrun(상태이상 데미지 적용, 날씨 데미지 적용, 필드효과 적용, 매 턴 발동하는 유틸 특성 적용 등 )
 
+import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { applyAfterDamage } from "./applyAfterDamage";
+import { applyEndTurnEffects } from "./applyEndTurnEffects";
 import { calculateOrder } from "./calculateOrder";
 import { calculateMoveDamage } from "./damageCalculator";
 import { calculateRankEffect } from "./rankEffect";
 import { switchPokemon } from "./switchPokemon";
 
+type BattleAction = MoveInfo | { type: "switch", index: number };
 
-export function battleSequence(myAction: MoveInfo | void, aiAction: MoveInfo | void) {
-  const {
-    myTeam, enemyTeam, activeMy, activeEnemy, publicEnv, myEnv, enemyEnv, turn, logs,
-    setMyTeam, setEnemyTeam, setActiveMy, setActiveEnemy, setPublicEnv, setMyEnv, setEnemyEnv, updatePokemon, addLog
-  } = useBattleStore.getState();
+function isMoveAction(action: BattleAction): action is MoveInfo {
+  return (action as MoveInfo).power !== undefined;
+}
 
-  const myPokemon = myTeam[activeMy];
-  const aiPokemon = enemyTeam[activeEnemy];
+function isSwitchAction(action: BattleAction): action is { type: "switch", index: number } {
+  return (action as any).type === "switch";
+}
 
-  // action은 기술 혹은 교체(void함수).
-  const whoIsFirst = calculateOrder(myAction, aiAction)
-  // 서로 기술 사용했을 때에만 calculateOrder 실행.
-  if ((typeof myAction === void) && (typeof aiAction === void)) { // 서로 교체했을 경우
-    if (whoIsFirst === 'my') {
-      myAction(); // void 함수 작동 (switchPokemon)
-      aiAction();
+
+
+export async function battleSequence(
+  myAction: BattleAction,
+  aiAction: BattleAction
+) {
+  const { addLog } = useBattleStore.getState();
+  console.log('우선도 및 스피드 계산중...')
+  const whoIsFirst = calculateOrder(
+    isMoveAction(myAction) ? myAction : undefined,
+    isMoveAction(aiAction) ? aiAction : undefined
+  );
+
+  // === 1. 둘 다 교체 ===
+  if (isSwitchAction(myAction) && isSwitchAction(aiAction)) {
+    if (whoIsFirst === "my") {
+      switchPokemon("my", myAction.index);
+      switchPokemon("enemy", aiAction.index);
     } else {
-      aiAction();
-      myAction();
+      switchPokemon("enemy", aiAction.index);
+      switchPokemon("my", myAction.index);
     }
-  } else if (myAction && aiAction && 'power' in myAction && 'power' in aiAction) { // 서로 기술 눌렀을 경우 
-    if (whoIsFirst === 'my') { // 내가 먼저 행동할 경우 
-      if (myAction.effects?.multiHit) { // 여러번 때리는 기술일 경우 
-        const prob = Math.random();
-        let hitTime: number;
-        if (prob < 0.15 || myPokemon.base.ability?.name === '스킬링크') { // 5회 타격 가능 여부 
-          const isHit = calculateMoveDamage({ moveName: myAction.name, side: "my" })
-          if (isHit.success) { // 맞았을 경우 
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-          }
-        } else if (prob >= 0.15 && prob < 0.3) { // 4회 타격 
-          const isHit = calculateMoveDamage({ moveName: myAction.name, side: "my" })
-          if (isHit.success) { // 맞았을 경우 
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-          }
-        } else if (prob >= 0.3 && prob < 0.65) { // 3회 타격
-          const isHit = calculateMoveDamage({ moveName: myAction.name, side: "my" })
-          if (isHit.success) { // 맞았을 경우 
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-          }
-        } else if (prob >= 0.65) {
-          const isHit = calculateMoveDamage({ moveName: myAction.name, side: "my" })
-          if (isHit.success) { // 맞았을 경우 
-            calculateMoveDamage({ moveName: myAction.name, side: "my", isAlwaysHit: true });
-          }
+    applyEndTurnEffects();
+    return;
+  }
+
+  // === 2. 한 쪽만 교체 ===
+  if (isSwitchAction(myAction)) {
+    switchPokemon("my", myAction.index);
+    if (isMoveAction(aiAction)) {
+      await handleMove("enemy", aiAction);
+    }
+    applyEndTurnEffects();
+    return;
+  }
+
+  if (isSwitchAction(aiAction)) {
+    switchPokemon("enemy", aiAction.index);
+    if (isMoveAction(myAction)) {
+      await handleMove("my", myAction);
+    }
+    applyEndTurnEffects();
+    return;
+  }
+
+  // === 3. 둘 다 기술 ===
+  if (whoIsFirst === "my") {
+    await handleMove("my", myAction as MoveInfo);
+    await handleMove("enemy", aiAction as MoveInfo);
+  } else {
+    await handleMove("enemy", aiAction as MoveInfo);
+    await handleMove("my", myAction as MoveInfo);
+  }
+
+  applyEndTurnEffects();
+}
+
+async function handleMove(side: "my" | "enemy", move: MoveInfo) {
+  const {
+    myTeam,
+    enemyTeam,
+    activeMy,
+    activeEnemy,
+  } = useBattleStore.getState();
+  const isMultiHit = move.effects?.multiHit;
+  const isDoubleHit = move.effects?.doubleHit;
+  const isTripleHit = ["트리플킥", "트리플악셀"].includes(move.name);
+  const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+
+  if (isTripleHit) {
+    const hitCount = getHitCount(move);
+    for (let i = 0; i < hitCount; i++) {
+      const result = await calculateMoveDamage({ moveName: move.name, side });
+      if (result?.success) {
+        // 트리플 기술은 데미지 누적 증가 (예시)
+        if (isTripleHit) {
+          move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
         }
-      } else if (myAction.name === '트리플악셀') {
-        // TODO: 이전 공격이 맞을때마다 additionalDamage에 20 넣어서 calculateMoveDamage 호출하고, 
-        // applyAfterDamage도 매번 호출. 
-      } else if (myAction.name === '트리플킥') {
-        // TODO: 이전 공격이 맞을때마다 additionalDamage에 10 넣어서 calculateMoveDamage 호출하고, 
-        // applyAfterDamage도 매번 호출. 
+        await applyAfterDamage(attacker, deffender, move, result.damage);
+      } else {
+        break; // 빗나가면 반복 중단
       }
-      /// TODO: 내 기술 사용 및 데미지 이후 함수 실행 끝나면, side에 enemy 넣어서 상대의 기술 발동 및 데미지 이후 함수 발동. 
-      // TODO: 상대도 마찬가지로 위와 동일하게.
-      ///TODO:  매 턴 발동하는 함수 발동하고 끝. 
-    } else if (whoIsFirst === 'enemy') {
-      //TODO:  whoIsFirst가 my였을 경우와 기본적으로 같되, myPokemon 들어갈 자리에 enemyPokemon 들어가고 my 대신에 enemy 들어감. 
+    }
+  } else if (isDoubleHit || isMultiHit) {
+    const result = await calculateMoveDamage({ moveName: move.name, side });
+    if (result?.success) {
+      const hitCount = getHitCount(move);
+      for (let i = 0; i < hitCount - 1; i++) {
+        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
+        await applyAfterDamage(attacker, deffender, move, result?.damage);
+      }
+      console.log("총 " + hitCount + "번 맞았다!");
     }
   }
+  else { // 그냥 다른 기술들
+    const result = await calculateMoveDamage({ moveName: move.name, side });
+    await applyAfterDamage(attacker, deffender, move, result?.damage);
+  }
+}
+
+function getHitCount(move: MoveInfo): number {
+  if (!move.effects?.multiHit) return 1;
+  if (move.effects?.doubleHit) return 2;
+  if (move.effects?.tripleHit) return 3;
+
+  const rand = Math.random();
+  if (move.name === "스킬링크") return 5;
+
+  if (rand < 0.15) return 5;
+  if (rand < 0.30) return 4;
+  if (rand < 0.65) return 3;
+  return 2;
 }

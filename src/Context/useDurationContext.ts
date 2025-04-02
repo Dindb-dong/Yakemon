@@ -12,7 +12,7 @@ type DurationState = {
 
   addEffect: (target: "my" | "enemy" | "public", effect: TimedEffect) => void;
   removeEffect: (target: "my" | "enemy" | "public", effectName: string) => void;
-  decrementTurns: () => void; // 매 턴마다 호출해서 remainingTurn -1 처리
+  decrementTurns: () => any; // 매 턴마다 호출해서 remainingTurn -1 처리
 };
 
 export const useDurationStore = create<DurationState>((set, get) => ({
@@ -38,17 +38,27 @@ export const useDurationStore = create<DurationState>((set, get) => ({
   },
 
   decrementTurns: () => {
+    const expired: { my: string[], enemy: string[], public: string[] } = { my: [], enemy: [], public: [] };
+
     set((state) => {
-      const dec = (list: TimedEffect[]) =>
+      const dec = (list: TimedEffect[], which: "my" | "enemy" | "public") =>
         list
-          .map(e => ({ ...e, remainingTurn: e.remainingTurn - 1 }))
+          .map(e => {
+            const newTurn = e.remainingTurn - 1;
+            if (newTurn <= 0) {
+              expired[which].push(e.name);
+            }
+            return { ...e, remainingTurn: newTurn };
+          })
           .filter(e => e.remainingTurn > 0);
 
       return {
-        myEffects: dec(state.myEffects),
-        enemyEffects: dec(state.enemyEffects),
-        publicEffects: dec(state.publicEffects),
+        myEffects: dec(state.myEffects, "my"),
+        enemyEffects: dec(state.enemyEffects, "enemy"),
+        publicEffects: dec(state.publicEffects, "public"),
       };
     });
+
+    return expired;
   }
 }));

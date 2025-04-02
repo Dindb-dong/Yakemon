@@ -1,6 +1,7 @@
-import { BattlePokemon } from "../../Context/BattlePokemon";
+import { BattlePokemon } from "../../models/BattlePokemon";
+import { AbilityInfo } from "../../models/Ability";
 import { RankManager } from "../../models/RankState";
-import { StatusState } from "../../models/Status";
+import { StatusManager, StatusState } from "../../models/Status";
 
 // 체력 변화
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
@@ -22,28 +23,38 @@ export function changeRank(
   return { ...pokemon, rank: manager.getState() };
 }
 
+// 랭크 초기화
+export function resetRank(pokemon: BattlePokemon): BattlePokemon {
+  const manager = new RankManager(pokemon.rank);
+  manager.resetState();
+  return { ...pokemon, rank: manager.getState() };
+}
+
 // 상태이상 추가
 export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
-  const has = pokemon.status.includes(status);
-  if (!has && status !== null) { // 중복된 상태이상 아닐 경우 추가 
-    // 마비, 독, 얼음, 화상, 잠듦은 다른 상태이상과 중복되지 않음. 
-    if (!(status === '마비') &&
-      !(status === '독') &&
-      !(status === '맹독') &&
-      !(status === '얼음') &&
-      !(status === '잠듦')) {
-      return { ...pokemon, status: [...pokemon.status, status] };
-    }
-  }
-  return pokemon;
+  const manager = new StatusManager(pokemon.status);
+  manager.addStatus(status);
+  return { ...pokemon, status: manager.getStatus() };
 }
 
 // 상태이상 제거
 export function removeStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
-  return {
-    ...pokemon,
-    status: pokemon.status.filter((s) => s !== status),
-  };
+  const manager = new StatusManager(pokemon.status);
+  manager.removeStatus(status);
+  return { ...pokemon, status: manager.getStatus() };
+}
+
+// 전체 상태이상 제거
+export function clearAllStatus(pokemon: BattlePokemon): BattlePokemon {
+  const manager = new StatusManager(pokemon.status);
+  manager.clearStatus();
+  return { ...pokemon, status: manager.getStatus() };
+}
+
+// 상태이상 확인
+export function hasStatus(pokemon: BattlePokemon, status: StatusState): boolean {
+  const manager = new StatusManager(pokemon.status);
+  return manager.hasStatus(status);
 }
 
 // 기술 사용 시 PP 차감
@@ -79,6 +90,28 @@ export function changePosition(
 // 전투 출전 여부 설정
 export function setActive(pokemon: BattlePokemon, isActive: boolean): BattlePokemon {
   return { ...pokemon, isActive };
+}
+
+// 특성 강제 변경 함수
+export function setAbility(pokemon: BattlePokemon, ability: AbilityInfo | null): BattlePokemon {
+  return {
+    ...pokemon,
+    base: {
+      ...pokemon.base,
+      ability: ability, // null도 가능
+    },
+  };
+}
+
+// 타입 강제 변경 함수 
+export function setTypes(pokemon: BattlePokemon, types: string[]): BattlePokemon {
+  return {
+    ...pokemon,
+    base: {
+      ...pokemon.base,
+      types: types, // 빈 배열 넣으면 사실상 타입 사라지게 함.
+    },
+  };
 }
 
 // Example:

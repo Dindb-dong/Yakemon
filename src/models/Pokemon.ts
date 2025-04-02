@@ -19,11 +19,5 @@ export type PokemonInfo = {
   defense: number;
   spDefense: number;
   speed: number;
-  // 랭크
-  rank?: RankState;
-  // 상태이상
-  status?: StatusState[];
-  // 포켓몬 위치 (구멍파기, 다이빙, 프리폴, 공중날기 등)
-  position?: '땅' | '바다' | '하늘' | null;
   level: number; // 레벨에 따라 동료 포획률 조정
 };

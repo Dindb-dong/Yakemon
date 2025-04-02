@@ -1,4 +1,6 @@
-export const mockPokemons = [
+import { PokemonInfo } from "../models/Pokemon";
+
+export const mockPokemon: PokemonInfo[] = [
   {
     id: 3,
     name: '이상해꽃',
@@ -40,11 +42,11 @@ export const mockPokemons = [
         criticalRate: 0,
         effects: {
           chance: 0.1,
-          statChange: {
+          statChange: [{
             target: 'opponent',
             stat: '특수방어',
             change: -1
-          }
+          }],
         },
       },
       {
@@ -65,7 +67,7 @@ export const mockPokemons = [
     {
       id: 1,
       name: '엽록소',
-      offensive: 'weather_specific',
+      util: ['rank_buff'],
     },
 
     hp: 80,
@@ -138,7 +140,7 @@ export const mockPokemons = [
     {
       id: 2,
       name: '선파워',
-      offensive: 'weather_specific',
+      offensive: ['rank_buff'],
     },
 
     hp: 78,
@@ -188,33 +190,55 @@ export const mockPokemons = [
         accuracy: 100,
         criticalRate: 0,
         effects: {
-          statChange: {
+          chance: 1,
+          statChange: [{
             target: 'self',
             stat: '방어',
-            change: 1
+            change: -1
+          }, {
+            target: 'self',
+            stat: '특수방어',
+            change: -1
+          }, {
+            target: 'self',
+            stat: '공격',
+            change: 2
+          },
+          {
+            target: 'self',
+            stat: '특수공격',
+            change: 2,
+          }, {
+            target: 'self',
+            stat: '스피드',
+            change: 2
           }
+          ]
         },
       },
       {
-        name: '대타출동',
-        type: '노말',
-        category: '변화',
+        name: '악의파동',
+        type: '악',
+        category: '특수',
         power: 0,
-        pp: 10,
+        pp: 15,
         isTouch: false,
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
+        effects: {
+          chance: 0.3,
+          status: '풀죽음',
+        }
       },
     ],
     sex: 'male',
-    ability: [
-      {
-        id: 3,
-        name: '급류',
-        offensive: 'hp_low_trigger',
-      },
-    ],
+    ability:
+    {
+      id: 3,
+      name: '급류',
+      offensive: ['damage_buff'],
+    },
     hp: 79,
     attack: 83,
     spAttack: 85,
@@ -222,5 +246,230 @@ export const mockPokemons = [
     spDefense: 105,
     speed: 78,
     level: 50,
+  }, {
+    id: 157,
+    name: '블레이범',
+    types: ['불'],
+    moves: [
+      {
+        name: "",
+        type: "",
+        category: "특수",
+        power: 0,
+        isTouch: false,
+        accuracy: 0,
+        criticalRate: 0
+      },
+    ], // 나중에 추가
+    sex: 'male',
+    ability: { id: 101, name: '맹화', offensive: ['damage_buff'] },
+    hp: 76, attack: 104, defense: 71, spAttack: 104, spDefense: 71, speed: 108, level: 50,
+  },
+  {
+    id: 154,
+    name: '메가니움',
+    types: ['풀'],
+    moves: [],
+    sex: 'female',
+    ability: { id: 102, name: '심록', offensive: ['damage_buff'] },
+    hp: 80, attack: 82, defense: 100, spAttack: 83, spDefense: 100, speed: 80, level: 50,
+  },
+  {
+    id: 160,
+    name: '장크로다일',
+    types: ['물'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 103, name: '우격다짐', offensive: ['damage_buff'] },
+    hp: 85, attack: 105, defense: 100, spAttack: 79, spDefense: 83, speed: 78, level: 50,
+  },
+  {
+    id: 257,
+    name: '번치코',
+    types: ['불', '격투'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 104, name: '가속', util: ['rank_change'] },
+    hp: 80, attack: 120, defense: 70, spAttack: 110, spDefense: 70, speed: 80, level: 50,
+  },
+  {
+    id: 254,
+    name: '나무킹',
+    types: ['풀'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 105, name: '심록', offensive: ['damage_buff'] },
+    hp: 70, attack: 85, defense: 65, spAttack: 105, spDefense: 85, speed: 120, level: 50,
+  },
+  {
+    id: 260,
+    name: '대짱이',
+    types: ['물', '땅'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 106, name: '급류', offensive: ['damage_buff'] },
+    hp: 100, attack: 110, defense: 90, spAttack: 85, spDefense: 90, speed: 60, level: 50,
+  },
+  {
+    id: 392,
+    name: '초염몽',
+    types: ['불', '격투'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 107, name: '철주먹', offensive: ['damage_buff'] },
+    hp: 76, attack: 104, defense: 71, spAttack: 104, spDefense: 71, speed: 108, level: 50,
+  },
+  {
+    id: 389,
+    name: '토대부기',
+    types: ['풀', '땅'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 108, name: '조가비갑옷', defensive: ['critical_nullification'] },
+    hp: 95, attack: 109, defense: 105, spAttack: 75, spDefense: 85, speed: 56, level: 50,
+  },
+  {
+    id: 395,
+    name: '엠페르트',
+    types: ['물', '강철'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 109, name: '오기', util: ['rank_change'] },
+    hp: 84, attack: 86, defense: 88, spAttack: 111, spDefense: 101, speed: 60, level: 50,
+  },
+  {
+    id: 500,
+    name: '염무왕',
+    types: ['불', '격투'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 110, name: '이판사판', offensive: ['damage_buff'] },
+    hp: 110, attack: 123, defense: 65, spAttack: 100, spDefense: 65, speed: 65, level: 50,
+  },
+  {
+    id: 497,
+    name: '샤로다',
+    types: ['풀'],
+    moves: [],
+    sex: 'female',
+    ability: { id: 111, name: '심술꾸러기', util: ['etc'] },
+    hp: 75, attack: 75, defense: 95, spAttack: 75, spDefense: 95, speed: 113, level: 50,
+  },
+  {
+    id: 503,
+    name: '대검귀',
+    types: ['물'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 112, name: '급류', offensive: ['damage_buff'] },
+    hp: 95, attack: 100, defense: 85, spAttack: 108, spDefense: 70, speed: 70, level: 50,
+  },
+  {
+    id: 655,
+    name: '마폭시',
+    types: ['불', '에스퍼'],
+    moves: [],
+    sex: 'female',
+    ability: { id: 113, name: '맹화', offensive: ['damage_buff'] },
+    hp: 75, attack: 69, defense: 72, spAttack: 114, spDefense: 100, speed: 104, level: 50,
+  },
+  {
+    id: 652,
+    name: '브리가론',
+    types: ['풀', '격투'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 114, name: '방탄', defensive: ['damage_nullification'] },
+    hp: 88, attack: 107, defense: 122, spAttack: 74, spDefense: 75, speed: 64, level: 50,
+  },
+  {
+    id: 658,
+    name: '개굴닌자',
+    types: ['물', '악'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 115, name: '변환자재', offensive: ['type_change'] }, // 발동하고 나면 특성 삭제시킬 것.
+    hp: 72, attack: 95, defense: 67, spAttack: 103, spDefense: 71, speed: 122, level: 50,
+  },
+  {
+    id: 727,
+    name: '어흥염',
+    types: ['불', '악'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 116, name: '맹화', offensive: ['damage_buff'] },
+    hp: 95, attack: 115, defense: 90, spAttack: 80, spDefense: 90, speed: 60, level: 50,
+  },
+  {
+    id: 724,
+    name: '모크나이퍼',
+    types: ['풀', '고스트'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 117, name: '심록', offensive: ['damage_buff'] },
+    hp: 78, attack: 107, defense: 75, spAttack: 100, spDefense: 100, speed: 70, level: 50,
+  },
+  {
+    id: 730,
+    name: '누리레느',
+    types: ['물', '페어리'],
+    moves: [],
+    sex: 'female',
+    ability: { id: 118, name: '급류', offensive: ['damage_buff'] },
+    hp: 80, attack: 74, defense: 74, spAttack: 126, spDefense: 116, speed: 60, level: 50,
+  },
+  {
+    id: 815,
+    name: '에이스번',
+    types: ['불'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 119, name: '맹화', offensive: ['damage_buff'] },
+    hp: 80, attack: 116, defense: 75, spAttack: 65, spDefense: 75, speed: 119, level: 50,
+  },
+  {
+    id: 812,
+    name: '고릴타',
+    types: ['풀'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 120, name: '심록', offensive: ['damage_buff'] },
+    hp: 100, attack: 125, defense: 90, spAttack: 60, spDefense: 70, speed: 85, level: 50,
+  },
+  {
+    id: 818,
+    name: '인텔리레온',
+    types: ['물'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 121, name: '급류', offensive: ['damage_buff'] },
+    hp: 70, attack: 85, defense: 65, spAttack: 125, spDefense: 65, speed: 120, level: 50,
+  },
+  {
+    id: 911,
+    name: '라우드본',
+    types: ['불', '고스트'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 122, name: '맹화', offensive: ['damage_buff'] },
+    hp: 104, attack: 75, defense: 100, spAttack: 110, spDefense: 75, speed: 66, level: 50,
+  },
+  {
+    id: 907,
+    name: '마스카나',
+    types: ['풀', '악'],
+    moves: [],
+    sex: 'female',
+    ability: { id: 123, name: '심록', offensive: ['damage_buff'] },
+    hp: 76, attack: 110, defense: 70, spAttack: 81, spDefense: 70, speed: 123, level: 50,
+  },
+  {
+    id: 914,
+    name: '웨이니발',
+    types: ['물', '격투'],
+    moves: [],
+    sex: 'male',
+    ability: { id: 124, name: '급류', offensive: ['damage_buff'] },
+    hp: 85, attack: 120, defense: 80, spAttack: 85, spDefense: 75, speed: 105, level: 50,
   }
 ]

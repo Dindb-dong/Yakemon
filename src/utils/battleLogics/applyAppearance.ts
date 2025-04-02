@@ -1,5 +1,5 @@
 
-import { BattlePokemon } from "../../Context/BattlePokemon";
+import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { RankState } from "../../models/RankState";
 import { changeRank } from "./updateBattlePokemon";
@@ -32,7 +32,6 @@ export function applyAppearance(
   for (const effect of ability.appear) {
     switch (effect) {
       case "weather_change":
-        // TODO: 특성 이름별로 분기 가능 (예: 가뭄 → 쾌청)
         if (ability.name === '가뭄') {
           setWeather("쾌청");
           logs.push(`${pokemon.base.name}의 특성으로 날씨가 쾌청이 되었다!`);
@@ -110,6 +109,23 @@ export function applyAppearance(
           logs.push(`${pokemon.base.name}의 등장으로 상대 ${enemyPokemon.base.name}의 공격력이 떨어졌다!`);
 
         } else if (ability.name === "고대활성" && publicEnv.weather === "쾌청") {
+          const stats = myPokemon.base;
+          const statEntries: [keyof RankState, number][] = [
+            ["attack", stats.attack],
+            ["defense", stats.defense],
+            ["spAttack", stats.spAttack],
+            ["spDefense", stats.spDefense],
+            ["speed", stats.speed],
+          ];
+
+          const [bestStat] = statEntries.reduce((prev, curr) => {
+            return curr[1] > prev[1] ? curr : prev;
+          });
+
+          const updatedMy = changeRank(myPokemon, bestStat, 1);
+          updatePokemon("my", activeMy, updatedMy);
+          logs.push(`${pokemon.base.name}의 ${bestStat} 능력이 상승했다!`);
+        } else if (ability.name === "쿼크차지" && publicEnv.field === "일렉트릭필드") {
           const stats = myPokemon.base;
           const statEntries: [keyof RankState, number][] = [
             ["attack", stats.attack],

@@ -5,23 +5,32 @@ export type StatusState = '화상' | '마비' | '독' | '맹독' | '얼음' | '�
 export class StatusManager {
   private status: StatusState[];
 
-  addStatus(status: StatusState) {
+  constructor(initialStatus: StatusState[] = []) {
+    this.status = [...initialStatus];
+  }
+
+  addStatus(status: StatusState): void {
+    if (!status || this.hasStatus(status)) return;
+
+    const exclusive = ['마비', '독', '맹독', '얼음', '잠듦'];
+    if (exclusive.some(s => this.status.includes(s as StatusState)) && exclusive.includes(status)) return;
+
     this.status.push(status);
   }
 
-  removeStatus(status: StatusState) {
-    this.status = this.status.filter((s) => s !== status);
+  removeStatus(status: StatusState): void {
+    this.status = this.status.filter(s => s !== status);
   }
 
-  hasStatus(status: StatusState) {
-    return this.status.some((s) => s === status);
-  }
-
-  constructor() {
+  clearStatus(): void { // 상태이상 전체 삭제 (리프레쉬 등)
     this.status = [];
   }
 
-  getStatus() {
+  hasStatus(status: StatusState): boolean {
+    return this.status.includes(status);
+  }
+
+  getStatus(): StatusState[] {
     return this.status;
   }
 }

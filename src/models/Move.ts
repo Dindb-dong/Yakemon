@@ -34,23 +34,23 @@ export type MoveInfo = {
 
 // 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.
 
-let movesCache: MoveInfo[] | null = null; // 캐시를 저장할 변수
-const movesFilePath = path.resolve(__dirname, "../data/moves.json"); // 경로 문제 방지
+// let movesCache: MoveInfo[] | null = null; // 캐시를 저장할 변수
+// const movesFilePath = path.resolve(__dirname, "../data/moves.json"); // 경로 문제 방지
 
-async function loadMoves(): Promise<MoveInfo[] | null> {
-  if (!movesCache) {
-    // 캐시가 없을 때만 파일을 읽음
-    const fileData = await fs.promises.readFile(movesFilePath, "utf-8");
-    movesCache = JSON.parse(fileData).moves;
-  }
-  return movesCache;
-}
+// async function loadMoves(): Promise<MoveInfo[] | null> {
+//   if (!movesCache) {
+//     // 캐시가 없을 때만 파일을 읽음
+//     const fileData = await fs.promises.readFile(movesFilePath, "utf-8");
+//     movesCache = JSON.parse(fileData).moves;
+//   }
+//   return movesCache;
+// }
 
-export async function getMoveInfo(moveName: string): Promise<MoveInfo> {
-  const moves = await loadMoves();
-  const move = moves?.find((move) => move.name === moveName);
-  if (!move) {
-    throw new Error(`Move with name: ${moveName} not found.`);
-  }
-  return move as MoveInfo;
-}
+// export async function getMoveInfo(moveName: string): Promise<MoveInfo> {
+//   const moves = await loadMoves();
+//   const move = moves?.find((move) => move.name === moveName);
+//   if (!move) {
+//     throw new Error(`Move with name: ${moveName} not found.`);
+//   }
+//   return move as MoveInfo;
+// }

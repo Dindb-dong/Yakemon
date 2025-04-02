@@ -1,10 +1,14 @@
-import React from 'react';
+import React from "react";
 
 function Result({ winner }) {
+  const handleRestart = () => {
+    window.location.reload(); // 새로고침 대신 리셋 상태관리로 대체할 수도 있음
+  };
+
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
+    <div style={{ padding: "2rem", textAlign: "center" }}>
       <h1>{winner} 승리!</h1>
-      <p>게임을 새로고침하여 다시 시작하세요.</p>
+      <button onClick={handleRestart}>다시 시작</button>
     </div>
   );
 }

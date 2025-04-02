@@ -1,7 +1,7 @@
 // 데미지 계산 후의 함수. 
 // 예를 들어, 기술의 부가 효과/특성의 부가효과/방어적 특성 효과/아이템의 부가효과 등을 적용시킴. 
 
-import { BattlePokemon } from "../../Context/BattlePokemon";
+import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";

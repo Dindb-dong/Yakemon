@@ -21,6 +21,22 @@ export class RankManager {
     return this.state;
   }
 
+  // Resetter
+  resetState(): RankState {
+    const reset: RankState = {
+      attack: 0,
+      spAttack: 0,
+      defense: 0,
+      spDefense: 0,
+      speed: 0,
+      accuracy: 0,
+      dodge: 0,
+      critical: 0,
+    };
+    this.state = this.clampState(reset);
+    return this.state;
+  }
+
   // Update state with clamping
   updateState(newState: Partial<RankState>) {
     this.state = this.clampState({ ...this.state, ...newState });

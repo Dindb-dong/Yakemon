@@ -1,4 +1,4 @@
-import { BattlePokemon } from "../../Context/BattlePokemon";
+import { BattlePokemon } from "../../models/BattlePokemon";
 import { PokemonInfo } from "../../models/Pokemon";
 import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
@@ -17,6 +17,10 @@ const defaultRank: RankState = {
 
 // BattlePokemon 생성 함수
 export function createBattlePokemon(base: PokemonInfo): BattlePokemon {
+  if (!base || !base.moves) {
+    throw new Error(`createBattlePokemon: 유효하지 않은 포켓몬 데이터: ${JSON.stringify(base)}`);
+  }
+
   const pp: Record<string, number> = {};
   base.moves.forEach((move) => {
     const movePP = move.pp ?? 10; // pp 없으면 기본값 10
@@ -24,11 +28,19 @@ export function createBattlePokemon(base: PokemonInfo): BattlePokemon {
   });
 
   return {
-    base,
+    base: {
+      ...base,
+      hp: base.hp + 75,
+      attack: base.attack + 20,
+      spAttack: base.spAttack + 20,
+      defense: base.defense + 20,
+      spDefense: base.spDefense + 20,
+      speed: base.speed + 20,
+    },
     currentHp: base.hp,
     pp,
-    rank: base.rank ?? { ...defaultRank },
-    status: base.status ?? [],
+    rank: defaultRank,
+    status: [],
     position: null,
     lockedMove: null,
     isActive: false,

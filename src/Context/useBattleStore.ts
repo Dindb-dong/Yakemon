@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { BattlePokemon } from "./BattlePokemon";
+import { BattlePokemon } from "../models/BattlePokemon";
 import { PublicBattleEnvironment, IndividualBattleEnvironment } from "./BattleEnvironment";
 
 type BattleStore = {
@@ -21,6 +21,7 @@ type BattleStore = {
   setMyEnv: (env: Partial<IndividualBattleEnvironment>) => void;
   setEnemyEnv: (env: Partial<IndividualBattleEnvironment>) => void;
   updatePokemon: (side: "my" | "enemy", index: number, update: Partial<BattlePokemon>) => void;
+  setTurn: (turn: number) => void;
   addLog: (log: string) => void;
 };
 
@@ -65,5 +66,6 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
       team[index] = { ...team[index], ...update };
       return { [teamKey]: team };
     }),
+  setTurn: (turn) => set({ turn: turn }),
   addLog: (log) => set((state) => ({ logs: [...state.logs, log] })),
 }));

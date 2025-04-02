@@ -1,26 +1,57 @@
-import React, { useState } from 'react';
-import PokemonSelect from './components/PokemonSelect';
-import Battle from './components/Battle';
-import './index.css';
-import { mockPokemons } from './data/mockPokemon';
+import React, { useCallback, useState } from "react";
+import PokemonSelect from "./components/PokemonSelect";
+import Battle from "./components/Battle";
+import "./index.css";
+import { createBattlePokemon } from "./utils/battleLogics/createBattlePokemon";
+import { useBattleStore } from "./Context/useBattleStore";
+import { PokemonInfo } from "./models/Pokemon";
+import { mockPokemon } from "./data/mockPokemon";
 
 function App() {
-  const [player1, setPlayer1] = useState(null);
-  const [player2, setPlayer2] = useState(null);
+  const [isSelected, setIsSelected] = useState(false);
+  const { setMyTeam, setEnemyTeam } = useBattleStore();
 
-  if (!player1 || !player2) {
-    return (
-      <PokemonSelect
-        pokemons={mockPokemons}
-        onSelect={(p1, p2) => {
-          setPlayer1({ ...p1, currentHp: p1.hp });
-          setPlayer2({ ...p2, currentHp: p2.hp });
-        }}
-      />
-    );
-  }
+  const handleSelect = useCallback(
+    (playerPokemons: PokemonInfo[]) => {
+      // AI 포켓몬 랜덤 선택
+      const aiCandidates = mockPokemon.filter(p => !playerPokemons.includes(p));
+      const aiRaw: PokemonInfo[] = Array.from({ length: 3 }, () => {
+        const idx = Math.floor(Math.random() * aiCandidates.length);
+        return aiCandidates.splice(idx, 1)[0];
+      });
+      console.log("선택된 포켓몬:", playerPokemons);
+      console.log("AI 포켓몬:", aiRaw);
 
-  return <Battle player1={player1} player2={player2} />;
+      const myBattleTeam = playerPokemons.map((p, i) => {
+        if (!p || !p.moves) {
+          console.error(`playerPokemons[${i}]가 이상함:`, p);
+        }
+        return createBattlePokemon(p);
+      });
+
+      const aiBattleTeam = aiRaw.map((p, i) => {
+        if (!p || !p.moves) {
+          console.error(`aiPokemons[${i}]가 이상함:`, p);
+        }
+        return createBattlePokemon(p);
+      });
+
+      setMyTeam(myBattleTeam);
+      setEnemyTeam(aiBattleTeam);
+      setIsSelected(true); // 화면 전환 트리거
+    },
+    [setMyTeam, setEnemyTeam]
+  );
+
+  return (
+    <div className="app">
+      {!isSelected ? (
+        <PokemonSelect onSelect={handleSelect} />
+      ) : (
+        <Battle />
+      )}
+    </div>
+  );
 }
 
 export default App;

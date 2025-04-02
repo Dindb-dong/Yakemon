@@ -1,7 +1,7 @@
-import { PokemonInfo } from "../models/Pokemon";
-import { RankState } from "../models/RankState";
-import { StatusState } from "../models/Status";
-import { MoveInfo } from "../models/Move";
+import { PokemonInfo } from "./Pokemon";
+import { RankState } from "./RankState";
+import { StatusState } from "./Status";
+import { MoveInfo } from "./Move";
 
 export type BattlePokemon = {
   base: PokemonInfo;               // 기본 정보 (정적인 데이터)

@@ -1,28 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { mockPokemon } from "../data/mockPokemon";
+import { PokemonInfo } from "../models/Pokemon";
 
-function PokemonSelect({ pokemons, onSelect }) {
-  const [p1, setP1] = useState(null);
-  const [p2, setP2] = useState(null);
+type Props = {
+  onSelect: (playerPokemons: PokemonInfo[]) => void;
+};
+
+function PokemonSelect({ onSelect }: Props) {
+  const [selected, setSelected] = useState<PokemonInfo[]>([]);
+
+  const handleSelect = (pokemon: PokemonInfo) => {
+    if (selected.includes(pokemon)) {
+      setSelected(selected.filter((p) => p !== pokemon));
+    } else if (selected.length < 3) {
+      setSelected([...selected, pokemon]);
+    }
+  };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>포켓몬 선택</h2>
-      <div style={{ display: 'flex', gap: '2rem' }}>
-        <div>
-          <h3>플레이어 1</h3>
-          {pokemons.map((p: any) => (
-            <button key={p.id} onClick={() => setP1(p)}>{p.name}</button>
-          ))}
-        </div>
-        <div>
-          <h3>플레이어 2</h3>
-          {pokemons.map((p: any) => (
-            <button key={p.id} onClick={() => setP2(p)}>{p.name}</button>
-          ))}
-        </div>
-      </div>
+    <div style={{ padding: "2rem" }}>
+      <h2>내 포켓몬 3마리 선택</h2>
+      {mockPokemon.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => handleSelect(p)}
+          style={{
+            backgroundColor: selected.includes(p) ? "#00bcd4" : "",
+            margin: "0.5rem",
+          }}
+        >
+          {p.name}
+        </button>
+      ))}
       <br />
-      <button disabled={!p1 || !p2} onClick={() => onSelect(p1, p2)}>배틀 시작</button>
+      <button disabled={selected.length !== 3} onClick={() => onSelect(selected)}>
+        배틀 시작
+      </button>
     </div>
   );
 }

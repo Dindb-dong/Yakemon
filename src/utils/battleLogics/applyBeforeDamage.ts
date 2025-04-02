@@ -1,19 +1,20 @@
 // 데미지 계산 전 함수.
 // 데미지 계산 전의 공격적 특성/상대 방어적 특성 적용          
 
+import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
-import { changeHp } from "./updateBattlePokemon";
+import { changeHp, setTypes } from "./updateBattlePokemon";
 
 // 내 포켓몬, 상대 포켓몬, 기술, 받은 데미지, 날씨, 필드
 export function applyDefensiveAbilityEffectBeforeDamage(
-  usedMove: MoveInfo): number {
+  usedMove: MoveInfo, side: 'my' | 'enemy'): number {
 
   const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon } = useBattleStore.getState();
-  const attacker = myTeam[activeMy];
-  const deffender = enemyTeam[activeEnemy];
+  const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = deffender.base.ability; // 상대 포켓몬의 특성
   const currentHp = deffender.currentHp; // 상대 포켓몬 남은 체력 (멀티스케일, 스펙터가드)
 
@@ -58,11 +59,11 @@ export function applyDefensiveAbilityEffectBeforeDamage(
 }
 
 export function applyOffensiveAbilityEffectBeforeDamage(
-  usedMove: MoveInfo
+  usedMove: MoveInfo, side: 'my' | 'enemy'
 ): number {
   const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon } = useBattleStore.getState();
-  const attacker = myTeam[0];
-  const deffender = enemyTeam[0];
+  const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = attacker.base.ability; // 내 포켓몬의 특성
   const currentHp = myTeam[activeMy]; // 내 포켓몬 남은 체력 (멀티스케일, 스펙터가드)
   let rate = 1;
@@ -77,6 +78,9 @@ export function applyOffensiveAbilityEffectBeforeDamage(
         case "type_nullification":
           break;
         case "type_change":
+          if (ability.name === '변환자재') {
+            updatePokemon(side, 0, setTypes(attacker, [usedMove.type])); // 사용하는 기술에 맞게 특성 변경 
+          }
           break;
         case "rank_buff":
           break;

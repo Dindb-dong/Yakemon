@@ -51,7 +51,7 @@ type utilAbility =
   'type_change' | // 타입 변화 (예: AR시스템, 멀티타입 등)
   'form_change' | // 폼체인지 등 (예: 배틀체인지, 꼬르륵스위치, 달마모드, 리밋실드 등)
   'tickDamage_nullification' | // 틱뎀 무효화, 기술 데미지만 받음 (예: 매직가드)
-  'statusMove_nullification' | // 변화기술 반사 (예: 매직코드)
+  'statusMove_nullification' | // 변화기술 반사 (예: 매직코트)
   'status_nullification' | // 상태이상 무효화 (예: 수의베일, 유연, 둔감, 리프가드, 마그마의무장, 마이페이스, 면역 등)
   'ability_nullification' | // 특성 무효화 (예: 화학변화가스 등)
   'weather_nullification' | // 날씨 없는 것 취급! 단, 턴 수 남아있을 때 교체하면 날씨 다시 적용 (예: 날씨부정 등)

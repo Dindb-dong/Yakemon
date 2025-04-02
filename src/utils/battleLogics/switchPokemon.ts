@@ -1,8 +1,9 @@
 import { useBattleStore } from "../../Context/useBattleStore";
+import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
-import { applyTrapDamage } from "./applyTrapDamage";
-import { setActive } from "./updateBattlePokemon";
-import { removeAura, removeDisaster } from "./updateEnvironment";
+import { applyTrapDamage } from "./applyNoneMoveDamage";
+import { addStatus, resetRank, setActive } from "./updateBattlePokemon";
+import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
 export function switchPokemon(side: "my" | "enemy", newIndex: number) {
   const {
@@ -34,20 +35,32 @@ export function switchPokemon(side: "my" | "enemy", newIndex: number) {
     removeAura(String(switchingPokemon.base.ability?.name));
   }
 
-  // 2. 새 포켓몬 활성화
+  // 2. 랭크업 초기화
+  updatePokemon(side, currentIndex, resetRank(switchingPokemon))
+
+  // 3. 새 포켓몬 활성화
   let next = setActive(team[newIndex], true);
   updatePokemon(side, newIndex, next);
 
   if (side === "my") setActiveMy(newIndex);
   else setActiveEnemy(newIndex);
 
-  // 3. 트랩 데미지
-  const { updated: trapped, log: trapLog } = applyTrapDamage(next, env.trap);
+  // 4. 트랩 데미지 적용
+  const { updated: trapped, log: trapLog, status_condition: trapCondition } = applyTrapDamage(next, env.trap);
   updatePokemon(side, newIndex, trapped);
+  // 독압정 등일 경우 상태이상 적용
+  if (trapCondition) {
+    if (trapCondition === '독압정 제거') {
+      removeTrap(side, '독압정')
+    }
+    updatePokemon(side, newIndex, addStatus(team[newIndex], trapCondition as StatusState))
+  }
   if (trapLog) addLog(trapLog);
   next = trapped;
 
-  // 4. 등장 특성 적용
+  // 5. 등장 특성 적용
   const logs = applyAppearance(next, side);
   logs.forEach(addLog);
+  const wncp = side === 'my' ? '나' : '상대';
+  console.log(wncp + '는 ' + next.base.name + '을/를 내보냈다!');
 }
