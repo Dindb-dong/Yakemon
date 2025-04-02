@@ -7,7 +7,7 @@ function Result({ winner }) {
 
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h1>{winner} 승리!</h1>
+      <h1>{winner}</h1>
       <button onClick={handleRestart}>다시 시작</button>
     </div>
   );

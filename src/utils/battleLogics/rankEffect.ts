@@ -2,7 +2,7 @@ import { AbilityInfo } from "../../models/Ability";
 
 export function calculateRankEffect(rank: number): number {
   // 공,방,특공,특방,스피드 랭크 효과 계산
-  if (rank > 0 && rank <= 6) {
+  if (rank >= 0 && rank <= 6) {
     // 상승 랭크 계산
     return (rank * 1 + 2) / 2;
   } else if (rank > 6) {

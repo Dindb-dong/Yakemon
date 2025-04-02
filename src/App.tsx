@@ -14,7 +14,8 @@ function App() {
   const handleSelect = useCallback(
     (playerPokemons: PokemonInfo[]) => {
       // AI 포켓몬 랜덤 선택
-      const aiCandidates = mockPokemon.filter(p => !playerPokemons.includes(p));
+      //const aiCandidates = mockPokemon.filter(p => !playerPokemons.includes(p));
+      const aiCandidates = [mockPokemon[0], mockPokemon[1], mockPokemon[2]];
       const aiRaw: PokemonInfo[] = Array.from({ length: 3 }, () => {
         const idx = Math.floor(Math.random() * aiCandidates.length);
         return aiCandidates.splice(idx, 1)[0];

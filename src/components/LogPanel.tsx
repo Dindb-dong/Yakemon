@@ -6,7 +6,7 @@ function LogPanel({ logs }: { logs: string[] }) {
     <div className="log-panel">
       <h4>전투 로그</h4>
       <ul>
-        {latest.map((log, idx) => <li key={idx}>{log}</li>)}
+        {logs.map((log, idx) => <li key={idx}>{log}</li>)}
       </ul>
     </div>
   );

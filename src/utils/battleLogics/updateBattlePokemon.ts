@@ -1,25 +1,29 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { AbilityInfo } from "../../models/Ability";
-import { RankManager } from "../../models/RankState";
+import { RankManager, RankState } from "../../models/RankState";
 import { StatusManager, StatusState } from "../../models/Status";
+import { useBattleStore } from "../../Context/useBattleStore";
 
 // 체력 변화
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
+  const { addLog } = useBattleStore.getState();
   const newHp = Math.max(0, pokemon.currentHp + amount);
-  // TODO: 체력 0 이하 되면 0으로 만들기. 이후 기절 처리 
-  return { ...pokemon, currentHp: newHp };
-
+  if (newHp <= 0) addLog(`${pokemon.base.name}은/는 쓰러졌다!`)
+  return { ...pokemon, currentHp: Math.min(pokemon.base.hp, newHp) };
 }
 
 // 랭크 변경
 export function changeRank(
   pokemon: BattlePokemon,
-  stat: keyof typeof pokemon.rank,
+  stat: keyof RankState,
   amount: number
 ): BattlePokemon {
-  const manager = new RankManager(pokemon.rank);
-  if (amount > 0) manager.increaseState(stat, amount);
-  else manager.decreaseState(stat, Math.abs(amount));
+  const manager = new RankManager(JSON.parse(JSON.stringify(pokemon.rank))); // 💡 깊은 복사
+  if (amount > 0) {
+    manager.increaseState(stat as keyof RankState, amount);
+  } else {
+    manager.decreaseState(stat as keyof RankState, Math.abs(amount));
+  }
   return { ...pokemon, rank: manager.getState() };
 }
 
@@ -113,19 +117,3 @@ export function setTypes(pokemon: BattlePokemon, types: string[]): BattlePokemon
     },
   };
 }
-
-// Example:
-// const { myTeam, updatePokemon } = useBattleStore();
-// const active = myTeam[0];
-
-// // 체력 -30
-// updatePokemon("my", 0, changeHp(active, -30));
-
-// // 공격 랭크 +2
-// updatePokemon("my", 0, changeRank(active, "attack", 2));
-
-// // 마비 상태 추가
-// updatePokemon("my", 0, addStatus(active, "마비"));
-
-// // 펀치 기술 사용
-// updatePokemon("my", 0, useMovePP(active, "불주먹"));

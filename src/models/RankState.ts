@@ -13,8 +13,8 @@ export class RankManager {
   private state: RankState; // 클래스 내부에서만 접근 가능하도록 
 
   constructor(initialState: RankState) {
-    this.state = this.clampState(initialState);
-  } // 범위가 제한된 현재 인스턴스를 참조
+    this.state = this.clampState(JSON.parse(JSON.stringify(initialState)));
+  }
 
   // Getter for state
   getState(): RankState {
@@ -43,18 +43,14 @@ export class RankManager {
   }
 
   // 상승 
-  increaseState(
-    whichState: keyof RankState,
-    rank: number
-  ): void {
-    // 현재 state의 값을 업데이트
+  increaseState(whichState: keyof RankState, rank: number): void {
+    console.log("🔼 상태 이전:", JSON.stringify(this.state));
     const updatedState = {
       ...this.state,
-      [whichState]: this.state[whichState] + rank,
+      [whichState]: (this.state[whichState] ?? 0) + rank, // 💡 혹시 undefined일 수도 있으므로
     };
-
-    // 업데이트된 state를 clamping 처리 후 저장
     this.state = this.clampState(updatedState);
+    console.log("🔼 상태 이후:", JSON.stringify(this.state));
   }
 
   // 하락 
@@ -87,27 +83,3 @@ export class RankManager {
     };
   }
 }
-
-const initialState: RankState = {
-  attack: 4,
-  spAttack: 3,
-  defense: 6,
-  spDefense: 2,
-  speed: 1,
-  accuracy: 5,
-  dodge: 7,
-  critical: 1,
-};
-
-// 아래는 예시 
-const manager = new RankManager(initialState);
-
-// 현재 상태 가져오기
-console.log(manager.getState());
-// { attack: 4, spAttack: 3, defense: 6, spDefense: 2, accuracy: 5, dodge: 6, critical: 1 }
-
-// 상태 업데이트
-manager.updateState({ attack: 7, defense: 5 });
-manager.increaseState("spDefense", 1)
-console.log(manager.getState());
-// { attack: 6, spAttack: 3, defense: 5, spDefense: 3, accuracy: 5, dodge: 6, critical: 1 }

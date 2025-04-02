@@ -6,14 +6,13 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
-import { addStatus } from "./updateBattlePokemon";
+import { addStatus, changeHp, changeRank } from "./updateBattlePokemon";
+import { RankState } from "../../models/RankState";
 
-const { publicEnv } = useBattleStore.getState();
 
 // 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
-export async function applyAfterDamage(attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
-  // TODO: 사용한 기술 pp 깎기 -> 
-  applyMoveEffectAfterDamage(attacker, deffender, usedMove, appliedDameage);
+export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
+  applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage);
 }
 
 function applyDefensiveAbilityEffectAfterDamage() {
@@ -24,29 +23,64 @@ function applyOffensiveAbilityEffectAfrerDamage() {
 
 }
 
-function applyMoveEffectAfterDamage(attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
+function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
+  const { updatePokemon, addLog, activeEnemy, activeMy } = useBattleStore.getState();
   const effect = usedMove.effects;
-  if (effect) {
-    if (effect.statChange && Math.random() < effect.chance) {
+  const opponentSide = side === 'my' ? 'enemy' : 'enemy';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const activeMine = side === 'my' ? activeMy : activeEnemy;
+  if (effect && Math.random() < effect.chance) {
+    console.log(`${usedMove.name}의 부가효과 발동!`)
+    if (effect.statChange) {
       effect.statChange.forEach((statChange) => {
         const target = statChange.target === 'opponent' ? deffender : attacker; // 상대에게 적용할지, 자신에게 적용할지 결정
+        let targetSide: 'my' | 'enemy' = 'enemy'; // 누구의 랭크를 변화시킬건지 정함. 
+        if (side === 'my' && statChange.target === 'opponent') {
+          targetSide = 'enemy';
+        } else if (side === 'my' && statChange.target === 'self') {
+          targetSide = 'my';
+        } else if (side === 'enemy' && statChange.target === 'opponent') {
+          targetSide = 'my';
+        } else if (side === 'enemy' && statChange.target === 'self') {
+          targetSide = 'enemy';
+        }
         const stat = statChange.stat;
         const change = statChange.change;
-        target[stat] += change;
+        const activeIndex = targetSide === 'my' ? activeMy : activeEnemy;
+        updatePokemon(targetSide, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
+        console.log(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
+        addLog(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
       });
     }
-    if (effect.status && Math.random() < effect.chance) {
+    if (effect.status) {
       // 상태이상 적용
+      // 아니 여기 원래 attacker가 아니라 deffender여야 하는데 이거 왜이러냐 이거?
       const status = effect.status;
-      addStatus(deffender, status);
+      if (status === '화상' && deffender.base.types.includes('불')) return;
+      if (status === '마비' && deffender.base.types.includes('전기')) return;
+      if (status === '얼음' && deffender.base.types.includes('얼음')) return;
+      if (status === '독' && deffender.base.types.includes('독')) return;
+      if (status === '맹독' && deffender.base.types.includes('독')) return;
+      updatePokemon(opponentSide, activeOpponent, (deffender) => addStatus(deffender, status));
+      addLog(`${deffender.base.name}은/는 ${status}상태가 되었다!`)
     }
     if (effect.recoil && appliedDameage) {
       // 반동 데미지 적용
       const recoilDamage = appliedDameage * effect.recoil;
-      // TODO: 반동데미지 적용 로직 추가하기 
+      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
+      addLog(`${attacker.base.name}은/는 반동 데미지를 입었다!`);
     }
-    if (effect.heal && appliedDameage) {
-      // TODO: 흡혈 로직 추가하기 
+    if (effect.heal && appliedDameage && appliedDameage > 0) {
+      const deal = appliedDameage;
+      const healRate = effect.heal;
+      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, deal * healRate));
+      addLog(`${attacker.base.name}은/는 체력을 회복했다!`)
+    }
+    if (effect.heal && !appliedDameage) {
+      // 반피 회복 로직 
+      const healRate = effect.heal;
+      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
+      addLog(`${attacker.base.name}은/는 체력을 회복했다!`)
     }
   }
 }

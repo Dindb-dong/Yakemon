@@ -17,6 +17,9 @@ export function applyDefensiveAbilityEffectBeforeDamage(
   const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = deffender.base.ability; // 상대 포켓몬의 특성
   const currentHp = deffender.currentHp; // 상대 포켓몬 남은 체력 (멀티스케일, 스펙터가드)
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const activeMine = side === 'my' ? activeMy : activeEnemy;
 
   let rate = 1;
   ability?.defensive?.forEach(
@@ -25,17 +28,17 @@ export function applyDefensiveAbilityEffectBeforeDamage(
         case 'type_nullification':
           if (ability.name === '저수' && usedMove.type === '물') {
             rate = 0;
-            updatePokemon("enemy", 0, changeHp(deffender, Math.round(deffender.base.hp / 4)));
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
           } else if (ability.name === '흙먹기' && usedMove.type === '땅') {
             rate = 0;
-            updatePokemon("enemy", 0, changeHp(deffender, Math.round(deffender.base.hp / 4)));
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
           } else if (ability.name === '축전' && usedMove.type === '전기') {
             rate = 0;
-            updatePokemon("enemy", 0, changeHp(deffender, Math.round(deffender.base.hp / 4)));
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
           } else if (ability.name === '건조피부') {
             if (usedMove.type === '물') {
               rate = 0;
-              updatePokemon("enemy", 0, changeHp(deffender, Math.round(deffender.base.hp / 4)));
+              updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
             } else if (usedMove.type === '불') {
               rate *= 1.25;
             }
@@ -66,6 +69,9 @@ export function applyOffensiveAbilityEffectBeforeDamage(
   const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = attacker.base.ability; // 내 포켓몬의 특성
   const currentHp = myTeam[activeMy]; // 내 포켓몬 남은 체력 (멀티스케일, 스펙터가드)
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const activeMine = side === 'my' ? activeMy : activeEnemy;
   let rate = 1;
   ability?.offensive?.forEach(
     (category: string) => {
@@ -79,7 +85,7 @@ export function applyOffensiveAbilityEffectBeforeDamage(
           break;
         case "type_change":
           if (ability.name === '변환자재') {
-            updatePokemon(side, 0, setTypes(attacker, [usedMove.type])); // 사용하는 기술에 맞게 특성 변경 
+            updatePokemon(side, activeMine, (attacker) => setTypes(attacker, [usedMove.type])); // 사용하는 기술에 맞게 특성 변경 
           }
           break;
         case "rank_buff":

@@ -26,14 +26,14 @@ export function applyEndTurnEffects() {
     // 이렇게 효율적으로 처리할 수도 있구만! 
     if (pokemon.status.includes("화상")) {
       const damage = Math.floor(pokemon.base.hp / 16);
-      const updated = changeHp(pokemon, -damage);
+      const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
       addLog(`${pokemon.base.name}은 화상으로 ${damage}의 데미지를 입었다!`);
     }
 
     if (pokemon.status.includes("맹독")) {
       const damage = Math.floor(pokemon.base.hp / 8);
-      const updated = changeHp(pokemon, -damage);
+      const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
       addLog(`${pokemon.base.name}은 독의 피해를 입었다!`);
     }
@@ -55,5 +55,4 @@ export function applyEndTurnEffects() {
   // ⏳ TODO:
   // - 날씨 데미지 (모래바람 등)
   // - 유틸 특성 효과 (포이즌힐 등)
-  // - 아이템 효과 (먹다남은 음식 등)
 }

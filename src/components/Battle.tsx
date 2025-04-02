@@ -52,7 +52,8 @@ function Battle() {
   const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
   const [isTurnProcessing, setIsTurnProcessing] = useState(false);
 
-  const isGameOver = myPokemon.currentHp <= 0 || enemyPokemon.currentHp <= 0;
+  // 어느 한 팀이 다 기절했을 때에 게임 끝 
+  const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
 
   const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
     if (isTurnProcessing) {
@@ -71,8 +72,18 @@ function Battle() {
   };
 
   if (isGameOver) {
-    const winner = myPokemon.currentHp > 0 ? myPokemon.base.name : enemyPokemon.base.name;
-    return <Result winner={winner} />;
+    let winner: string = '승리';
+    if (myTeam.some((p) => p.currentHp > 0)) {
+      winner = '승리';
+    } else if (enemyTeam.some((p) => p.currentHp > 0)) {
+      winner = '패배';
+    }
+    return (
+      <div>
+        <Result winner={winner} />
+        <LogPanel logs={logs} />
+      </div>
+    )
   }
 
   return (

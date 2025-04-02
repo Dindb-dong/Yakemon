@@ -35,8 +35,28 @@ export async function battleSequence(
   myAction: BattleAction,
   aiAction: BattleAction
 ) {
-  const { addLog } = useBattleStore.getState();
+  const { addLog, myTeam, enemyTeam, activeEnemy, activeMy } = useBattleStore.getState();
+  const myPokemon = myTeam[activeMy];
+  const aiPokemon = enemyTeam[activeEnemy];
   console.log('우선도 및 스피드 계산중...')
+
+  // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
+  if (aiPokemon.currentHp <= 0) {
+    removeFaintedPokemon("enemy");
+    const updatedEnemy = useBattleStore.getState().enemyTeam[
+      useBattleStore.getState().activeEnemy
+    ];
+    if (updatedEnemy.currentHp <= 0) return; // 남은 포켓몬이 없으면 턴 종료
+  }
+
+  if (myPokemon.currentHp <= 0) {
+    removeFaintedPokemon("my");
+    const updatedMine = useBattleStore.getState().myTeam[
+      useBattleStore.getState().activeMy
+    ];
+    if (updatedMine.currentHp <= 0) return;
+  }
+
   const whoIsFirst = calculateOrder(
     isMoveAction(myAction) ? myAction : undefined,
     isMoveAction(aiAction) ? aiAction : undefined
@@ -77,9 +97,31 @@ export async function battleSequence(
   // === 3. 둘 다 기술 ===
   if (whoIsFirst === "my") {
     await handleMove("my", myAction as MoveInfo);
+
+    // 상대가 쓰러졌는지 확인
+    const updatedEnemy = useBattleStore.getState().enemyTeam[
+      useBattleStore.getState().activeEnemy
+    ];
+    if (updatedEnemy.currentHp <= 0) {
+      removeFaintedPokemon("enemy");
+      applyEndTurnEffects();
+      return;
+    }
+
     await handleMove("enemy", aiAction as MoveInfo);
-  } else {
+  } else { // 상대가 선공일 경우 
     await handleMove("enemy", aiAction as MoveInfo);
+
+    // 내가 쓰러졌는지 확인
+    const updatedMe = useBattleStore.getState().myTeam[
+      useBattleStore.getState().activeMy
+    ];
+    if (updatedMe.currentHp <= 0) {
+      removeFaintedPokemon("my");
+      applyEndTurnEffects();
+      return;
+    }
+
     await handleMove("my", myAction as MoveInfo);
   }
 
@@ -98,6 +140,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
   const isTripleHit = ["트리플킥", "트리플악셀"].includes(move.name);
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+  const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
 
   if (isTripleHit) {
     const hitCount = getHitCount(move);
@@ -108,7 +151,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
         if (isTripleHit) {
           move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
         }
-        await applyAfterDamage(attacker, deffender, move, result.damage);
+        await applyAfterDamage(side, attacker, deffender, move, result.damage);
       } else {
         break; // 빗나가면 반복 중단
       }
@@ -119,14 +162,26 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       const hitCount = getHitCount(move);
       for (let i = 0; i < hitCount - 1; i++) {
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
-        await applyAfterDamage(attacker, deffender, move, result?.damage);
+        await applyAfterDamage(side, attacker, deffender, move, result?.damage);
       }
       console.log("총 " + hitCount + "번 맞았다!");
     }
   }
   else { // 그냥 다른 기술들
     const result = await calculateMoveDamage({ moveName: move.name, side });
-    await applyAfterDamage(attacker, deffender, move, result?.damage);
+    await applyAfterDamage(side, attacker, deffender, move, result?.damage); // 주체 
+  }
+}
+
+function removeFaintedPokemon(side: 'my' | 'enemy') {
+  const {
+    myTeam,
+    enemyTeam,
+  } = useBattleStore.getState();
+  const team = side === "my" ? myTeam : enemyTeam;
+  const nextIndex = team.findIndex(p => p.currentHp > 0);
+  if (nextIndex !== -1) {
+    switchPokemon(side, nextIndex);
   }
 }
 

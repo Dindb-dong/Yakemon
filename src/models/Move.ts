@@ -3,7 +3,7 @@ import * as path from "path";
 
 type StatChange = {
   target: 'opponent' | 'self';
-  stat: '공격' | '방어' | '특수공격' | '특수방어' | '스피드' | '명중률' | '회피율';
+  stat: '공격' | '방어' | '특수공격' | '특수방어' | '스피드' | '명중률' | '회피율' | '급소율';
   change: -6 | -5 | -4 | -3 | -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
 }
 
@@ -11,12 +11,13 @@ type MoveEffect = {
   chance: number; // 발동 확률, 0.1 ~ 1
   status?: '화상' | '마비' | '독' | '맹독' | '얼음' | '잠듦' | '혼란' | '풀죽음' | '앵콜' | '트집' | '도발';
   recoil?: number; // 반동, 0.1 ~ 1
-  heal?: number; // 흡혈, 0.1 ~ 1 
+  fail?: number; // 공격 빗나갔을 때 데미지 비율, 0.1 ~ 1
+  heal?: number; // 흡혈 또는 자힐, 0.1 ~ 1 
   statChange?: StatChange[];
   multiHit?: boolean; // 2~5회 타격 여부 (isAlwaysHit), 명중 여부는 초기에 계산 
   doubleHit?: boolean; // 2회 타격 (isAlwaysHit)
   tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
-  priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
+  uTurn?: boolean; // 유턴이나 퀵턴, 볼트체인치같이 교체하는 기술.
 }
 
 export type MoveInfo = {
@@ -28,8 +29,9 @@ export type MoveInfo = {
   isTouch: boolean; // 접촉 기술 여부 
   affiliation?: '펀치' | '폭탄' | '바람' | '가루' | null; // 계열 
   accuracy: number; // 명중율. 
-  criticalRate: number; // 급소율. 랭크로 나타냄. 0은 6.25프로, ..4는 50프로. 
+  criticalRate: number; // 급소율. 랭크로 나타냄. 0이 기본, 1이 깜짝베기같은거, 3은 확정임 
   effects?: MoveEffect;
+  priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
 };
 
 // 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.

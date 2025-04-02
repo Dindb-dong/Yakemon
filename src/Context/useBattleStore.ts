@@ -20,7 +20,12 @@ type BattleStore = {
   setPublicEnv: (env: Partial<PublicBattleEnvironment>) => void;
   setMyEnv: (env: Partial<IndividualBattleEnvironment>) => void;
   setEnemyEnv: (env: Partial<IndividualBattleEnvironment>) => void;
-  updatePokemon: (side: "my" | "enemy", index: number, update: Partial<BattlePokemon>) => void;
+  // 타입 정의를 이렇게 바꿔!
+  updatePokemon: (
+    side: "my" | "enemy",
+    index: number,
+    updater: (prev: BattlePokemon) => BattlePokemon
+  ) => void;
   setTurn: (turn: number) => void;
   addLog: (log: string) => void;
 };
@@ -59,11 +64,12 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   setEnemyEnv: (envUpdate) => set((state) => ({
     enemyEnv: { ...state.enemyEnv, ...envUpdate }
   })),
-  updatePokemon: (side, index, update) =>
+  updatePokemon: (side, index, updater: (prev: BattlePokemon) => BattlePokemon) =>
     set((state) => {
       const teamKey = side === "my" ? "myTeam" : "enemyTeam";
       const team = [...state[teamKey]];
-      team[index] = { ...team[index], ...update };
+      const prev = team[index];
+      team[index] = updater(prev); // 이전 상태 기반 안전한 업데이트
       return { [teamKey]: team };
     }),
   setTurn: (turn) => set({ turn: turn }),

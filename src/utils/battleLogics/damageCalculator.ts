@@ -10,7 +10,6 @@ import { calculateTypeEffectivenessWithAbility, isTypeImmune } from "./calculate
 import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
 import { changeHp, useMovePP } from "./updateBattlePokemon";
-import { applyAfterDamage } from "./applyAfterDamage";
 import { BattlePokemon } from "../../models/BattlePokemon";
 
 type ItemInfo = {
@@ -37,17 +36,21 @@ export async function calculateMoveDamage({
     activeMy,
     activeEnemy,
     publicEnv,
-    updatePokemon
+    updatePokemon,
+    addLog
   } = useBattleStore.getState();
   // side에 따라 공격 시전자와 피격자가 달라짐. 
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-  const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+  const deffender: BattlePokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const myPokemon: PokemonInfo = side === 'my' ? myTeam[activeMy].base : enemyTeam[activeEnemy].base;
-  const aiPokemon: PokemonInfo = side === 'enemy' ? enemyTeam[activeEnemy].base : myTeam[activeMy].base;
+  const opponentPokemon: PokemonInfo = side === 'enemy' ? myTeam[activeMy].base : enemyTeam[activeEnemy].base;
   const moveInfo: MoveInfo = getMoveInfo(myPokemon, moveName);
   const weatherEffect = publicEnv.weather;
   const filedEffect = publicEnv.field;
   const disasterEffect = publicEnv.disaster;
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const activeMine = side === 'my' ? activeMy : activeEnemy;
 
   // 초기 변수 설정
   let types = 1; // 타입 상성 배율
@@ -57,17 +60,18 @@ export async function calculateMoveDamage({
   let rate = 1; // 데미지 배율
   let isHit = false; // 공격 적중 여부
   let isCritical = false; // 공격 급소 여부
-  let wasEffective = false; // 약점 효과 여부
+  let wasEffective = 0; // 약점 효과 여부, -1은 별로, 0은 평범, 1은 좋음 
+  let wasNull = false; // 공격 무효 여부 
   let message: string | null = null;
   let myPokeRank = attacker.rank;
   let opPokeRank = deffender.rank;
   let myPokeStatus = attacker.status;
   // 공격, 방어 스탯 결정
   let attackStat = moveInfo.category === '물리' ? myPokemon.attack : myPokemon.spAttack;
-  let defenseStat = moveInfo.category === '물리' ? aiPokemon.defense : aiPokemon.spDefense;
+  let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
 
   // 1. 상대 포켓몬 타입 설정
-  let opponentType = [...aiPokemon.types];
+  let opponentType = [...opponentPokemon.types];
 
   // 2. 타입 무효 특성 처리
   if (myPokemon.ability && hasAbility(myPokemon.ability, ['배짱', '심안'])) {
@@ -76,27 +80,45 @@ export async function calculateMoveDamage({
 
   // 3. 특성 무시 특성 처리
   if (myPokemon.ability && hasAbility(myPokemon.ability, ['틀깨기', '터보블레이즈', '테라볼티지'])) {
-    aiPokemon.ability = null; // 상대 특성 무효 처리. 실제 특성 메모리엔 영향 x.
+    opponentPokemon.ability = null; // 상대 특성 무효 처리. 실제 특성 메모리엔 영향 x.
   }
 
   // 4. 타입 상성 계산
-  types = calculateTypeEffectivenessWithAbility(myPokemon, aiPokemon, moveInfo);
-  // 상대가 타입 상성 무효화 특성 있을 경우 미리 적용 
-  if (aiPokemon.ability?.defensive?.forEach((category: string) => {
-    if (category === 'damage_nullification') {
-      types = applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
+  if (moveInfo.power > 0) {
+    // 상대가 타입 상성 무효화 특성 있을 경우 미리 적용 
+    if (opponentPokemon.ability?.defensive) {
+      opponentPokemon.ability?.defensive?.forEach((category: string) => {
+        if (category === 'damage_nullification') {
+          types = applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
+        }
+      })
+    } else {
+      types = calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
     }
-  }))
-    if (types >= 2) { wasEffective = true };
+  }
+
+  if (types >= 2) { wasEffective = 1 };
+  if (types > 0 && types <= 0.5) { wasEffective = -1 };
+  if (types === 0) { wasNull = true }
+
+  // 4-1. 자속보정
+  if (myPokemon.types.some((type) => type === moveInfo.type)) {
+    if (myPokemon.ability?.name === '적응력') {
+      types *= 2;
+    } else {
+      types *= 1.5;
+    }
+  }
+
 
   // 5-1. 날씨 효과 적용
   if (weatherEffect) { // 날씨 있을 때만 
     if (weatherEffect === '모래바람') {
-      if (aiPokemon.types.includes('바위') && moveInfo.category === '특수') { // 날씨가 모래바람이고 상대가 바위타입일 경우
+      if (opponentPokemon.types.includes('바위') && moveInfo.category === '특수') { // 날씨가 모래바람이고 상대가 바위타입일 경우
         rate *= 2 / 3;
       } else { rate *= 1 }
     } else if (weatherEffect === '싸라기눈') {
-      if (aiPokemon.types.includes('얼음') && moveInfo.category === '물리') { // 날씨가 싸라기눈이고 상대가 얼음타입일 경우 
+      if (opponentPokemon.types.includes('얼음') && moveInfo.category === '물리') { // 날씨가 싸라기눈이고 상대가 얼음타입일 경우 
         rate *= 2 / 3;
       } else { rate *= 1 }
     }
@@ -167,14 +189,14 @@ export async function calculateMoveDamage({
   if (myPokemon.ability?.name == '무모한행동' && myPokeStatus.some((v) => v === '독' || v === '맹독')) {
     isCritical = true;
   }
-  if (aiPokemon.ability?.name === '전투무장' || aiPokemon.ability?.name === '조가비갑옷') {
+  if (opponentPokemon.ability?.name === '전투무장' || opponentPokemon.ability?.name === '조가비갑옷') {
     criRate = 0;
     isCritical = false; // 무조건 급소 안 맞음 
   }
   isCritical = calculateCritical(moveInfo.criticalRate + criRate, myPokemon.ability, myPokeRank?.critical ?? 0);
 
   if (isCritical && myPokemon.ability?.name === '스나이퍼') {
-    rate *= 2; // 스나이퍼는 급소 데미지 2배
+    rate *= 2.25; // 스나이퍼는 급소 데미지 2배
   } else if (isCritical) {
     rate *= 1.5 // 그 외에는 1.5배 
   }
@@ -182,20 +204,33 @@ export async function calculateMoveDamage({
   // 13. 데미지 계산
 
   // 랭크 적용 
-  if (myPokeRank) {
+  if (myPokeRank.attack > 0 && moveInfo.category === '물리') {
     attackStat *= calculateRankEffect(myPokeRank.attack);
+    addLog(`${attacker.base.name}의 공격 랭크업이 적용되었다!`)
   }
-  if (opPokeRank) {
-    defenseStat *= calculateRankEffect(opPokeRank.defense);
+  if (myPokeRank.spAttack > 0 && moveInfo.category === '특수') {
+    attackStat *= calculateRankEffect(myPokeRank.spAttack);
+    addLog(`${attacker.base.name}의 특수공격 랭크업이 적용되었다!`)
+  }
+  if (opPokeRank.defense > 0 && moveInfo.category === '물리') {
+    attackStat *= calculateRankEffect(myPokeRank.defense);
+    addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
+  }
+  if (opPokeRank.spDefense > 0 && moveInfo.category === '특수') {
+    attackStat *= calculateRankEffect(myPokeRank.spDefense);
+    addLog(`${attacker.base.name}의 특수방어 랭크업이 적용되었다!`)
   }
   // 내구력 계산
-  const durability = defenseStat * aiPokemon.hp * aiPokemon.level * 0.00822;
+  const durability = (defenseStat * (opponentPokemon.hp)) / 0.411;
+  console.log(`${deffender.base.name}의 내구력: ${durability}`)
+
 
   // 결정력 계산
   const effectiveness = attackStat * power * rate * types;
+  console.log(`${attacker.base.name}의 결정력: ${effectiveness}`)
 
   // 최종 데미지 계산 (내구력 비율 기반)
-  const damage = Math.round((effectiveness * aiPokemon.hp) / durability); // 소수점 반올림 
+  const damage = Math.min(deffender.currentHp, Math.round((effectiveness / durability) * (opponentPokemon.hp))); // 소수점 반올림 
   // •	상대 내구력: 20,000
   // •	결정력: 50,000
   // •	상대 체력: 100
@@ -205,21 +240,38 @@ export async function calculateMoveDamage({
 
   // 14. 최종적으로 데미지 줬는지 여부 계산
   if (types === 0 || rate === 0) {
-    isHit = false;
     return { success: false, message: '효과가 없었다!' }
   }
 
   if (!isHit) {
+    addLog(`${attacker.base.name}의 공격은 빗나갔다!`);
+    if (moveInfo.effects?.fail) { // 무릎차기, 점프킥 등 빗나가면 반동.
+      const dmg = moveInfo.effects?.fail
+      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
+      addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
+    }
+    return { success: false }
+  }
+
+  if (wasNull) {
+    addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
+    if (moveInfo.effects?.fail) { // 무릎차기, 점프킥 등 빗나가면 반동.
+      const dmg = moveInfo.effects?.fail
+      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
+      addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
+    }
     return { success: false }
   }
 
   // 15. 데미지 적용 및 이후 함수 적용
   if (isHit) {
     // 데미지 적용
-    const opponentSide = side === 'my' ? 'enemy' : 'my';
-    updatePokemon(opponentSide, 0, changeHp(enemyTeam[activeEnemy], -damage));
-    updatePokemon(opponentSide, 0, useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
-    console.log('calculateDamage 종료')
+    addLog(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
+    if (wasEffective === 1) addLog('효과가 굉장했다!');
+    else if (wasEffective === -1) addLog('효과가 별로였다...')
+    updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, -damage));
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
+    console.log(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
     return { success: true, damage, wasEffective };
   }
 

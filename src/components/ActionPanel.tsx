@@ -11,16 +11,6 @@ type ActionPanelParams = {
 }
 
 function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }: ActionPanelParams) {
-  const [selectedSwitchIndex, setSelectedSwitchIndex] = useState<number | null>(null);
-  const [showStatusIndex, setShowStatusIndex] = useState<number | null>(null);
-
-  const handlePressStatus = (i: number) => {
-    setShowStatusIndex(i);
-    setTimeout(() => {
-      setShowStatusIndex(null); // 2초 뒤 자동 숨김
-    }, 2000);
-  };
-
   return (
     <div className="action-panel">
       <div className="move-grid">

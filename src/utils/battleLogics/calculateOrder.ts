@@ -28,9 +28,9 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
   whoIsFirst = speedDiff >= 0 ? 'my' : 'enemy';
 
   // 이 아래는 우선도 있는 기술이 사용됐을 경우에만. 
-  if (playerMove && playerMove.effects?.priority && aiMove && aiMove.effects?.priority) { // 둘 다 우선도 가진 기술 사용했을 경우 
-    const myPriority = playerMove.effects?.priority
-    const aiPriority = aiMove.effects?.priority
+  if (playerMove && playerMove.priority && aiMove && aiMove.priority) { // 둘 다 우선도 가진 기술 사용했을 경우 
+    const myPriority = playerMove.priority
+    const aiPriority = aiMove.priority
     const priorityDiff = myPriority - aiPriority;
     if (priorityDiff > 0) { // 내 우선도가 높을 때 
       whoIsFirst = 'my';
@@ -39,9 +39,9 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
     } else if (priorityDiff < 0) { // 상대 우선도가 높을 때 
       whoIsFirst = 'enemy';
     }
-  } else if (aiMove && aiMove.effects?.priority) { // 상대만 우선도 가진 기술 사용 
+  } else if (aiMove && aiMove.priority) { // 상대만 우선도 가진 기술 사용 
     whoIsFirst = 'enemy';
-  } else if (playerMove && playerMove.effects?.priority) { // 나만 우선도 가진 기술 사용
+  } else if (playerMove && playerMove.priority) { // 나만 우선도 가진 기술 사용
     whoIsFirst = 'my';
   }
 

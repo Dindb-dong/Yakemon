@@ -21,6 +21,7 @@ type offensive_BeforeAbility =
 type offensive_AfterAbility =
   // 아래는 데미지 계산 후 발동하는 특성
   'status_change' | // 상태이상 부여 (예: 독사슬, 독수, 악취, 독조종 등)
+  'rank_change' | // 랭크 변화 (예: 자기과신 등 )
   'remove_demerit' | // 디메리트 삭제 (예: 돌머리 등)
   'item'; // 아이템 관련 (예: 나쁜손버릇, 매지션)
 

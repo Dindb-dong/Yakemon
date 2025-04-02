@@ -37,7 +37,7 @@ export function createBattlePokemon(base: PokemonInfo): BattlePokemon {
       spDefense: base.spDefense + 20,
       speed: base.speed + 20,
     },
-    currentHp: base.hp,
+    currentHp: base.hp + 75,
     pp,
     rank: defaultRank,
     status: [],
