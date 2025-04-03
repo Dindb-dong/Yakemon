@@ -2,6 +2,17 @@
   padding: 1rem;
 }
 
+.switch-modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 2px solid black;
+  padding: 16px;
+  z-index: 9999;
+}
+
 .turn-banner {
   text-align: center;
   font-size: 1.5rem;

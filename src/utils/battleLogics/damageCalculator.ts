@@ -9,7 +9,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectivenessWithAbility, isTypeImmune } from "./calculateTypeEffectiveness";
 import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
-import { changeHp, useMovePP } from "./updateBattlePokemon";
+import { changeHp, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
 
 type ItemInfo = {
@@ -68,6 +68,9 @@ export async function calculateMoveDamage({
   let myPokeStatus = attacker.status;
   // 공격, 방어 스탯 결정
   let attackStat = moveInfo.category === '물리' ? myPokemon.attack : myPokemon.spAttack;
+  if (moveName === '바디프레스') {
+    attackStat = myPokemon.defense;
+  }
   let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
 
   // 1. 상대 포켓몬 타입 설정
@@ -210,8 +213,13 @@ export async function calculateMoveDamage({
   // 랭크 적용 
   if (myPokeRank.attack > 0 && moveInfo.category === '물리') {
     if (!(deffender.base.ability?.name === '천진')) {
-      attackStat *= calculateRankEffect(myPokeRank.attack);
-      addLog(`${attacker.base.name}의 공격 랭크업이 적용되었다!`)
+      if (moveName === '바디프레스') {
+        attackStat *= calculateRankEffect(myPokeRank.defense);
+        addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
+      } else {
+        attackStat *= calculateRankEffect(myPokeRank.attack);
+        addLog(`${attacker.base.name}의 공격 랭크업이 적용되었다!`)
+      }
     }
   }
   if (myPokeRank.spAttack > 0 && moveInfo.category === '특수') {
@@ -221,14 +229,15 @@ export async function calculateMoveDamage({
     }
   }
   if (opPokeRank.defense > 0 && moveInfo.category === '물리') {
-    if (!(attacker.base.ability?.name === '천진')) {
-      attackStat *= calculateRankEffect(myPokeRank.defense);
+    if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.rank_nullification)) {
+      // 공격자가 천진도 아니고, 기술이 랭크업 무시하는 기술도 아닐 경우에만 업데이트. (둘 중 하나라도 만족하면 안함)
+      defenseStat *= calculateRankEffect(myPokeRank.defense);
       addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
     }
   }
   if (opPokeRank.spDefense > 0 && moveInfo.category === '특수') {
-    if (!(attacker.base.ability?.name === '천진')) {
-      attackStat *= calculateRankEffect(myPokeRank.spDefense);
+    if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.rank_nullification)) {
+      defenseStat *= calculateRankEffect(myPokeRank.spDefense);
       addLog(`${attacker.base.name}의 특수방어 랭크업이 적용되었다!`)
     }
   }

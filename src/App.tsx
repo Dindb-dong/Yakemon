@@ -6,6 +6,7 @@ import { createBattlePokemon } from "./utils/battleLogics/createBattlePokemon";
 import { useBattleStore } from "./Context/useBattleStore";
 import { PokemonInfo } from "./models/Pokemon";
 import { mockPokemon } from "./data/mockPokemon";
+import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 
 function App() {
   const [isSelected, setIsSelected] = useState(false);
@@ -40,6 +41,8 @@ function App() {
       setMyTeam(myBattleTeam);
       setEnemyTeam(aiBattleTeam);
       setIsSelected(true); // 화면 전환 트리거
+      applyAppearance(myBattleTeam[0], "my");
+      applyAppearance(aiBattleTeam[0], "enemy");
     },
     [setMyTeam, setEnemyTeam]
   );

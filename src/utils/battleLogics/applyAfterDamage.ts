@@ -10,6 +10,7 @@ import { addStatus, changeHp, changeRank } from "./updateBattlePokemon";
 import { RankState } from "../../models/RankState";
 import { applyStatusWithDuration } from "./applyStatusWithDuration";
 import { applyConfusionStatus } from "./applyConfusionStatus";
+import { switchPokemon } from "./switchPokemon";
 
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
@@ -32,6 +33,13 @@ function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemo
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+
+  if (effect?.recoil && appliedDameage) {
+    // 반동 데미지 적용
+    const recoilDamage = appliedDameage * effect.recoil;
+    updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
+    addLog(`${attacker.base.name}은/는 반동 데미지를 입었다!`);
+  }
   if (effect && Math.random() < effect.chance) {
     console.log(`${usedMove.name}의 부가효과 발동!`)
     if (effect.statChange) {
@@ -74,12 +82,6 @@ function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemo
       addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
       console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
     }
-    if (effect.recoil && appliedDameage) {
-      // 반동 데미지 적용
-      const recoilDamage = appliedDameage * effect.recoil;
-      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
-      addLog(`${attacker.base.name}은/는 반동 데미지를 입었다!`);
-    }
     if (effect.heal && appliedDameage && appliedDameage > 0) {
       const deal = appliedDameage;
       const healRate = effect.heal;
@@ -91,6 +93,18 @@ function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemo
       const healRate = effect.heal;
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
       addLog(`${attacker.base.name}은/는 체력을 회복했다!`)
+    }
+    if (effect?.uTurn) {
+      const { setSwitchRequest } = useBattleStore.getState();
+      setSwitchRequest({
+        side,
+        reason: "uTurn",
+        onSwitch: (index: number) => {
+          switchPokemon(side, index);
+          setSwitchRequest(null);
+        },
+      });
+      addLog(`${attacker.base.name}은/는 교체하려 하고 있다!`);
     }
   }
 }

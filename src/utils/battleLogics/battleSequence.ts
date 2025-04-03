@@ -19,6 +19,8 @@ import { calculateMoveDamage } from "./damageCalculator";
 import { calculateRankEffect } from "./rankEffect";
 import { switchPokemon } from "./switchPokemon";
 import { decrementConfusionTurn } from "../../Context/useDurationContext";
+import { hasAbility } from "./helpers";
+import { setAbility, setTypes } from "./updateBattlePokemon";
 
 type BattleAction = MoveInfo | { type: "switch", index: number };
 
@@ -106,7 +108,7 @@ export async function battleSequence(
       useBattleStore.getState().activeEnemy
     ];
     if (updatedEnemy.currentHp <= 0) {
-      removeFaintedPokemon("enemy");
+      //removeFaintedPokemon("enemy");
       applyEndTurnEffects();
       return;
     }
@@ -120,7 +122,7 @@ export async function battleSequence(
       useBattleStore.getState().activeMy
     ];
     if (updatedMe.currentHp <= 0) {
-      removeFaintedPokemon("my");
+      //removeFaintedPokemon("my");
       applyEndTurnEffects();
       return;
     }
@@ -137,7 +139,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
     enemyTeam,
     activeMy,
     activeEnemy,
-    addLog
+    addLog, updatePokemon
   } = useBattleStore.getState();
   const isMultiHit = move.effects?.multiHit;
   const isDoubleHit = move.effects?.doubleHit;
@@ -150,6 +152,12 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
   if (isTripleHit) {
     const hitCount = getHitCount(move);
     for (let i = 0; i < hitCount; i++) {
+      // 리베로, 변환자재
+      if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
+        updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
+        updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
+        addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+      }
       const result = await calculateMoveDamage({ moveName: move.name, side });
       if (result?.success) {
         const recovered = decrementConfusionTurn(side, activeIndex);
@@ -164,6 +172,12 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       }
     }
   } else if (isDoubleHit || isMultiHit) {
+    // 리베로, 변환자재
+    if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
+      updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
+      updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
+      addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+    }
     const result = await calculateMoveDamage({ moveName: move.name, side });
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);
@@ -181,10 +195,17 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
           await applyAfterDamage(side, attacker, deffender, move, result?.damage);
         }
       }
-      console.log("총 " + hitCount + "번 맞았다!");
+      addLog("총 " + hitCount + "번 맞았다!");
+
     }
   }
   else { // 그냥 다른 기술들
+    // 리베로, 변환자재
+    if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
+      updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
+      updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
+      addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+    }
     const result = await calculateMoveDamage({ moveName: move.name, side });
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);

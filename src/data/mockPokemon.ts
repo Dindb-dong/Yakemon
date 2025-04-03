@@ -108,31 +108,27 @@ export const mockPokemon: PokemonInfo[] = [
         effects: { chance: 0.1, status: '화상' },
       },
       {
-        name: '열사의대지',
+        name: '지진',
         type: '땅',
-        category: '특수',
-        power: 70,
+        category: '물리',
+        power: 100,
         pp: 10,
         isTouch: false,
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: {
-          chance: 0.1,
-          status: '화상',
-        },
       },
       {
-        name: '솔라빔',
-        type: '풀',
+        name: '오버히트',
+        type: '불',
         category: '특수',
-        power: 120,
-        pp: 10,
+        power: 130,
+        pp: 5,
         isTouch: false,
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: { chance: 0.1, status: '화상' }
+        effects: { chance: 1, statChange: [{ target: 'self', stat: 'spAttack', change: -2 }] },
       }
     ],
     sex: 'male',
@@ -368,7 +364,71 @@ export const mockPokemon: PokemonInfo[] = [
     id: 655,
     name: '마폭시',
     types: ['불', '에스퍼'],
-    moves: [],
+    moves: [
+      {
+        name: '매지컬플레임',
+        type: '불',
+        category: '특수',
+        power: 75,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          statChange: [{ target: 'opponent', stat: 'spAttack', change: -1 }]
+        }
+      },
+      {
+        name: '사이코키네시스',
+        type: '에스퍼',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 0.1,
+          statChange: [{ target: 'opponent', stat: 'spDefense', change: -1 }]
+        }
+      },
+      {
+        name: '에너지볼',
+        type: '풀',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 0.1,
+          statChange: [{ target: 'opponent', stat: 'spDefense', change: -1 }]
+        }
+      },
+      {
+        name: '명상',
+        type: '에스퍼',
+        category: '변화',
+        power: 0,
+        pp: 20,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          statChange: [
+            { target: 'self', stat: 'spAttack', change: 1 },
+            { target: 'self', stat: 'spDefense', change: 1 }
+          ]
+        }
+      }
+    ],
     sex: 'female',
     ability: { id: 113, name: '맹화', offensive: ['damage_buff'] },
     hp: 75, attack: 69, defense: 72, spAttack: 114, spDefense: 100, speed: 104, level: 50,
@@ -377,7 +437,58 @@ export const mockPokemon: PokemonInfo[] = [
     id: 652,
     name: '브리가론',
     types: ['풀', '격투'],
-    moves: [],
+    moves: [
+      {
+        name: '씨기관총',
+        type: '풀',
+        category: '물리',
+        power: 25,
+        pp: 30,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 1, multiHit: true }
+      },
+      {
+        name: '광합성',
+        type: '풀',
+        category: '변화',
+        power: 0,
+        pp: 5,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 1, heal: 0.5 }
+      },
+      {
+        name: '바디프레스',
+        type: '격투',
+        category: '물리',
+        power: 80,
+        pp: 10,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0
+      },
+      {
+        name: '철벽',
+        type: '강철',
+        category: '변화',
+        power: 0,
+        pp: 15,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          statChange: [{ target: 'self', stat: 'defense', change: 2 }]
+        }
+      }
+    ],
     sex: 'male',
     ability: { id: 114, name: '방탄', defensive: ['damage_nullification'] },
     hp: 88, attack: 107, defense: 122, spAttack: 74, spDefense: 75, speed: 64, level: 50,
@@ -386,7 +497,57 @@ export const mockPokemon: PokemonInfo[] = [
     id: 658,
     name: '개굴닌자',
     types: ['물', '악'],
-    moves: [],
+    moves: [
+      {
+        name: '물수리검',
+        type: '물',
+        category: '특수',
+        power: 15,
+        pp: 20,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 1,
+        priority: 1,
+        effects: { chance: 1, multiHit: true }
+      },
+      {
+        name: '악의파동',
+        type: '악',
+        category: '특수',
+        power: 80,
+        pp: 15,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 0.2, status: '풀죽음' }
+      },
+      {
+        name: '독압정',
+        type: '독',
+        category: '변화',
+        power: 0,
+        pp: 20,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        trap: '독압정',
+      },
+      {
+        name: '냉동빔',
+        type: '얼음',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: { chance: 0.1, status: '얼음' }
+      }
+    ],
     sex: 'male',
     ability: { id: 115, name: '변환자재', offensive: ['type_change'] }, // 발동하고 나면 특성 삭제시킬 것.
     hp: 72, attack: 95, defense: 67, spAttack: 103, spDefense: 71, speed: 122, level: 50,
@@ -395,16 +556,133 @@ export const mockPokemon: PokemonInfo[] = [
     id: 727,
     name: '어흥염',
     types: ['불', '악'],
-    moves: [],
+    moves: [
+      {
+        name: '플레어드라이브',
+        type: '불',
+        category: '물리',
+        power: 120,
+        pp: 15,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          recoil: 0.33,
+          status: '화상'
+        }
+      },
+      {
+        name: '도깨비불',
+        type: '불',
+        category: '변화',
+        power: 0,
+        pp: 15,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 85,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          status: '화상'
+        }
+      },
+      {
+        name: 'DD래리어트',
+        type: '악',
+        category: '물리',
+        power: 85,
+        pp: 10,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          rank_nullification: true
+        }
+      },
+      {
+        name: '막말내뱉기',
+        type: '악',
+        category: '변화',
+        power: 0,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1, statChange: [
+            { target: 'opponent', stat: 'spAttack', change: -1 },
+            { target: 'opponent', stat: 'attack', change: -1 }
+          ], uTurn: true,
+        }
+      }
+    ],
     sex: 'male',
-    ability: { id: 116, name: '맹화', offensive: ['damage_buff'] },
+    ability: { id: 116, name: '위협', appear: ['rank_change'] },
     hp: 95, attack: 115, defense: 90, spAttack: 80, spDefense: 90, speed: 60, level: 50,
   },
   {
     id: 724,
     name: '모크나이퍼',
     types: ['풀', '고스트'],
-    moves: [],
+    moves: [
+      {
+        name: '리프블레이드',
+        type: '풀',
+        category: '물리',
+        power: 90,
+        pp: 15,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 1
+      },
+      {
+        name: '폴터가이스트',
+        type: '고스트',
+        category: '물리',
+        power: 110,
+        pp: 5,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 90,
+        criticalRate: 0
+      },
+      {
+        name: '칼춤',
+        type: '노말',
+        category: '변화',
+        power: 0,
+        pp: 20,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          statChange: [{ target: 'self', stat: 'attack', change: 2 }]
+        }
+      },
+      {
+        name: '더블윙',
+        type: '비행',
+        category: '물리',
+        power: 40,
+        pp: 10,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 90,
+        criticalRate: 0,
+        effects: {
+          chance: 1,
+          doubleHit: true
+        }
+      }
+    ],
     sex: 'male',
     ability: { id: 117, name: '심록', offensive: ['damage_buff'] },
     hp: 78, attack: 107, defense: 75, spAttack: 100, spDefense: 100, speed: 70, level: 50,
@@ -413,7 +691,61 @@ export const mockPokemon: PokemonInfo[] = [
     id: 730,
     name: '누리레느',
     types: ['물', '페어리'],
-    moves: [],
+    moves: [
+      {
+        name: '물거품아리아',
+        type: '물',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: '소리',
+        accuracy: 100,
+        criticalRate: 0
+      },
+      {
+        name: '문포스',
+        type: '페어리',
+        category: '특수',
+        power: 95,
+        pp: 15,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 0.3,
+          statChange: [{ target: 'opponent', stat: 'spAttack', change: -1 }]
+        }
+      },
+      {
+        name: '아쿠아제트',
+        type: '물',
+        category: '물리',
+        power: 40,
+        pp: 20,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        priority: 1
+      },
+      {
+        name: '에너지볼',
+        type: '풀',
+        category: '특수',
+        power: 90,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: {
+          chance: 0.1,
+          statChange: [{ target: 'opponent', stat: 'spDefense', change: -1 }]
+        }
+      }
+    ],
     sex: 'female',
     ability: { id: 118, name: '급류', offensive: ['damage_buff'] },
     hp: 80, attack: 74, defense: 74, spAttack: 126, spDefense: 116, speed: 60, level: 50,
@@ -457,7 +789,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: { chance: 1 } // 교체 효과는 별도 처리
+        effects: { chance: 1, uTurn: true } // 교체 효과는 별도 처리
       },
       {
         name: '칼춤',

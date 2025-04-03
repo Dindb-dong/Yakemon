@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
+import { useBattleStore } from "../Context/useBattleStore";
 
 type Props = {
   team: BattlePokemon[];
@@ -11,7 +12,7 @@ type Props = {
 function SwapPanel({ team, activeIndex, isProcessing, onSwitch }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [viewingIndex, setViewingIndex] = useState<number | null>(null);
-
+  const { isSwitchWaiting } = useBattleStore.getState()
   const toggleView = (index: number) => {
     setViewingIndex((prev) => (prev === index ? null : index));
   };
@@ -28,7 +29,7 @@ function SwapPanel({ team, activeIndex, isProcessing, onSwitch }: Props) {
         return (
           <div key={poke.base.name} className="swap-slot">
             <button
-              disabled={isProcessing || isCurrent || isFainted}
+              disabled={isProcessing || isCurrent || isFainted || isSwitchWaiting}
               onClick={() => setSelectedIndex(i)}
             >
               {poke.base.name} {isCurrent ? "(현재)" : ""}

@@ -9,6 +9,8 @@ import PokemonArea from "./PokemonArea";
 import ActionPanel from "./ActionPanel";
 import LogPanel from "./LogPanel";
 
+
+
 function Battle() {
   const {
     myTeam,
@@ -16,10 +18,10 @@ function Battle() {
     activeMy,
     activeEnemy,
     logs,
-    turn,
+    turn, isSwitchWaiting, switchRequest,
     setTurn,
     setMyTeam,
-    setEnemyTeam
+    setEnemyTeam, clearSwitchRequest
   } = useBattleStore.getState();
 
   const aiChooseAction = () => {
@@ -45,6 +47,31 @@ function Battle() {
     const randIdx = Math.floor(Math.random() * usableMoves.length);
     return usableMoves[randIdx];
   };
+
+  const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+  const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
+  const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
+    setPendingSwitch(() => (index) => {
+      onSwitchConfirmed(index);
+      setIsSwitchModalOpen(false);
+    });
+    setIsSwitchModalOpen(true);
+  };
+
+  useEffect(() => {
+    console.log('Battle.tsx에서 교체 로직 진행중...1')
+    if (isSwitchWaiting && switchRequest?.side === "my") {
+      console.log('Battle.tsx에서 교체 로직 진행중...2')
+      setIsSwitchModalOpen(true);
+      setPendingSwitch(() => (index) => {
+        if (switchRequest?.onSwitch) {
+          switchRequest.onSwitch(index); // zustand의 콜백 실행
+        }
+        clearSwitchRequest();
+        setIsSwitchModalOpen(false);
+      });
+    }
+  }, [isSwitchWaiting, switchRequest]);
 
   const myPokemon = myTeam[activeMy];
   const enemyPokemon = enemyTeam[activeEnemy];
@@ -87,7 +114,26 @@ function Battle() {
   }
 
   return (
+
     <div className="battle-layout">
+      {
+        isSwitchModalOpen && (
+          <div className="switch-modal">
+            <h3>어느 포켓몬으로 교체하시겠습니까?</h3>
+            {myTeam.map((poke, index) =>
+              index !== activeMy && poke.currentHp > 0 ? (
+                <button key={index} onClick={() => {
+                  if (pendingSwitch) {
+                    pendingSwitch(index); // index 넘겨주기
+                  }
+                }}>
+                  {poke.base.name}
+                </button>
+              ) : null
+            )}
+          </div>
+        )
+      }
       <TurnBanner turn={turn} />
       <div className="main-area">
         <PokemonArea my={myPokemon} enemy={enemyPokemon} />

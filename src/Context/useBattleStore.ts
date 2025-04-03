@@ -2,6 +2,12 @@ import { create } from "zustand";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { PublicBattleEnvironment, IndividualBattleEnvironment } from "./BattleEnvironment";
 
+type SwitchRequest = {
+  side: 'my' | 'enemy';
+  reason: 'uTurn' | 'faint' | null;
+  onSwitch?: (index: number) => void; // ✅ 콜백 추가
+};
+
 type BattleStore = {
   myTeam: BattlePokemon[];
   enemyTeam: BattlePokemon[];
@@ -12,6 +18,9 @@ type BattleStore = {
   enemyEnv: IndividualBattleEnvironment;
   turn: number;
   logs: string[];
+  isSwitchWaiting: boolean;
+  switchRequest: SwitchRequest | null;
+
 
   setMyTeam: (team: BattlePokemon[]) => void;
   setEnemyTeam: (team: BattlePokemon[]) => void;
@@ -28,6 +37,8 @@ type BattleStore = {
   ) => void;
   setTurn: (turn: number) => void;
   addLog: (log: string) => void;
+  setSwitchRequest: (req: SwitchRequest | null) => void;
+  clearSwitchRequest: () => void;
 };
 
 export const useBattleStore = create<BattleStore>((set, get) => ({
@@ -50,6 +61,8 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   },
   turn: 1,
   logs: [],
+  isSwitchWaiting: false,
+  switchRequest: null,
 
   setMyTeam: (team) => set({ myTeam: team }),
   setEnemyTeam: (team) => set({ enemyTeam: team }),
@@ -74,4 +87,6 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     }),
   setTurn: (turn) => set({ turn: turn }),
   addLog: (log) => set((state) => ({ logs: [...state.logs, log] })),
+  setSwitchRequest: (req) => set({ isSwitchWaiting: true, switchRequest: req }),
+  clearSwitchRequest: () => set({ isSwitchWaiting: false, switchRequest: null }),
 }));

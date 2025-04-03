@@ -19,7 +19,13 @@ export function changeRank(
   amount: number
 ): BattlePokemon {
   const manager = new RankManager(JSON.parse(JSON.stringify(pokemon.rank))); // 💡 깊은 복사
-  if (amount > 0) {
+  if (pokemon.base.ability?.name === '심술꾸러기') {
+    if (amount > 0) {
+      manager.decreaseState(stat as keyof RankState, amount);
+    } else {
+      manager.increaseState(stat as keyof RankState, Math.abs(amount));
+    }
+  } else if (amount > 0) {
     manager.increaseState(stat as keyof RankState, amount);
   } else {
     manager.decreaseState(stat as keyof RankState, Math.abs(amount));

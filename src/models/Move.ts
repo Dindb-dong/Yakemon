@@ -19,6 +19,7 @@ type MoveEffect = {
   doubleHit?: boolean; // 2회 타격 (isAlwaysHit)
   tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
   uTurn?: boolean; // 유턴이나 퀵턴, 볼트체인치같이 교체하는 기술.
+  rank_nullification?: boolean; // DD래리어트, 성스러운칼, 야금야금 같이 상대 능력변화 무시하고 데미지 주는 기술.
 }
 
 export type MoveInfo = {
@@ -28,11 +29,12 @@ export type MoveInfo = {
   power: number; // 위력 
   pp?: number;
   isTouch: boolean; // 접촉 기술 여부 
-  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | null; // 계열 
+  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | null; // 계열 
   accuracy: number; // 명중율. 
   criticalRate: number; // 급소율. 랭크로 나타냄. 0이 기본, 1이 깜짝베기같은거, 3은 확정임 
   effects?: MoveEffect;
   priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
+  trap?: '독압정' | '스텔스락' | '압정뿌리기';
 };
 
 // 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.
