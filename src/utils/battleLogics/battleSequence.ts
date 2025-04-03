@@ -226,9 +226,9 @@ function removeFaintedPokemon(side: 'my' | 'enemy') {
 }
 
 function getHitCount(move: MoveInfo): number {
-  if (!move.effects?.multiHit) return 1;
   if (move.effects?.doubleHit) return 2;
   if (move.effects?.tripleHit) return 3;
+  if (!move.effects?.multiHit) return 1;
 
   const rand = Math.random();
   if (move.name === "스킬링크") return 5;
