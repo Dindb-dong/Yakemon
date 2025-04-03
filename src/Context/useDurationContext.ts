@@ -6,6 +6,7 @@ import { removeStatus } from "../utils/battleLogics/updateBattlePokemon";
 export type TimedEffect = {
   name: string;
   remainingTurn: number;
+  ownerIndex?: number; // ✅ 누구에게 걸린 효과인지 명시
 };
 
 type DurationState = {
@@ -49,8 +50,15 @@ export const useDurationStore = create<DurationState>((set, get) => ({
     const battleStore = useBattleStore.getState();
 
     const dec = (list: TimedEffect[], side: "my" | "enemy" | "public") => {
+      const activeIndex = side === "my" ? battleStore.activeMy : side === "enemy" ? battleStore.activeEnemy : null;
+
       return list
         .map((e) => {
+          // 💤 잠듦은 active 포켓몬일 때만 턴 감소
+          if (e.name === "잠듦" && e.ownerIndex !== activeIndex) {
+            return e; // 턴 유지
+          }
+
           const newTurn = e.remainingTurn - 1;
           if (newTurn <= 0) {
             expired[side].push(e.name);

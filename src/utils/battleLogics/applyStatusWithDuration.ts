@@ -27,5 +27,6 @@ export function applyStatusWithDuration(
   addEffect(side, {
     name: status,
     remainingTurn: durationMap[status],
+    ownerIndex: index,
   });
 }

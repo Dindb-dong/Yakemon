@@ -7,20 +7,21 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
   // 우선도 있는 기술의 경우, 무조건 먼저 공격. 
   // 내 기술의 우선도, 상대 기술의 우선도, 내 스피드, 상대 스피드를 따져야 함. 
   // 우선도가 없을 경우, 스피드 높은 쪽이 먼저 행동함. 단, 트릭룸이 있으면 거꾸로임. 
+  // 왼쪽에 있는 플레이어 기준이므로, myPokemon 고정.
   let whoIsFirst: string;
-  const { publicEnv, myTeam, activeMy, enemyTeam, activeEnemy } = useBattleStore.getState();
+  const { publicEnv, myTeam, activeMy, enemyTeam, activeEnemy, addLog } = useBattleStore.getState();
   const myPokemon = myTeam[activeMy];
-  const aiPokemon = enemyTeam[activeEnemy];
+  const opponentPokemon = enemyTeam[activeEnemy];
   let mySpeed = myPokemon.base.speed;
   mySpeed *= calculateRankEffect(myPokemon.rank.speed);
-  let aiSpeed = aiPokemon.base.speed;
-  aiSpeed *= calculateRankEffect(aiPokemon.rank.speed);
+  let opponentSpeed = opponentPokemon.base.speed;
+  opponentSpeed *= calculateRankEffect(opponentPokemon.rank.speed);
   if (publicEnv.room === '트릭룸') {
     mySpeed *= -1;
-    aiSpeed *= -1;
+    opponentSpeed *= -1;
   }
 
-  let speedDiff = mySpeed - aiSpeed;
+  let speedDiff = mySpeed - opponentSpeed;
   if (speedDiff === 0) {
     speedDiff = (Math.random() - 0.5) // 스피드 같은 경우, 랜덤하게 정해짐. 
   }
@@ -44,6 +45,6 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
   } else if (playerMove && playerMove.priority) { // 나만 우선도 가진 기술 사용
     whoIsFirst = 'my';
   }
-
+  addLog(`${whoIsFirst}의 선공!`)
   return whoIsFirst;
 }

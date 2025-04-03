@@ -73,6 +73,16 @@ export async function calculateMoveDamage({
   }
   let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
 
+  // 0. 상태이상 확인
+  if (myPokeStatus) {
+    const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo, side);
+    rate = statusResult.rate; // 화상 적용 
+    if (!statusResult.isHit) {
+      addLog(`${attacker}의 기술은 실패했다!`);
+      return { success: false }; // 바로 함수 종료 
+    }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
+  }
+
   // 1. 상대 포켓몬 타입 설정
   let opponentType = [...opponentPokemon.types];
 
@@ -86,7 +96,21 @@ export async function calculateMoveDamage({
     opponentPokemon.ability = null; // 상대 특성 무효 처리. 실제 특성 메모리엔 영향 x.
   }
 
-  // 4. 타입 상성 계산
+  // 8. 명중률 계산
+  if (isAlwaysHit) { // 연속기 사용 시 
+    isHit = true;
+  } else {
+    const hitSuccess = calculateAccuracy(accRate, moveInfo.accuracy, myPokeRank?.accuracy ?? 0, opPokeRank?.dodge ?? 0);
+    if (!hitSuccess) {
+      isHit = false;
+      addLog(`${attacker}의 공격은 빗나갔다!`)
+      return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
+    } else {
+      isHit = true;
+    }
+  }
+
+  // 4-1. 타입 상성 계산
   if (moveInfo.power > 0) {
     // 상대가 타입 상성 무효화 특성 있을 경우 미리 적용 
     if (opponentPokemon.ability?.defensive) {
@@ -100,11 +124,12 @@ export async function calculateMoveDamage({
     }
   }
 
-  if (types >= 2) { wasEffective = 1 };
-  if (types > 0 && types <= 0.5) { wasEffective = -1 };
-  if (types === 0) { wasNull = true }
+  addLog(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
+  if (types >= 2) { wasEffective = 1; addLog('효과가 굉장했다!') };
+  if (types > 0 && types <= 0.5) { wasEffective = -1; addLog(`효과가 별로였다...`) };
+  if (types === 0) { wasNull = true; addLog(`효과가 없었다...`) }
 
-  // 4-1. 자속보정
+  // 4-2. 자속보정
   if (myPokemon.types.some((type) => type === moveInfo.type)) {
     if (myPokemon.ability?.name === '적응력') {
       types *= 2;
@@ -112,7 +137,6 @@ export async function calculateMoveDamage({
       types *= 1.5;
     }
   }
-
 
   // 5-1. 날씨 효과 적용
   if (weatherEffect) { // 날씨 있을 때만 
@@ -167,28 +191,6 @@ export async function calculateMoveDamage({
   // 만약 위에서 이미 types가 0이더라도, 나중에 곱하면 어차피 0 돼서 상관없음.
   rate *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
 
-  // 8. 상태이상 확인
-  if (myPokeStatus) {
-    const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo, side);
-    rate = statusResult.rate; // 화상 적용 
-    if (!statusResult.isHit) {
-      addLog(`${attacker}의 기술은 실패했다!`);
-      return { success: false }; // 바로 함수 종료 
-    }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
-  }
-
-  // 9. 명중률 계산
-  if (isAlwaysHit) { // 연속기 사용 시 
-    isHit = true;
-  } else {
-    const hitSuccess = calculateAccuracy(accRate, moveInfo.accuracy, myPokeRank?.accuracy ?? 0, opPokeRank?.dodge ?? 0);
-    if (!hitSuccess) {
-      isHit = false;
-      console.log(side + '의 공격은 빗나갔다!')
-    } else {
-      isHit = true;
-    }
-  }
 
   // 13. 급소 적용
   if (myPokemon.ability?.name == '무모한행동' && myPokeStatus.some((v) => v === '독' || v === '맹독')) {
@@ -202,6 +204,7 @@ export async function calculateMoveDamage({
 
   if (isCritical && myPokemon.ability?.name === '스나이퍼') {
     rate *= 2.25; // 스나이퍼는 급소 데미지 2배
+    addLog(`${moveName}은/는 급소에 맞았다!`)
   } else if (isCritical) {
     rate *= 1.5 // 그 외에는 1.5배 
     addLog(`${moveName}은/는 급소에 맞았다!`)
@@ -211,34 +214,34 @@ export async function calculateMoveDamage({
   // 공격자가 천진일 때: 상대 방어 랭크 무시, 
   // 피격자가 천진일 때; 공격자 공격 랭크 무시 
   // 랭크 적용 
-  if (myPokeRank.attack > 0 && moveInfo.category === '물리') {
+  if (myPokeRank.attack && moveInfo.category === '물리') {
     if (!(deffender.base.ability?.name === '천진')) {
       if (moveName === '바디프레스') {
         attackStat *= calculateRankEffect(myPokeRank.defense);
-        addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
+        addLog(`${attacker.base.name}의 방어 랭크 변화가 적용되었다!`)
       } else {
         attackStat *= calculateRankEffect(myPokeRank.attack);
-        addLog(`${attacker.base.name}의 공격 랭크업이 적용되었다!`)
+        addLog(`${attacker.base.name}의 공격 랭크 변화가 적용되었다!`)
       }
     }
   }
-  if (myPokeRank.spAttack > 0 && moveInfo.category === '특수') {
+  if (myPokeRank.spAttack && moveInfo.category === '특수') {
     if (!(deffender.base.ability?.name === '천진')) {
       attackStat *= calculateRankEffect(myPokeRank.spAttack);
-      addLog(`${attacker.base.name}의 특수공격 랭크업이 적용되었다!`)
+      addLog(`${attacker.base.name}의 특수공격 랭크 변화가 적용되었다!`)
     }
   }
-  if (opPokeRank.defense > 0 && moveInfo.category === '물리') {
+  if (opPokeRank.defense && moveInfo.category === '물리') {
     if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.rank_nullification)) {
       // 공격자가 천진도 아니고, 기술이 랭크업 무시하는 기술도 아닐 경우에만 업데이트. (둘 중 하나라도 만족하면 안함)
-      defenseStat *= calculateRankEffect(myPokeRank.defense);
-      addLog(`${attacker.base.name}의 방어 랭크업이 적용되었다!`)
+      defenseStat *= calculateRankEffect(opPokeRank.defense);
+      addLog(`${deffender.base.name}의 방어 랭크 변화가 적용되었다!`)
     }
   }
-  if (opPokeRank.spDefense > 0 && moveInfo.category === '특수') {
+  if (opPokeRank.spDefense && moveInfo.category === '특수') {
     if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.rank_nullification)) {
-      defenseStat *= calculateRankEffect(myPokeRank.spDefense);
-      addLog(`${attacker.base.name}의 특수방어 랭크업이 적용되었다!`)
+      defenseStat *= calculateRankEffect(opPokeRank.spDefense);
+      addLog(`${deffender.base.name}의 특수방어 랭크 변화가 적용되었다!`)
     }
   }
   // 내구력 계산
@@ -284,12 +287,8 @@ export async function calculateMoveDamage({
   // 15. 데미지 적용 및 이후 함수 적용
   if (isHit) {
     // 데미지 적용
-    addLog(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
-    if (wasEffective === 1) addLog('효과가 굉장했다!');
-    else if (wasEffective === -1) addLog('효과가 별로였다...')
     updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, -damage));
     updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
-    console.log(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
     return { success: true, damage, wasEffective };
   }
 
