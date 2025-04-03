@@ -36,7 +36,7 @@ function isSwitchAction(action: BattleAction): action is { type: "switch", index
 
 export async function battleSequence(
   myAction: BattleAction,
-  aiAction: BattleAction
+  enemyAction: BattleAction
 ) {
   const { addLog, myTeam, enemyTeam, activeEnemy, activeMy } = useBattleStore.getState();
   const myPokemon = myTeam[activeMy];
@@ -44,8 +44,8 @@ export async function battleSequence(
   console.log('우선도 및 스피드 계산중...')
 
   // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
-  if (aiPokemon.currentHp <= 0) {
-    removeFaintedPokemon("enemy");
+  if (aiPokemon.currentHp <= 0 && isSwitchAction(enemyAction)) {
+    switchPokemon("enemy", enemyAction.index);
     const updatedEnemy = useBattleStore.getState().enemyTeam[
       useBattleStore.getState().activeEnemy
     ];
@@ -64,16 +64,16 @@ export async function battleSequence(
 
   const whoIsFirst = calculateOrder(
     isMoveAction(myAction) ? myAction : undefined,
-    isMoveAction(aiAction) ? aiAction : undefined
+    isMoveAction(enemyAction) ? enemyAction : undefined
   );
 
   // === 1. 둘 다 교체 ===
-  if (isSwitchAction(myAction) && isSwitchAction(aiAction)) {
+  if (isSwitchAction(myAction) && isSwitchAction(enemyAction)) {
     if (whoIsFirst === "my") {
       switchPokemon("my", myAction.index);
-      switchPokemon("enemy", aiAction.index);
+      switchPokemon("enemy", enemyAction.index);
     } else {
-      switchPokemon("enemy", aiAction.index);
+      switchPokemon("enemy", enemyAction.index);
       switchPokemon("my", myAction.index);
     }
     applyEndTurnEffects();
@@ -83,15 +83,15 @@ export async function battleSequence(
   // === 2. 한 쪽만 교체 ===
   if (isSwitchAction(myAction)) {
     switchPokemon("my", myAction.index);
-    if (isMoveAction(aiAction)) {
-      await handleMove("enemy", aiAction);
+    if (isMoveAction(enemyAction)) {
+      await handleMove("enemy", enemyAction);
     }
     applyEndTurnEffects();
     return;
   }
 
-  if (isSwitchAction(aiAction)) {
-    switchPokemon("enemy", aiAction.index);
+  if (isSwitchAction(enemyAction)) {
+    switchPokemon("enemy", enemyAction.index);
     if (isMoveAction(myAction)) {
       await handleMove("my", myAction);
     }
@@ -113,9 +113,9 @@ export async function battleSequence(
       return;
     }
 
-    await handleMove("enemy", aiAction as MoveInfo);
+    await handleMove("enemy", enemyAction as MoveInfo);
   } else { // 상대가 선공일 경우 
-    await handleMove("enemy", aiAction as MoveInfo);
+    await handleMove("enemy", enemyAction as MoveInfo);
 
     // 내가 쓰러졌는지 확인
     const updatedMe = useBattleStore.getState().myTeam[
@@ -171,7 +171,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
         break; // 빗나가면 반복 중단
       }
     }
-  } else if (isDoubleHit || isMultiHit) {
+  } else if (isDoubleHit || isMultiHit) { // 첫타 맞으면 다 맞춤 
     // 리베로, 변환자재
     if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
       updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
@@ -188,10 +188,6 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       for (let i = 0; i < hitCount - 1; i++) {
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
         if (result?.success) {
-          const recovered = decrementConfusionTurn(side, activeIndex);
-          if (recovered) {
-            addLog(`${attacker}는 혼란에서 회복했다!`);
-          }
           await applyAfterDamage(side, attacker, deffender, move, result?.damage);
         }
       }

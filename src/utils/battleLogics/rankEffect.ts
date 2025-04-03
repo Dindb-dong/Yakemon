@@ -2,7 +2,7 @@ import { AbilityInfo } from "../../models/Ability";
 
 export function calculateRankEffect(rank: number): number {
   // 공,방,특공,특방,스피드 랭크 효과 계산
-  if (rank >= 0 && rank <= 6) {
+  if (rank > 0 && rank <= 6) {
     // 상승 랭크 계산
     return (rank * 1 + 2) / 2;
   } else if (rank > 6) {
@@ -11,8 +11,8 @@ export function calculateRankEffect(rank: number): number {
     return 1 / 4; // 최대 하락 랭크
   } else {
     // 하락 랭크 계산 (rank는 음수)
-    const absRank = Math.abs(rank);
-    return 2 / (absRank * 1 + 2);
+    console.log('랭크 적용된 스탯 비율:' + (2 / (Math.abs(rank * 1) + 2)))
+    return (2 / (Math.abs(rank * 1) + 2));
   }
 }
 

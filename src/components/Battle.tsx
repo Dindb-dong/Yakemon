@@ -8,6 +8,8 @@ import TurnBanner from "./TurnBanner";
 import PokemonArea from "./PokemonArea";
 import ActionPanel from "./ActionPanel";
 import LogPanel from "./LogPanel";
+import { calculateTypeEffectiveness } from "../utils/typeRalation";
+import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
 
 
 
@@ -25,27 +27,140 @@ function Battle() {
   } = useBattleStore.getState();
 
   const aiChooseAction = () => {
-    const myTypes = myPokemon.base.types;
-    const weakToMyType = enemyPokemon.base.types.some(t =>
-      myTypes.includes(t) // 매우 간단한 타입 상성 판정 (더 정교하게 가능)
-    );
+    const { myTeam, enemyTeam, activeMy, activeEnemy } = useBattleStore.getState();
+    const userPokemon = myTeam[activeMy];
+    const aiPokemon = enemyTeam[activeEnemy];
 
-    // 상대 타입이 불리하면 교체
-    if (weakToMyType) {
-      const otherIndex = enemyTeam.findIndex(
-        (p, i) => i !== activeEnemy && p.currentHp > 0
-      );
-      if (otherIndex !== -1) {
-        return { type: "switch" as const, index: otherIndex };
+    const userSpeed = userPokemon.base.speed * calculateRankEffect(userPokemon.rank.speed);
+    const aiSpeed = aiPokemon.base.speed * calculateRankEffect(aiPokemon.rank.speed);
+    const isEnemyFaster = aiSpeed > userSpeed;
+    const roll = Math.random();
+    const aiHpRation = aiPokemon.currentHp / aiPokemon.base.hp; // ai 포켓몬의 체력 비율 
+    const userHpRation = userPokemon.currentHp / userPokemon.base.hp; // ai 포켓몬의 체력 비율 
+
+    const typeEffectiveness = (attackerTypes: string[], defenderTypes: string[]) => {
+      return attackerTypes.reduce((maxEff, atk) => {
+        return Math.max(maxEff, calculateTypeEffectiveness(atk, defenderTypes));
+      }, 1);
+    };
+
+    const getBestMove = (): MoveInfo => {
+      let best: MoveInfo | null = null;
+      let bestScore = -1;
+
+      usableMoves.forEach((move) => {
+        const stab = aiPokemon.base.types.includes(move.type) ? 1.5 : 1;
+        const effectiveness = calculateTypeEffectiveness(move.type, userPokemon.base.types);
+        const basePower = move.power ?? 0;
+        const score = basePower * stab * effectiveness;
+
+        if (score > bestScore) {
+          bestScore = score;
+          best = move;
+        }
+      });
+
+      return best!;
+    };
+
+    const aiTouser = typeEffectiveness(aiPokemon.base.types, userPokemon.base.types);
+    const userToai = typeEffectiveness(userPokemon.base.types, aiPokemon.base.types);
+
+    const usableMoves = aiPokemon.base.moves.filter((m) => aiPokemon.pp[m.name] > 0);
+    const counterMove = usableMoves.find((m) => calculateTypeEffectiveness(m.type, userPokemon.base.types) > 1);
+    const bestMove = getBestMove();
+    const supportMove = usableMoves.find((m) => m.category === "변화");
+
+    const getSwitchIndex = (targetFor: "offense" | "defense") => {
+      const isOffense = targetFor === "offense";
+      return enemyTeam.findIndex((p, i) => {
+        if (i === activeEnemy || p.currentHp <= 0) return false;
+        const eff = typeEffectiveness(p.base.types, isOffense ? userPokemon.base.types : []);
+        return isOffense ? eff > 1.5 : eff < 1;
+      });
+    };
+
+    const hasSwitchOption = enemyTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
+    const isAi_lowHp = aiHpRation < 0.25;
+    const isUser_lowHp = userHpRation < 0.35;
+
+    // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
+    if (aiPokemon.currentHp <= 0) {
+      const switchIn = enemyTeam.findIndex((p, i) => i !== activeEnemy && p.currentHp > 0);
+      return { type: "switch" as const, index: switchIn };
+    }
+
+    // === 2. 플레이어가 더 빠를 경우 ===
+    if (!isEnemyFaster) {
+      if (aiTouser > 1) { // ai가 불리 
+        if (roll < 0.6 && (hasSwitchOption)) {
+          const switchIdx = getSwitchIndex("offense");
+          if (switchIdx !== -1) {
+            console.log("AI는 느리고 불리하므로 교체 선택");
+            return { type: "switch" as const, index: switchIdx };
+          }
+        }
+        console.log("AI는 최고 위력기를 선택");
+        return bestMove;
+      } else { // ai가 유리 
+        if (roll < 0.5) {
+          console.log("AI는 최고 위력기를 선택");
+          return bestMove;
+        }
+        if (roll < 0.7 && supportMove) {
+          console.log("AI는 변화 기술을 사용");
+          return supportMove;
+        }
+        if (roll < 0.9 && hasSwitchOption) {
+          const switchIdx = getSwitchIndex("defense");
+          if (switchIdx !== -1) {
+            console.log("AI는 상대가 교체할 것으로 예상하고 맞교체 시도");
+            return { type: "switch" as const, index: switchIdx };
+          }
+        }
+        console.log("AI는 예측샷으로 최고 위력기 사용");
+        return bestMove;
       }
     }
 
-    // 아니면 기술 선택
-    const usableMoves = enemyPokemon.base.moves.filter(
-      (m) => enemyPokemon.pp[m.name] > 0
-    );
-    const randIdx = Math.floor(Math.random() * usableMoves.length);
-    return usableMoves[randIdx];
+    // === 3. AI가 더 빠를 경우 ===
+    if (aiTouser > 1) { // ai가 불리 
+      if (isUser_lowHp) {
+        console.log("AI는 플레이어 포켓몬의 빈틈을 포착!");
+        return bestMove;
+      }
+      if (roll < 0.3 && supportMove) {
+        console.log("AI는 변화 기술을 사용");
+        return supportMove;
+      }
+      if (roll < 0.7 && (hasSwitchOption || isAi_lowHp)) {
+        const switchIdx = getSwitchIndex("offense");
+        if (switchIdx !== -1) {
+          console.log("AI는 빠르지만 불리하므로 교체");
+          return { type: "switch" as const, index: switchIdx };
+        }
+      }
+      console.log("AI는 가장 강한 공격 시도");
+      return bestMove;
+    } else { // ai가 유리 
+      if (isUser_lowHp) {
+        console.log("AI는 플레이어 포켓몬의 빈틈을 포착!");
+        return bestMove;
+      }
+      if (roll < 0.1 && hasSwitchOption) {
+        const switchIdx = getSwitchIndex("defense");
+        if (switchIdx !== -1) {
+          console.log("AI는 플레이어 교체 예상하고 맞교체");
+          return { type: "switch" as const, index: switchIdx };
+        }
+      }
+      if (roll < 0.2 && supportMove) {
+        console.log("AI는 변화 기술 사용");
+        return supportMove;
+      }
+      console.log("AI는 가장 강한 기술로 공격");
+      return bestMove;
+    }
   };
 
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
@@ -59,9 +174,8 @@ function Battle() {
   };
 
   useEffect(() => {
-    console.log('Battle.tsx에서 교체 로직 진행중...1')
     if (isSwitchWaiting && switchRequest?.side === "my") {
-      console.log('Battle.tsx에서 교체 로직 진행중...2')
+      console.log('Battle.tsx에서 유턴 효과 실행중...')
       setIsSwitchModalOpen(true);
       setPendingSwitch(() => (index) => {
         if (switchRequest?.onSwitch) {
@@ -73,8 +187,8 @@ function Battle() {
     }
   }, [isSwitchWaiting, switchRequest]);
 
-  const myPokemon = myTeam[activeMy];
-  const enemyPokemon = enemyTeam[activeEnemy];
+  const userPokemon = myTeam[activeMy];
+  const aiPokemon = enemyTeam[activeEnemy];
 
   const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
   const [isTurnProcessing, setIsTurnProcessing] = useState(false);
@@ -136,10 +250,10 @@ function Battle() {
       }
       <TurnBanner turn={turn} />
       <div className="main-area">
-        <PokemonArea my={myPokemon} enemy={enemyPokemon} />
+        <PokemonArea my={userPokemon} enemy={aiPokemon} />
         <div className="side-panel">
           <ActionPanel
-            myPokemon={myPokemon}
+            myPokemon={userPokemon}
             myTeam={myTeam}
             activeMy={activeMy}
             isTurnProcessing={isTurnProcessing}

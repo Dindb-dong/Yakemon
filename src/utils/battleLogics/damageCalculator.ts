@@ -9,7 +9,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectivenessWithAbility, isTypeImmune } from "./calculateTypeEffectiveness";
 import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
-import { changeHp, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
+import { changeHp, changeRank, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
 
 type ItemInfo = {
@@ -287,6 +287,13 @@ export async function calculateMoveDamage({
   // 15. 데미지 적용 및 이후 함수 적용
   if (isHit) {
     // 데미지 적용
+    if (damage >= deffender.currentHp) { // 쓰러뜨렸을 경우 
+      if (attacker.base.ability?.name === '자기과신' || attacker.base.ability?.name === '백의울음') {
+        updatePokemon(side, activeMine, (attacker) => changeRank(attacker, 'attack', 1));
+      } else if (attacker.base.ability?.name === '흑의울음') {
+        updatePokemon(side, activeMine, (attacker) => changeRank(attacker, 'spAttack', 1));
+      }
+    }
     updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, -damage));
     updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
     return { success: true, damage, wasEffective };

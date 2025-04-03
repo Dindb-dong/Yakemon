@@ -120,7 +120,7 @@ export function applyAppearance(
         if (ability.name === '위협') {
           const updatedOpponent = (enemyPokemon) => changeRank(enemyPokemon, "attack", -1);
           updatePokemon(opponentSide, activeOpponent, updatedOpponent);
-          addLog(`${pokemon.base.name}의 등장으로 상대 ${enemyPokemon.base.name}의 공격력이 떨어졌다!`);
+          addLog(`${pokemon.base.name}의 등장으로 상대의 공격력이 떨어졌다!`);
 
         } else if (ability.name === "고대활성" && publicEnv.weather === "쾌청") {
           const stats = myPokemon.base;

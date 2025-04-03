@@ -15,7 +15,7 @@ import { switchPokemon } from "./switchPokemon";
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
 export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
-  applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage);
+  await applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage);
 }
 
 function applyDefensiveAbilityEffectAfterDamage() {
@@ -26,7 +26,7 @@ function applyOffensiveAbilityEffectAfrerDamage() {
 
 }
 
-function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
+async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
   const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
   const effect = usedMove.effects;
   const opponentSide = side === 'my' ? 'enemy' : 'my';
@@ -96,15 +96,19 @@ function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemo
     }
     if (effect?.uTurn) {
       const { setSwitchRequest } = useBattleStore.getState();
-      setSwitchRequest({
-        side,
-        reason: "uTurn",
-        onSwitch: (index: number) => {
-          switchPokemon(side, index);
-          setSwitchRequest(null);
-        },
+
+      return new Promise<void>((resolve) => {
+        setSwitchRequest({
+          side,
+          reason: "uTurn",
+          onSwitch: (index: number) => {
+            switchPokemon(side, index);
+            setSwitchRequest(null);
+            resolve(); // ✅ 교체가 완료되면 resolve 호출
+          },
+        });
+        addLog(`${attacker.base.name}은/는 유턴으로 교체하려 하고 있다!`);
       });
-      addLog(`${attacker.base.name}은/는 교체하려 하고 있다!`);
     }
   }
 }

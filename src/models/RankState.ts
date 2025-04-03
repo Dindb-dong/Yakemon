@@ -44,13 +44,11 @@ export class RankManager {
 
   // 상승 
   increaseState(whichState: keyof RankState, rank: number): void {
-    console.log("🔼 상태 이전:", JSON.stringify(this.state));
     const updatedState = {
       ...this.state,
       [whichState]: (this.state[whichState] ?? 0) + rank, // 💡 혹시 undefined일 수도 있으므로
     };
     this.state = this.clampState(updatedState);
-    console.log("🔼 상태 이후:", JSON.stringify(this.state));
   }
 
   // 하락 
