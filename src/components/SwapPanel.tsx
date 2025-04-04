@@ -38,7 +38,7 @@ function SwapPanel({ team, activeIndex, isProcessing, onSwitch }: Props) {
             {isSelected && (
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={() => toggleView(i)}>
-                  상태 보기
+                  {isViewing ? "닫기" : "상세보기"}
                 </button>
                 <button onClick={() => onSwitch(i)} style={{ marginLeft: "0.5rem" }}>
                   교체하기
@@ -54,7 +54,7 @@ function SwapPanel({ team, activeIndex, isProcessing, onSwitch }: Props) {
                       <ul>
                         {poke.base.moves.map((m) => (
                           <li key={m.name}>
-                            {m.name}: {poke.pp[m.name]}
+                            {m.name}: {poke.pp[m.name]}, ({m.power}, {m.accuracy}), {m.type}
                           </li>
                         ))}
                       </ul>

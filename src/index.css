@@ -160,11 +160,15 @@
 
 .move-name {
   font-size: 1rem;
+  align-self: center;
+  text-align: center;
 }
 
 .move-pp {
   font-size: 0.75rem;
   color: #333;
+  align-self: center;
+  text-align: center;
 }
 
 .move-type {
@@ -203,6 +207,8 @@
 .move-accuracy {
   font-size: 0.75rem;
   color: #444;
+  align-self: center;
+  text-align: center;
 }
 
 @keyframes fadeIn {

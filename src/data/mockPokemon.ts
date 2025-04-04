@@ -1000,7 +1000,7 @@ export const mockPokemon: PokemonInfo[] = [
         type: '불',
         category: '특수',
         power: 100,
-        pp: 5,
+        pp: 10,
         isTouch: false,
         affiliation: null,
         accuracy: 100,
