@@ -63,13 +63,23 @@ function Battle() {
       return best!;
     };
 
+    const getRankUpMove = (): MoveInfo => {
+      const rankUpMoves = usableMoves.filter(
+        (m) => m.category === "변화" && m.effects?.some(
+          (e) => e.statChange?.some((s) => s.target === "self" && s.change > 0)
+        )
+      );
+      return rankUpMoves[0];
+    }
+
     const aiTouser = typeEffectiveness(aiPokemon.base.types, userPokemon.base.types);
     const userToai = typeEffectiveness(userPokemon.base.types, aiPokemon.base.types);
 
     const usableMoves = aiPokemon.base.moves.filter((m) => aiPokemon.pp[m.name] > 0);
     const counterMove = usableMoves.find((m) => calculateTypeEffectiveness(m.type, userPokemon.base.types) > 1);
     const bestMove = getBestMove();
-    const supportMove = usableMoves.find((m) => m.category === "변화");
+    const rankUpMove = getRankUpMove();
+    const supportMove = usableMoves.find((m) => m.category === "변화" && m !== rankUpMove);
 
     const getSwitchIndex = (targetFor: "offense" | "defense") => {
       const isOffense = targetFor === "offense";
@@ -81,8 +91,10 @@ function Battle() {
     };
 
     const hasSwitchOption = enemyTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
-    const isAi_lowHp = aiHpRation < 0.25;
+    const isAi_lowHp = aiHpRation < 0.35;
+    const isAi_highHp = aiHpRation > 0.75;
     const isUser_lowHp = userHpRation < 0.35;
+    const isUser_highHp = aiHpRation > 0.75;
 
     // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
     if (aiPokemon.currentHp <= 0) {
@@ -143,6 +155,9 @@ function Battle() {
       console.log("AI는 가장 강한 공격 시도");
       return bestMove;
     } else { // ai가 유리 
+      if (isAi_highHp && rankUpMove) {
+        return rankUpMove;
+      }
       if (isUser_lowHp) { // 막타치기 로직 
         console.log("AI는 플레이어 포켓몬의 빈틈을 포착!");
         return bestMove;
