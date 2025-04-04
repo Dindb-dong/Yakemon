@@ -35,7 +35,7 @@ export type MoveInfo = {
   effects?: MoveEffect[];
   priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
   trap?: '독압정' | '스텔스락' | '압정뿌리기';
-  target?: 'self' | 'opponent'; // 상대를 때리는 기술인지, 나에게 거는 기술인지 
+  target?: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청 등 )
 };
 
 // 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.

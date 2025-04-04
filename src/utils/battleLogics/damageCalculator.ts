@@ -112,28 +112,32 @@ export async function calculateMoveDamage({
 
   // 5-1. 타입 상성 계산
 
-  if (!(moveInfo.target === 'self')) {
+  if (moveInfo.target === 'opponent') { // 상대를 대상으로 하는 기술일 경우 
     // 상대가 타입 상성 무효화 특성 있을 경우 미리 적용 
-    if (moveInfo.category === '변화' && moveInfo.target === 'opponent') { // 상대를 때리는 변화기술일 경우 
+    if (moveInfo.category === '변화') { // 상대를 때리는 변화기술일 경우 
       if (moveInfo.type === '풀' && opponentPokemon.types.includes('풀')) {
-        types = 0;
+        types *= 0;
       } // 추가 가능 
-    }
-    if (opponentPokemon.ability?.defensive) {
+    } else if (opponentPokemon.ability?.defensive) { // 상대 포켓몬이 방어적 특성 있을 경우 
       opponentPokemon.ability?.defensive?.forEach((category: string) => {
-        if (category === 'damage_nullification') {
-          types = applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
+        if (category === 'damage_nullification' || category === 'type_nullification' || category === 'damage_reduction') {
+          console.log(`${opponentPokemon.name}의 방어적 특성이 적용되었다!`)
+          types *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
         }
       })
-    } else {
-      types = calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
     }
+    // 마지막에 또 곱해줘도 상관없음. 0이였으면 어차피 0이니까.
+    types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
   }
 
   addLog(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
-  if (types >= 2) { wasEffective = 1; addLog('효과가 굉장했다!') };
-  if (types > 0 && types <= 0.5) { wasEffective = -1; addLog(`효과가 별로였다...`) };
-  if (types === 0) { wasNull = true; addLog(`효과가 없었다...`) }
+  if (types >= 2) { wasEffective = 1; addLog(`${attacker.base.name}의 공격은 효과가 굉장했다!`) };
+  if (types > 0 && types <= 0.5) { wasEffective = -1; addLog(`${attacker.base.name}의 공격은 효과가 별로였다...`) };
+  if (types === 0) {
+    wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')) // pp 깎기
+    return;
+  }
 
   // 4-2. 자속보정
   if (myPokemon.types.some((type) => type === moveInfo.type)) {
@@ -286,7 +290,6 @@ export async function calculateMoveDamage({
   }
 
   if (wasNull) {
-    addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
     if (moveInfo.effects?.some((effect) => effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
       let dmg: number;
       moveInfo.effects.forEach((effect) => {

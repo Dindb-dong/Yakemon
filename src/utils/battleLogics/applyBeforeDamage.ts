@@ -14,7 +14,7 @@ export function applyDefensiveAbilityEffectBeforeDamage(
 
   const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon, addLog } = useBattleStore.getState();
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-  const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+  const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = deffender.base.ability; // 상대 포켓몬의 특성
   const currentHp = deffender.currentHp; // 상대 포켓몬 남은 체력 (멀티스케일, 스펙터가드)
   const opponentSide = side === 'my' ? 'enemy' : 'my';
@@ -48,6 +48,7 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           break;
         case 'damage_nullification':
           if (ability.name === '방진' && usedMove.affiliation === '가루') {
+            console.log("방진 발동");
             rate = 0;
           } else if (ability.name === '방탄' && usedMove.affiliation === '폭탄') {
             rate = 0;

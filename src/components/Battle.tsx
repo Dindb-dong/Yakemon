@@ -136,15 +136,18 @@ function Battle() {
       if (roll < 0.7 && (hasSwitchOption || isAi_lowHp)) {
         const switchIdx = getSwitchIndex("offense");
         if (switchIdx !== -1) {
-          console.log("AI는 빠르지만 불리하므로 교체");
+          console.log("AI는 빠르지만 상성상 유리한 포켓몬이 있으므로 교체");
           return { type: "switch" as const, index: switchIdx };
         }
       }
       console.log("AI는 가장 강한 공격 시도");
       return bestMove;
     } else { // ai가 유리 
-      if (isUser_lowHp) {
+      if (isUser_lowHp) { // 막타치기 로직 
         console.log("AI는 플레이어 포켓몬의 빈틈을 포착!");
+        return bestMove;
+      }
+      if (bestMove && !(userToai > 1)) { // 상대 때릴 유리한 기술 있으면 그냥 때리기 
         return bestMove;
       }
       if (roll < 0.1 && hasSwitchOption) {
