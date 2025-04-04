@@ -33,6 +33,36 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+
+  let shouldWaitForSwitch = false;
+  let switchPromise: Promise<void> | null = null;
+
+  if (effect?.some((e) => e.uTurn)) {
+    const { setSwitchRequest } = useBattleStore.getState();
+
+    switchPromise = new Promise<void>((resolve) => {
+      console.log('유턴 로직 실행중...1')
+      setSwitchRequest({
+        side,
+        reason: "uTurn",
+        onSwitch: (index: number) => {
+          switchPokemon(side, index);
+          setSwitchRequest(null);
+          resolve();
+          console.log('유턴 로직 실행중...4')
+        },
+      });
+      addLog(`${attacker.base.name}은/는 유턴으로 교체하려 하고 있다!`);
+    });
+
+    shouldWaitForSwitch = true;
+  }
+
+  if (shouldWaitForSwitch && switchPromise) {
+    console.log('유턴 로직 실행중...2');
+    await switchPromise;
+    console.log('유턴 로직 실행중...5 (완료)');
+  }
   effect?.forEach((effect) => {
     if (effect?.recoil && appliedDameage) {
       // 반동 데미지 적용
@@ -94,22 +124,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
         addLog(`${attacker.base.name}은/는 체력을 회복했다!`)
       }
-      if (effect?.uTurn) {
-        const { setSwitchRequest } = useBattleStore.getState();
 
-        return new Promise<void>((resolve) => {
-          setSwitchRequest({
-            side,
-            reason: "uTurn",
-            onSwitch: (index: number) => {
-              switchPokemon(side, index);
-              setSwitchRequest(null);
-              resolve(); // ✅ 교체가 완료되면 resolve 호출
-            },
-          });
-          addLog(`${attacker.base.name}은/는 유턴으로 교체하려 하고 있다!`);
-        });
-      }
     }
   })
 

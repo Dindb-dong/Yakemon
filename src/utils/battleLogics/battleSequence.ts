@@ -113,7 +113,6 @@ export async function battleSequence(
       applyEndTurnEffects();
       return;
     }
-
     await handleMove("enemy", enemyAction as MoveInfo);
   } else { // 상대가 선공일 경우 
     await handleMove("enemy", enemyAction as MoveInfo);
@@ -146,7 +145,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
   const isDoubleHit = move.effects?.some((effect) => effect.doubleHit)
   const isTripleHit = ["트리플킥", "트리플악셀"].includes(move.name);
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-  const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+  const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
 

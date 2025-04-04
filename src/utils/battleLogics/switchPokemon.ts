@@ -5,7 +5,7 @@ import { applyTrapDamage } from "./applyNoneMoveDamage";
 import { addStatus, removeStatus, resetRank, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
-export function switchPokemon(side: "my" | "enemy", newIndex: number) {
+export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   const {
     myTeam,
     enemyTeam,
@@ -75,5 +75,6 @@ export function switchPokemon(side: "my" | "enemy", newIndex: number) {
   logs.forEach(addLog);
   const wncp = side === 'my' ? '나' : '상대';
   console.log(wncp + '는 ' + next.base.name + '을/를 내보냈다!');
-  addLog(wncp + '는 ' + next.base.name + '을/를 내보냈다!')
+  addLog(wncp + '는 ' + next.base.name + '을/를 내보냈다!');
+  return;
 }
