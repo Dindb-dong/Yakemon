@@ -112,7 +112,7 @@ export async function calculateMoveDamage({
 
   // 5-1. 타입 상성 계산
 
-  if (moveInfo.power > 0 && !(moveInfo.target === 'self')) {
+  if (!(moveInfo.target === 'self')) {
     // 상대가 타입 상성 무효화 특성 있을 경우 미리 적용 
     if (moveInfo.category === '변화' && moveInfo.target === 'opponent') { // 상대를 때리는 변화기술일 경우 
       if (moveInfo.type === '풀' && opponentPokemon.types.includes('풀')) {
