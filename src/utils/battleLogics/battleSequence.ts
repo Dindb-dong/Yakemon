@@ -21,6 +21,7 @@ import { switchPokemon } from "./switchPokemon";
 import { decrementConfusionTurn } from "../../Context/useDurationContext";
 import { hasAbility } from "./helpers";
 import { setAbility, setTypes } from "./updateBattlePokemon";
+import { useEffect } from "react";
 
 type BattleAction = MoveInfo | { type: "switch", index: number };
 
@@ -141,8 +142,8 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
     activeEnemy,
     addLog, updatePokemon
   } = useBattleStore.getState();
-  const isMultiHit = move.effects?.multiHit;
-  const isDoubleHit = move.effects?.doubleHit;
+  const isMultiHit = move.effects?.some((effect) => effect.multiHit)
+  const isDoubleHit = move.effects?.some((effect) => effect.doubleHit)
   const isTripleHit = ["트리플킥", "트리플악셀"].includes(move.name);
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
@@ -226,9 +227,12 @@ function removeFaintedPokemon(side: 'my' | 'enemy') {
 }
 
 function getHitCount(move: MoveInfo): number {
-  if (move.effects?.doubleHit) return 2;
-  if (move.effects?.tripleHit) return 3;
-  if (!move.effects?.multiHit) return 1;
+  move.effects?.forEach((effect => {
+    if (effect.doubleHit) return 2;
+    if (effect.tripleHit) return 3;
+    if (effect.multiHit) return 1;
+  }))
+
 
   const rand = Math.random();
   if (move.name === "스킬링크") return 5;

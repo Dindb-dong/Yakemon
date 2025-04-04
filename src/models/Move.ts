@@ -27,14 +27,15 @@ export type MoveInfo = {
   type: string;
   category: '물리' | '특수' | '변화';
   power: number; // 위력 
-  pp?: number;
+  pp: number;
   isTouch: boolean; // 접촉 기술 여부 
   affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | null; // 계열 
   accuracy: number; // 명중율. 
   criticalRate: number; // 급소율. 랭크로 나타냄. 0이 기본, 1이 깜짝베기같은거, 3은 확정임 
-  effects?: MoveEffect;
+  effects?: MoveEffect[];
   priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
   trap?: '독압정' | '스텔스락' | '압정뿌리기';
+  target?: 'self' | 'opponent'; // 상대를 때리는 기술인지, 나에게 거는 기술인지 
 };
 
 // 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.

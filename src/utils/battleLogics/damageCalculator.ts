@@ -96,7 +96,7 @@ export async function calculateMoveDamage({
     opponentPokemon.ability = null; // 상대 특성 무효 처리. 실제 특성 메모리엔 영향 x.
   }
 
-  // 8. 명중률 계산
+  // 4. 명중률 계산
   if (isAlwaysHit) { // 연속기 사용 시 
     isHit = true;
   } else {
@@ -110,9 +110,15 @@ export async function calculateMoveDamage({
     }
   }
 
-  // 4-1. 타입 상성 계산
-  if (moveInfo.power > 0) {
+  // 5-1. 타입 상성 계산
+
+  if (moveInfo.power > 0 && !(moveInfo.target === 'self')) {
     // 상대가 타입 상성 무효화 특성 있을 경우 미리 적용 
+    if (moveInfo.category === '변화' && moveInfo.target === 'opponent') { // 상대를 때리는 변화기술일 경우 
+      if (moveInfo.type === '풀' && opponentPokemon.types.includes('풀')) {
+        types = 0;
+      } // 추가 가능 
+    }
     if (opponentPokemon.ability?.defensive) {
       opponentPokemon.ability?.defensive?.forEach((category: string) => {
         if (category === 'damage_nullification') {
@@ -232,14 +238,14 @@ export async function calculateMoveDamage({
     }
   }
   if (opPokeRank.defense && moveInfo.category === '물리') {
-    if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.rank_nullification)) {
+    if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.some((effect) => effect.rank_nullification))) {
       // 공격자가 천진도 아니고, 기술이 랭크업 무시하는 기술도 아닐 경우에만 업데이트. (둘 중 하나라도 만족하면 안함)
       defenseStat *= calculateRankEffect(opPokeRank.defense);
       addLog(`${deffender.base.name}의 방어 랭크 변화가 적용되었다!`)
     }
   }
   if (opPokeRank.spDefense && moveInfo.category === '특수') {
-    if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.rank_nullification)) {
+    if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.some((effect) => effect.rank_nullification))) {
       defenseStat *= calculateRankEffect(opPokeRank.spDefense);
       addLog(`${deffender.base.name}의 특수방어 랭크 변화가 적용되었다!`)
     }
@@ -266,8 +272,13 @@ export async function calculateMoveDamage({
 
   if (!isHit) {
     addLog(`${attacker.base.name}의 공격은 빗나갔다!`);
-    if (moveInfo.effects?.fail) { // 무릎차기, 점프킥 등 빗나가면 반동.
-      const dmg = moveInfo.effects?.fail
+    if (moveInfo.effects?.some((effect) => effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
+      let dmg: number;
+      moveInfo.effects.forEach((effect) => {
+        if (effect.fail) {
+          dmg = effect.fail;
+        }
+      })
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
       addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
     }
@@ -276,8 +287,13 @@ export async function calculateMoveDamage({
 
   if (wasNull) {
     addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
-    if (moveInfo.effects?.fail) { // 무릎차기, 점프킥 등 빗나가면 반동.
-      const dmg = moveInfo.effects?.fail
+    if (moveInfo.effects?.some((effect) => effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
+      let dmg: number;
+      moveInfo.effects.forEach((effect) => {
+        if (effect.fail) {
+          dmg = effect.fail;
+        }
+      })
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
       addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
     }

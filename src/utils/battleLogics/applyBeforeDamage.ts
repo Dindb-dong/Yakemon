@@ -47,6 +47,11 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           // updatePokemon("my", 0, changeRank(active, "spAttack", 1)); 같은거 이용해서.
           break;
         case 'damage_nullification':
+          if (ability.name === '방진' && usedMove.affiliation === '가루') {
+            rate = 0;
+          } else if (ability.name === '방탄' && usedMove.affiliation === '폭탄') {
+            rate = 0;
+          }
           // TODO: 방탄, 방진 등 추가하기.
           break;
         case 'damage_reduction':
