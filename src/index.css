@@ -167,6 +167,44 @@
   color: #333;
 }
 
+.move-type {
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  display: inline-block;
+  align-self: center;
+  text-align: center;
+}
+
+/* 타입별 색상 설정 */
+.move-type.불 { background-color: #F08030; }
+.move-type.물 { background-color: #4375e8; }
+.move-type.풀 { background-color: #78C850; }
+.move-type.전기 { background-color: #F8D030; }
+.move-type.얼음 { background-color: #98D8D8; }
+.move-type.격투 { background-color: #C03028; }
+.move-type.비행 { background-color: #a2b9f3; }
+.move-type.에스퍼 { background-color: #F85888; }
+.move-type.바위 { background-color: #B8A038; }
+.move-type.고스트 { background-color: #705898; }
+.move-type.드래곤 { background-color: #4412c4; }
+.move-type.악 { background-color: #160e09; }
+.move-type.강철 { background-color: #8b8b9a; }
+.move-type.페어리 { background-color: #EE99AC; }
+.move-type.노말 { background-color: #f7f7f7; color:#160e09;}
+.move-type.독 { background-color: #A040A0; }
+.move-type.땅 { background-color: #e0b94e; }
+.move-type.벌레 { background-color: #A8B820; }
+
+.move-power,
+.move-accuracy {
+  font-size: 0.75rem;
+  color: #444;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }

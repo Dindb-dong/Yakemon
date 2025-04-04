@@ -24,6 +24,9 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }
           >
             <span className="move-name">{move.name}</span>
             <span className="move-pp">PP: {myPokemon.pp[move.name]}</span>
+            <span className="move-power">위력: {move.power}</span>
+            <span className="move-accuracy">명중율: {move.accuracy}</span>
+            <span className={`move-type ${move.type}`}>{move.type}</span>
           </button>
         ))}
       </div>

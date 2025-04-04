@@ -915,7 +915,7 @@ export const mockPokemon: PokemonInfo[] = [
     moves: [
       {
         name: '기충전',
-        type: '전기',
+        type: '노말',
         category: '변화',
         power: 0,
         pp: 20,
