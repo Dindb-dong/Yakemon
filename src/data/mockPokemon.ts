@@ -259,7 +259,7 @@ export const mockPokemon: PokemonInfo[] = [
     name: '블레이범',
     types: ['불'],
     moves: [
-    ], // 나중에 추가
+    ],
     sex: 'male',
     ability: { id: 101, name: '맹화', offensive: ['damage_buff'] },
     hp: 76, attack: 104, defense: 71, spAttack: 104, spDefense: 71, speed: 108, level: 50,
@@ -633,11 +633,12 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
+        uTurn: true,
         effects: [{
           chance: 1, statChange: [
             { target: 'opponent', stat: 'spAttack', change: -1 },
             { target: 'opponent', stat: 'attack', change: -1 }
-          ], uTurn: true,
+          ],
         }],
         target: 'opponent',
       }
@@ -820,7 +821,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{ chance: 1, uTurn: true }], // 교체 효과는 별도 처리
+        uTurn: true,
         target: 'opponent',
       },
       {
@@ -1076,7 +1077,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{ chance: 1, uTurn: true }], // 교체 효과는 별도 처리
+        uTurn: true,
         target: 'opponent',
       },
       {

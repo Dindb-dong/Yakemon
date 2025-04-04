@@ -18,7 +18,7 @@ type MoveEffect = {
   multiHit?: boolean; // 2~5회 타격 여부 (isAlwaysHit), 명중 여부는 초기에 계산 
   doubleHit?: boolean; // 2회 타격 (isAlwaysHit)
   tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
-  uTurn?: boolean; // 유턴이나 퀵턴, 볼트체인치같이 교체하는 기술.
+
   rank_nullification?: boolean; // DD래리어트, 성스러운칼, 야금야금 같이 상대 능력변화 무시하고 데미지 주는 기술.
 }
 
@@ -35,7 +35,8 @@ export type MoveInfo = {
   effects?: MoveEffect[];
   priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
   trap?: '독압정' | '스텔스락' | '압정뿌리기';
-  target?: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청 등 )
+  uTurn?: boolean; // 유턴이나 퀵턴, 볼트체인치같이 교체하는 기술.
+  target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청 등 )
 };
 
 // 지금은 mockPokemon에 하드코딩했지만, 나중에는 확장성 위해서 아래 로직 사용.

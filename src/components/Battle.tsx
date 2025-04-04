@@ -75,40 +75,7 @@ export const aiChooseAction = () => {
       m.category === "변화" &&
       m.effects?.forEach((effect) => effect.statChange?.some((s) => s.target === "self" && s.change > 0))
     );
-
     if (rankUpMoves.length === 0) return null;
-
-    const rankEffect = (rank: number): number => {
-      if (rank >= 0) return (2 + rank) / 2;
-      return 2 / (2 - rank);
-    };
-
-    const userSpeed =
-      userPokemon.base.speed *
-      rankEffect(userPokemon.rank.speed || 0);
-    const aiSpeed =
-      aiPokemon.base.speed *
-      rankEffect(aiPokemon.rank.speed || 0);
-
-    const isAiFaster = aiSpeed > userSpeed;
-
-    if (isAiFaster) {
-      // 느리면 스피드 올리는 기술 우선
-      const speedUpMove = rankUpMoves.find((m) =>
-        m.effects?.forEach((effect) => effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change > 0))
-      );
-      if (speedUpMove) return speedUpMove;
-    } else {
-      // 빠르면 공격/특수공격 올리는 기술 우선
-      const offensiveUpMove = rankUpMoves.find((m) =>
-        m.effects?.forEach((effect) => effect.statChange?.some((s) => s.target === "self" &&
-          (s.stat === "attack" || s.stat === "spAttack") &&
-          s.change > 0))
-      );
-      if (offensiveUpMove) return offensiveUpMove;
-    }
-
-    // 아무 것도 없으면 그냥 첫 번째 랭크업 기술
     return rankUpMoves[0];
   };
 
@@ -116,7 +83,6 @@ export const aiChooseAction = () => {
   const userToai = typeEffectiveness(userPokemon.base.types, aiPokemon.base.types);
 
   const usableMoves = aiPokemon.base.moves.filter((m) => aiPokemon.pp[m.name] > 0);
-  const counterMove = usableMoves.find((m) => calculateTypeEffectiveness(m.type, userPokemon.base.types) > 1);
   const bestMove = getBestMove();
   const rankUpMove = getRankUpMove();
   const speedUpMove = getSpeedUpMove();
@@ -146,7 +112,7 @@ export const aiChooseAction = () => {
 
   // === 2. 플레이어가 더 빠를 경우 ===
   if (!isEnemyFaster) {
-    if (aiTouser > 1) { // ai가 불리 
+    if (aiTouser < 1) { // ai가 불리 
       if (roll < 0.1 && speedUpMove) {
         addLog("AI는 상대의 맞교체 또는 랭크업을 예측하고 스피드 상승을 시도!");
         return speedUpMove;
@@ -186,7 +152,7 @@ export const aiChooseAction = () => {
   }
 
   // === 3. AI가 더 빠를 경우 ===
-  if (aiTouser > 1) { // ai가 상성 불리 
+  if (aiTouser < 1) { // ai가 상성 불리 
     if (isUser_lowHp) {
       addLog("AI는 플레이어 포켓몬의 빈틈을 포착!");
       return bestMove;
