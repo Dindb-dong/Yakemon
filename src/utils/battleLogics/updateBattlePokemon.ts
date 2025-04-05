@@ -45,27 +45,35 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePo
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜']
   const { publicEnv } = useBattleStore.getState();
-  if (status === '독' || status === '맹독' && pokemon.base.ability?.name === '면역') return { ...pokemon };
-  if (status === '도발' || status === '헤롱헤롱' && pokemon.base.ability?.name === '둔감') return { ...pokemon };
-  if (status === '마비' && pokemon.base.ability?.name === '유연') return { ...pokemon };
-  if (status === '화상') {
-    if (pokemon.base.ability?.name === '수의베일' || pokemon.base.ability?.name === '수포') {
+  if (status === '독' || status === '맹독') {
+    if (pokemon.base.ability?.name === '면역' || pokemon.base.types.includes('독') || pokemon.base.types.includes('강철')) {
       return { ...pokemon };
+    }
+  }
+
+  if ((status === '도발' || status === '헤롱헤롱') &&
+    pokemon.base.ability?.name === '둔감') {
+    return { ...pokemon };
+  }
+  if (status === '마비' && (pokemon.base.ability?.name === '유연' || pokemon.base.types.includes('전기'))) { return { ...pokemon }; }
+  if (status === '화상') {
+    if (pokemon.base.ability?.name === '수의베일' || pokemon.base.ability?.name === '수포' || pokemon.base.types.includes('불')) {
+      { return { ...pokemon }; }
     }
   }
   if (status === '잠듦') {
     if (pokemon.base.ability?.name === '불면' || pokemon.base.ability?.name === '의기양양' || pokemon.base.ability?.name === '스위트베일') {
-      return { ...pokemon };
+      { return { ...pokemon }; }
     }
   }
-  if (status === '얼음' && pokemon.base.ability?.name === '마그마의무장') {
-    return { ...pokemon };
+  if (status === '얼음' && (pokemon.base.ability?.name === '마그마의무장' || pokemon.base.types.includes('얼음'))) {
+    { return { ...pokemon }; }
   }
   if (unMainStatusCondition.some((s) => s === status) && pokemon.base.ability?.name === '아로마베일') {
-    return { ...pokemon };
+    { return { ...pokemon }; }
   }
   if (publicEnv.weather === '쾌청' && pokemon.base.ability?.name === '리프가드') {
-    if (mainStatusCondition.some((s) => s === status)) return { ...pokemon };
+    if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
   }
 
   const manager = new StatusManager(pokemon.status);

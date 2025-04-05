@@ -135,7 +135,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 90,
         criticalRate: 0,
-        effects: [{ chance: 1, statChange: [{ target: 'self', stat: 'spAttack', change: -2 }] }],
+        demeritEffects: [{ chance: 1, statChange: [{ target: 'self', stat: 'spAttack', change: -2 }] }],
         target: 'opponent',
       }
     ],
@@ -259,6 +259,60 @@ export const mockPokemon: PokemonInfo[] = [
     name: '블레이범',
     types: ['불'],
     moves: [
+      {
+        name: "니트로차지",
+        type: "불",
+        category: "물리",
+        power: 50,
+        pp: 20,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: [{
+          chance: 1,
+          statChange: [{ target: "self", stat: "speed", change: 1 }]
+        }],
+        target: "opponent"
+      },
+      {
+        name: "불대문자",
+        type: "불",
+        category: "특수",
+        power: 110,
+        pp: 5,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 85,
+        criticalRate: 0,
+        effects: [{ chance: 0.1, status: "화상" }],
+        target: "opponent"
+      },
+      {
+        name: "와일드볼트",
+        type: "전기",
+        category: "물리",
+        power: 90,
+        pp: 15,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        demeritEffects: [{ chance: 1, recoil: 0.25 }],
+        target: "opponent"
+      },
+      {
+        name: "지진",
+        type: "땅",
+        category: "물리",
+        power: 100,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        target: "opponent"
+      }
     ],
     sex: 'male',
     ability: { id: 101, name: '맹화', offensive: ['damage_buff'] },
@@ -268,7 +322,59 @@ export const mockPokemon: PokemonInfo[] = [
     id: 154,
     name: '메가니움',
     types: ['풀'],
-    moves: [],
+    moves: [
+      {
+        name: "기가드레인",
+        type: "풀",
+        category: "특수",
+        power: 75,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: [{ chance: 1, heal: 0.5 }],
+        target: "opponent"
+      },
+      {
+        name: "광합성",
+        type: "풀",
+        category: "변화",
+        power: 0,
+        pp: 5,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: [{ chance: 1, heal: 0.5 }],
+        target: "self"
+      },
+      {
+        name: "씨뿌리기",
+        type: "풀",
+        category: "변화",
+        power: 0,
+        pp: 10,
+        isTouch: false,
+        accuracy: 90,
+        criticalRate: 0,
+        effects: [{ chance: 1, status: "씨뿌리기" }],
+        target: "opponent"
+      },
+      {
+        name: "방어",
+        type: "노말",
+        category: "변화",
+        power: 0,
+        pp: 10,
+        isTouch: false,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        protect: true,
+        target: "self"
+      }
+    ],
     sex: 'female',
     ability: { id: 102, name: '심록', offensive: ['damage_buff'] },
     hp: 80, attack: 82, defense: 100, spAttack: 83, spDefense: 100, speed: 80, level: 50,
@@ -277,7 +383,67 @@ export const mockPokemon: PokemonInfo[] = [
     id: 160,
     name: '장크로다일',
     types: ['물'],
-    moves: [],
+    moves: [
+      {
+        name: "퀵턴",
+        type: "물",
+        category: "물리",
+        power: 60,
+        pp: 20,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: [],
+        uTurn: true,
+        target: "opponent"
+      },
+      {
+        name: "아쿠아브레이크",
+        type: "물",
+        category: "물리",
+        power: 85,
+        pp: 10,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        effects: [{ chance: 0.2, statChange: [{ target: "opponent", stat: "defense", change: -1 }] }],
+        target: "opponent"
+      },
+      {
+        name: "냉동펀치",
+        type: "얼음",
+        category: "물리",
+        power: 75,
+        pp: 15,
+        isTouch: true,
+        affiliation: "펀치",
+        accuracy: 100,
+        criticalRate: 0,
+        effects: [{ chance: 0.1, status: "얼음" }],
+        target: "opponent"
+      },
+      {
+        name: "엄청난힘",
+        type: "노말",
+        category: "물리",
+        power: 120,
+        pp: 5,
+        isTouch: true,
+        affiliation: null,
+        accuracy: 100,
+        criticalRate: 0,
+        demeritEffects: [{
+          chance: 1,
+          statChange: [
+            { target: "self", stat: "attack", change: -1 },
+            { target: "self", stat: "defense", change: -1 }
+          ]
+        }],
+        target: "opponent"
+      }
+    ],
     sex: 'male',
     ability: { id: 103, name: '우격다짐', offensive: ['damage_buff'] },
     hp: 85, attack: 105, defense: 100, spAttack: 79, spDefense: 83, speed: 78, level: 50,
@@ -582,10 +748,11 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{
+        demeritEffects: [{
           chance: 1,
           recoil: 0.33,
-        }, {
+        }],
+        effects: [{
           chance: 0.1,
           status: '화상'
         }],
@@ -885,7 +1052,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{ chance: 1, recoil: 0.33 }],
+        demeritEffects: [{ chance: 1, recoil: 0.33 }],
         target: 'opponent',
       },
       {
@@ -1148,7 +1315,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{ chance: 1, recoil: 0.33 }], // 반동 1/3
+        demeritEffects: [{ chance: 1, recoil: 0.33 }], // 반동 1/3
         target: 'opponent',
       },
       {
@@ -1161,7 +1328,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{
+        demeritEffects: [{
           chance: 1,
           statChange: [
             { target: 'self', stat: 'defense', change: -1 },
@@ -1180,7 +1347,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,
-        effects: [{ chance: 1, recoil: 0.33 }],
+        demeritEffects: [{ chance: 1, recoil: 0.33 }],
         target: 'opponent',
       },
     ],

@@ -18,15 +18,13 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
-  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜'];
+  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기'];
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
   const env = side === "my" ? myEnv : enemyEnv;
   const switchingPokemon = team[currentIndex]; // 현재 교체하고자 하는 포켓몬
   let next = team[newIndex];
-  // 3. 새 포켓몬 활성화
-  updatePokemon(side, newIndex, (newPokemon) => setActive(newPokemon, true));
 
   // 1. 현재 포켓몬 비활성화
   updatePokemon(side, currentIndex, (switchingPokemon) => setActive(switchingPokemon, false));
@@ -50,6 +48,9 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
       updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
   }
+
+  // 3. 새 포켓몬 활성화
+  updatePokemon(side, newIndex, (newPokemon) => setActive(newPokemon, true));
 
   if (side === "my") {
     setActiveMy(newIndex);

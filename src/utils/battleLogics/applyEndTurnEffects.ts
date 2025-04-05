@@ -19,11 +19,12 @@ export function applyEndTurnEffects() {
   const { publicEffects, decrementTurns } = useDurationStore.getState();
 
   const myActive = myTeam[activeMy]; // 내 포켓몬 
-  const enemyActive = enemyTeam[activeEnemy]; // 상대 포켓몬 
+  const enemyActive = enemyTeam[activeEnemy]; // 상대 포켓몬
 
   // === 상태이상 효과 처리 ===
   [myActive, enemyActive].forEach((pokemon, i) => {
     const side = i === 0 ? "my" : "enemy";
+    const opponentSide = i === 0 ? "enemy" : "my";
     // 이렇게 효율적으로 처리할 수도 있구만! 
     if (pokemon.status.includes("화상")) {
       const damage = Math.floor(pokemon.base.hp / 16);
@@ -31,12 +32,25 @@ export function applyEndTurnEffects() {
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
       addLog(`${pokemon.base.name}은 화상으로 ${damage}의 데미지를 입었다!`);
     }
-
     if (pokemon.status.includes("맹독")) {
+      const damage = Math.floor(pokemon.base.hp / 6);
+      const updated = (pokemon) => changeHp(pokemon, -damage);
+      updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
+      addLog(`${pokemon.base.name}은 맹독의 피해를 입었다!`);
+    }
+    if (pokemon.status.includes("독")) {
       const damage = Math.floor(pokemon.base.hp / 8);
       const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
       addLog(`${pokemon.base.name}은 독의 피해를 입었다!`);
+    }
+    if (pokemon.status.includes("씨뿌리기")) {
+      const damage = Math.floor(pokemon.base.hp / 8);
+      const damaged = (prev) => changeHp(prev, -damage);
+      const healed = (prev) => changeHp(prev, damage);
+      updatePokemon(side, i === 0 ? activeMy : activeEnemy, damaged);
+      updatePokemon(opponentSide, i === 0 ? activeEnemy : activeMy, healed);
+      addLog(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
     }
   });
 

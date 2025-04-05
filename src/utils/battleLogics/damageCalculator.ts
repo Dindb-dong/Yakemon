@@ -11,6 +11,7 @@ import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
 import { changeHp, changeRank, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
+import { addTrap, setField } from "./updateEnvironment";
 
 type ItemInfo = {
   id: number;
@@ -73,7 +74,7 @@ export async function calculateMoveDamage({
   }
   let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
 
-  // 0. 상태이상 확인
+  // 0-1. 상태이상 확인
   if (myPokeStatus) {
     const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo, side);
     rate = statusResult.rate; // 화상 적용 
@@ -81,6 +82,13 @@ export async function calculateMoveDamage({
       addLog(`${attacker}의 기술은 실패했다!`);
       return { success: false }; // 바로 함수 종료 
     }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
+  }
+
+  // 0-2. 자신에게 거는 기술이나 필드 등에 적용하는 기술 효과 처리 
+  if (moveInfo.target === 'self' || moveInfo.target === 'none') {
+    applyChangeEffect(moveInfo, side, myPokemon, opponentPokemon)
+    isHit = true; // 무조건 적중 처리
+    return { success: true }; // 바로 함수 종료
   }
 
   // 1. 상대 포켓몬 타입 설정
@@ -130,7 +138,7 @@ export async function calculateMoveDamage({
     types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
   }
 
-  addLog(`${attacker.base.name}은 ${moveName}을/를 사용했다!`)
+  addLog(`${side}는 ${moveName}을/를 사용했다!`)
   if (types >= 2) { wasEffective = 1; addLog(`${attacker.base.name}의 공격은 효과가 굉장했다!`) };
   if (types > 0 && types <= 0.5) { wasEffective = -1; addLog(`${attacker.base.name}의 공격은 효과가 별로였다...`) };
   if (types === 0) {
@@ -197,6 +205,7 @@ export async function calculateMoveDamage({
   // 6. 공격 관련 특성 적용 (배율)
   rate *= applyOffensiveAbilityEffectBeforeDamage(moveInfo, side);
 
+
   // 7. 상대 방어 특성 적용 (배율)
   // 만약 위에서 이미 types가 0이더라도, 나중에 곱하면 어차피 0 돼서 상관없음.
   rate *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
@@ -214,9 +223,14 @@ export async function calculateMoveDamage({
 
   if (isCritical && myPokemon.ability?.name === '스나이퍼') {
     rate *= 2.25; // 스나이퍼는 급소 데미지 2배
+    myPokeRank.attack = Math.max(0, myPokeRank.attack);
+    myPokeRank.spAttack = Math.max(0, myPokeRank.spAttack);
+    // 급소 맞출 시에는 내 공격 랭크 다운 무효 
     addLog(`${moveName}은/는 급소에 맞았다!`)
   } else if (isCritical) {
     rate *= 1.5 // 그 외에는 1.5배 
+    myPokeRank.attack = Math.max(0, myPokeRank.attack);
+    myPokeRank.spAttack = Math.max(0, myPokeRank.spAttack);
     addLog(`${moveName}은/는 급소에 맞았다!`)
   }
 
@@ -276,11 +290,11 @@ export async function calculateMoveDamage({
 
   if (!isHit) {
     addLog(`${attacker.base.name}의 공격은 빗나갔다!`);
-    if (moveInfo.effects?.some((effect) => effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
+    if (moveInfo.demeritEffects?.some((d_effect) => d_effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
       let dmg: number;
-      moveInfo.effects.forEach((effect) => {
-        if (effect.fail) {
-          dmg = effect.fail;
+      moveInfo.demeritEffects.forEach((d_effect) => {
+        if (d_effect.fail) {
+          dmg = d_effect.fail;
         }
       })
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
@@ -318,6 +332,31 @@ export async function calculateMoveDamage({
     return { success: true, damage, wasEffective };
   }
 
+}
+// 자신에게 거는 기술이나 필드에 거는 기술 등의 변화 기술 효과 처리 함수 
+function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker: PokemonInfo, deffender: PokemonInfo) {
+  const { updatePokemon, activeMy, activeEnemy, addLog } = useBattleStore.getState();
+  const activeMine = side === 'my' ? activeMy : activeEnemy;
+  if (moveInfo.category === '변화') {
+    if (moveInfo.target === 'self') { // 자신에게 거는 기술일 경우 
+      moveInfo.effects?.forEach((effect) => {
+        if (effect.statChange) { // 랭크업 기술일 경우 
+          effect.statChange.forEach((statChange) => {
+            updatePokemon(side, activeMine, (attacker) => changeRank(attacker, statChange.stat, statChange.change));
+          })
+        }
+      })
+    } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 
+      if (moveInfo.trap) {
+        addTrap(side, moveInfo.trap);
+        addLog(`${side}는 ${moveInfo.name}을/를 설치했다!`)
+      }
+      if (moveInfo.field) {
+        setField(moveInfo.field);
+        addLog(`${side}는 필드를 ${moveInfo.name}로 바꿨다!`)
+      }
+    }
+  }
 }
 
 function getMoveInfo(myPokemon: PokemonInfo, moveName: string): MoveInfo {

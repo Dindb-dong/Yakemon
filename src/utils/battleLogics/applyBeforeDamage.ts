@@ -84,6 +84,9 @@ export function applyOffensiveAbilityEffectBeforeDamage(
       switch (category) {
         // TODO: 아래에 전부 추가하기 
         case "damage_buff":
+          if (ability.name === '우격다짐' && usedMove.effects) {
+            rate *= 1.3; // 우격다짐은 1.3배
+          }
           break;
         case "demerit":
           break;

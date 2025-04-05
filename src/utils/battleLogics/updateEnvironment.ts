@@ -1,13 +1,22 @@
 import { useBattleStore } from "../../Context/useBattleStore";
+import { useDurationStore } from "../../Context/useDurationContext";
 import { FieldType } from "../../models/Field";
 
 // 📍 날씨 설정 (공유)
 export function setWeather(weather: string | null) {
+  const { addEffect } = useDurationStore.getState()
+  if (weather !== null) {
+    addEffect("public", { name: weather, remainingTurn: 5 });
+  }
   useBattleStore.getState().setPublicEnv({ weather });
 }
 
 // 📍 필드 설정 (공유)
 export function setField(field: FieldType) {
+  const { addEffect } = useDurationStore.getState()
+  if (field !== null) {
+    addEffect("public", { name: field, remainingTurn: 5 });
+  }
   useBattleStore.getState().setPublicEnv({ field });
 }
 

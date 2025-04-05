@@ -29,6 +29,7 @@ function applyOffensiveAbilityEffectAfrerDamage() {
 async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
   const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
   const effect = usedMove.effects;
+  const demeritEffect = usedMove.demeritEffects;
   const opponentSide = side === 'my' ? 'enemy' : 'my';
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
@@ -63,14 +64,16 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     await switchPromise;
     console.log('유턴 로직 실행중...5 (완료)');
   }
-  if (!(attacker.base.ability?.name === '우격다짐')) { // 우격다짐일 때에는 부가효과 적용안함.
+  demeritEffect?.forEach((demerit) => {
+    if (demerit?.recoil && appliedDameage) {
+      // 반동 데미지 적용
+      const recoilDamage = appliedDameage * demerit.recoil;
+      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
+      addLog(`${attacker.base.name}은/는 반동 데미지를 입었다!`);
+    }
+  })
+  if (attacker.base.ability?.name !== '우격다짐' && usedMove.target === 'opponent') { // 우격다짐일 때에는 부가효과 적용안함.
     effect?.forEach((effect) => {
-      if (effect?.recoil && appliedDameage) {
-        // 반동 데미지 적용
-        const recoilDamage = appliedDameage * effect.recoil;
-        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
-        addLog(`${attacker.base.name}은/는 반동 데미지를 입었다!`);
-      }
       if (effect && Math.random() < effect.chance) {
         console.log(`${usedMove.name}의 부가효과 발동!`)
         if (effect.statChange) {
