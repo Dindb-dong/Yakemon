@@ -11,18 +11,25 @@ import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 function App() {
   const [isSelected, setIsSelected] = useState(false);
   const { setMyTeam, setEnemyTeam } = useBattleStore();
+  const [watchMode, setWatchMode] = useState(false);
+  const [watchCount, setWatchCount] = useState(1);
 
   const handleSelect = useCallback(
-    (playerPokemons: PokemonInfo[], watchMode?: boolean) => {
-      // AI 포켓몬 랜덤 선택
-      //const aiCandidates = mockPokemon.filter(p => !playerPokemons.includes(p));
-      const aiCandidates = [mockPokemon[0], mockPokemon[1], mockPokemon[2]];
-      const aiRaw: PokemonInfo[] = Array.from({ length: 3 }, () => {
-        const idx = Math.floor(Math.random() * aiCandidates.length);
-        return aiCandidates.splice(idx, 1)[0];
-      });
+    (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number) => {
+      setWatchMode(watchMode);
+      setWatchCount(watchCount || 1);
+
+      const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
+        const pool = mockPokemon.filter(p => p.types.includes(type) && !exclude.includes(p));
+        return pool[Math.floor(Math.random() * pool.length)];
+      };
+      const myRaw = ['불', '물', '풀'].map((type) => getRandomByType(type));
+      const enemyRaw = ['불', '물', '풀'].map((type) =>
+        getRandomByType(type, myRaw)
+      );
+
       console.log("선택된 포켓몬:", playerPokemons);
-      console.log("AI 포켓몬:", aiRaw);
+      console.log("AI 포켓몬:", enemyRaw);
 
       const myBattleTeam = playerPokemons.map((p, i) => {
         if (!p || !p.moves) {
@@ -31,7 +38,7 @@ function App() {
         return createBattlePokemon(p);
       });
 
-      const aiBattleTeam = aiRaw.map((p, i) => {
+      const aiBattleTeam = enemyRaw.map((p, i) => {
         if (!p || !p.moves) {
           console.error(`aiPokemons[${i}]가 이상함:`, p);
         }
@@ -52,7 +59,7 @@ function App() {
       {!isSelected ? (
         <PokemonSelect onSelect={handleSelect} />
       ) : (
-        <Battle />
+        <Battle watchMode={watchMode} watchCount={watchCount} />
       )}
     </div>
   );

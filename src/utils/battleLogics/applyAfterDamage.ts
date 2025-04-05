@@ -12,6 +12,7 @@ import { applyStatusWithDuration } from "./applyStatusWithDuration";
 import { applyConfusionStatus } from "./applyConfusionStatus";
 import { switchPokemon } from "./switchPokemon";
 import { calculateTypeEffectiveness } from "../typeRalation";
+import { getBestSwitchIndex } from "./getBestSwitchIndex";
 
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
@@ -34,27 +35,19 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   const opponentSide = side === 'my' ? 'enemy' : 'my';
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
+  const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+  const enemyPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
 
   let shouldWaitForSwitch = false;
   let switchPromise: Promise<void> | null = null;
 
   if (usedMove.uTurn) {
     const { setSwitchRequest } = useBattleStore.getState();
-
-    if (side === "enemy") {
-      // AI가 직접 유리한 포켓몬 선택
-      const { enemyTeam, activeEnemy } = useBattleStore.getState();
-      const targetIndex = enemyTeam.findIndex(
-        (p, i) =>
-          i !== activeEnemy &&
-          p.currentHp > 0 &&
-          calculateTypeEffectiveness(p.base.types[0], deffender.base.types) > 1
-      );
-
-      if (targetIndex !== -1) {
-        switchPokemon(side, targetIndex);
-      }
+    if (watchMode) {
+      console.log('관전 모드에서 유턴 사용');
+      const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
+      switchPokemon(side, switchIndex);
     } else {
       switchPromise = new Promise<void>((resolve) => {
         setSwitchRequest({

@@ -3,11 +3,12 @@ import { mockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
 
 type Props = {
-  onSelect: (playerPokemons: PokemonInfo[], watchMode?: boolean) => void;
+  onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number) => void;
 };
 
 function PokemonSelect({ onSelect }: Props) {
   const [selected, setSelected] = useState<PokemonInfo[]>([]);
+  const [watchCount, setWatchCount] = useState(1); // 관전 반복 횟수
 
   const handleSelect = (pokemon: PokemonInfo) => {
     if (selected.includes(pokemon)) {
@@ -33,18 +34,21 @@ function PokemonSelect({ onSelect }: Props) {
         </button>
       ))}
       <br />
-      <button disabled={selected.length !== 3} onClick={() => onSelect(selected)}>
+      <button disabled={selected.length !== 3} onClick={() => onSelect(selected, false)}>
         배틀 시작
       </button>
-      <button
-        disabled={selected.length !== 3}
-        onClick={() => {
-          // 관전 모드일 경우 상태 전달
-          onSelect(selected, true);
-        }}
-      >
-        관전 모드 시작
-      </button>
+      <div style={{ marginTop: "2rem" }}>
+        <h3>관전 모드</h3>
+        <input
+          type="number"
+          min={1}
+          value={watchCount}
+          onChange={(e) => setWatchCount(parseInt(e.target.value))}
+        />
+        <button onClick={() => onSelect([], true, watchCount)}>
+          관전 모드 시작
+        </button>
+      </div>
     </div>
   );
 }

@@ -273,7 +273,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   }
 };
 
-function Battle() {
+function Battle({ watchMode = false, watchCount = 1 }) {
   const {
     myTeam,
     enemyTeam,
@@ -287,7 +287,7 @@ function Battle() {
   } = useBattleStore.getState();
 
 
-  const [watchMode, setWatchMode] = useState<boolean>(false);
+  const [currentWatch, setCurrentWatch] = useState(0);
   const leftPokemon = myTeam[activeMy];
   const rightPokemon = enemyTeam[activeEnemy];
 
@@ -319,34 +319,28 @@ function Battle() {
     }
   }, [isSwitchWaiting, switchRequest]);
 
-  useEffect(() => {
-    if (watchMode && !isGameOver && !isTurnProcessing) {
-      const timer = setTimeout(() => {
-        executeSimulationTurn();
-      }, 100); // 0.1초마다 턴 진행
-      return () => clearTimeout(timer);
-    }
-  }, [turn, watchMode, isTurnProcessing]);
-
-
-
   // 어느 한 팀이 다 기절했을 때에 게임 끝 
   const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
-  const executeSimulationTurn = async () => {
-    if (isTurnProcessing) {
-      console.log('턴 프로세스 진행중')
-      return;
+  useEffect(() => {
+    if (watchMode && !isTurnProcessing && !isGameOver) {
+      const runAIvsAI = async () => {
+        setIsTurnProcessing(true);
+        const leftAction = aiChooseAction("my");
+        const rightAction = aiChooseAction("enemy");
+        await battleSequence(leftAction, rightAction);
+        setTurn(turn + 1);
+        setIsTurnProcessing(false);
+      };
+      runAIvsAI();
     }
 
-    setIsTurnProcessing(true);
-    const leftAction = aiChooseAction("my");
-    const rightAction = aiChooseAction("enemy");
+    if (watchMode && isGameOver && currentWatch < watchCount - 1) {
+      setTimeout(() => {
+        window.location.reload(); // 또는 리셋 로직 함수로 대체
+      }, 1000);
+    }
+  }, [turn, isGameOver, watchMode, currentWatch]);
 
-    await battleSequence(leftAction, rightAction, watchMode);
-
-    setTurn(turn + 1);
-    setIsTurnProcessing(false);
-  };
   const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
     if (isTurnProcessing) {
       console.log('턴 프로세스 진행중')
