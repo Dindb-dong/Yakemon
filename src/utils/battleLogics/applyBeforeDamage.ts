@@ -124,10 +124,6 @@ export function applyOffensiveAbilityEffectBeforeDamage(
         case "type_nullification":
           break;
         case "type_change":
-          if (ability.name === '변환자재') {
-            updatePokemon(side, activeMine, (attacker) => setTypes(attacker, [usedMove.type])); // 사용하는 기술에 맞게 특성 변경 
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
-          }
           break;
         case "rank_buff":
           break;

@@ -2,7 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { calculateRankEffect } from "./rankEffect";
 
-export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | void): string {
+export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | void): Promise<string> {
   // 선공권 누구한테 있는지 계산하는 함수. 
   // 우선도 있는 기술의 경우, 무조건 먼저 공격. 
   // 내 기술의 우선도, 상대 기술의 우선도, 내 스피드, 상대 스피드를 따져야 함. 
@@ -58,5 +58,6 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
     whoIsFirst = 'my';
   }
   addLog(`${whoIsFirst}의 선공!`)
+  console.log(`${whoIsFirst}의 선공!`);
   return whoIsFirst;
 }

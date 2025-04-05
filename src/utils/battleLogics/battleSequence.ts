@@ -46,6 +46,7 @@ export async function battleSequence(
   // 1.5초 대기
   setTimeout(() => {
     addLog("우선도 및 스피드 계산중...");
+    console.log("우선도 및 스피드 계산중...");
   }, 1500);
 
   // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
@@ -67,7 +68,7 @@ export async function battleSequence(
     return;
   }
 
-  const whoIsFirst = calculateOrder(
+  const whoIsFirst = await calculateOrder(
     isMoveAction(myAction) ? myAction : undefined,
     isMoveAction(enemyAction) ? enemyAction : undefined
   );
@@ -161,12 +162,15 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
         updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
         updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
         addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+        console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
       }
       const result = await calculateMoveDamage({ moveName: move.name, side });
       if (result?.success) {
         const recovered = decrementConfusionTurn(side, activeIndex);
         if (recovered) {
           addLog(`${attacker}는 혼란에서 회복했다!`);
+          console.log(`${attacker}는 혼란에서 회복했다!`);
+
         }
         // 트리플 기술은 데미지 누적 증가 (예시)
         move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
@@ -181,12 +185,14 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
       updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
       addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+      console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
     const result = await calculateMoveDamage({ moveName: move.name, side });
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);
       if (recovered) {
         addLog(`${attacker}는 혼란에서 회복했다!`);
+        console.log(`${attacker}는 혼란에서 회복했다!`);
       }
       const hitCount = getHitCount(move);
       for (let i = 0; i < hitCount - 1; i++) {
@@ -196,6 +202,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
         }
       }
       addLog("총 " + hitCount + "번 맞았다!");
+      console.log("총 " + hitCount + "번 맞았다!");
 
     }
   }
@@ -205,12 +212,14 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
       updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
       addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+      console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
     const result = await calculateMoveDamage({ moveName: move.name, side });
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);
       if (recovered) {
         addLog(`${attacker}는 혼란에서 회복했다!`);
+        console.log(`${attacker}는 혼란에서 회복했다!`);
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage);
     }

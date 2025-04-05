@@ -45,7 +45,7 @@ function PokemonSelect({ onSelect }: Props) {
           value={watchCount}
           onChange={(e) => setWatchCount(parseInt(e.target.value))}
         />
-        <button onClick={() => onSelect([], true, watchCount)}>
+        <button onClick={() => onSelect(selected.length === 3 ? selected : [], true, watchCount)}>
           관전 모드 시작
         </button>
       </div>

@@ -76,11 +76,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         effect.chance > 0.5 &&
         effect.statChange?.some((s) =>
           s.target === "self" &&
-          (s.stat === "attack" || s.stat === "spAttack") &&
+          (s.stat === "attack" || s.stat === "spAttack" || s.stat === 'critical') &&
           s.change > 0
-        ) || effect.statChange?.some((s) =>
-          s.target === "opponent" &&
-          (s.stat === "defense" || s.stat === "spDefense") && s.change < 0) ||
+        ) ||
         (prankster && effect.statChange?.some((s) =>
           s.target === "self" &&
           (s.stat === "attack" || s.stat === "spAttack") &&
@@ -360,9 +358,9 @@ function Battle({ watchMode, watchCount }) {
         console.log('오른쪽 플레이어 행동:', rightAction);
         await battleSequence(leftAction, rightAction);
         setTimeout(() => {
-          console.log(`${turn}턴 종료`)
-        }, 10000);
-        setTurn(turn + 1);
+          console.log(`${turn}턴 종료`);
+        }, 2000);
+
         setIsTurnProcessing(false);
       };
       runAIvsAI();
@@ -386,7 +384,6 @@ function Battle({ watchMode, watchCount }) {
 
     await battleSequence(playerAction, aiAction);
 
-    setTurn(turn + 1);
     setSelectedMove(null);
     setIsTurnProcessing(false);
   };

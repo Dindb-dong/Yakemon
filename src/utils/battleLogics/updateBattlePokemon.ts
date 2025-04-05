@@ -8,7 +8,10 @@ import { useBattleStore } from "../../Context/useBattleStore";
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
   const { addLog } = useBattleStore.getState();
   const newHp = Math.max(0, pokemon.currentHp + amount);
-  if (newHp <= 0) addLog(`${pokemon.base.name}은/는 쓰러졌다!`)
+  if (newHp <= 0) {
+    addLog(`${pokemon.base.name}은/는 쓰러졌다!`);
+    console.log(`${pokemon.base.name}은/는 쓰러졌다!`);
+  }
   return { ...pokemon, currentHp: Math.min(pokemon.base.hp, newHp) };
 }
 

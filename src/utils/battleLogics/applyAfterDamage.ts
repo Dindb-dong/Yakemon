@@ -44,23 +44,40 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
 
   if (usedMove.uTurn) {
     const { setSwitchRequest } = useBattleStore.getState();
+    const availableIndexes = mineTeam
+      .map((p, i) => ({ ...p, index: i }))
+      .filter(p => p.currentHp > 0);
+
+    // ✅ 1마리만 남은 경우
+    if (availableIndexes.length === 1) {
+      return;
+    }
     if (watchMode) {
       console.log('관전 모드에서 유턴 사용');
       const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
-      switchPokemon(side, switchIndex);
-    } else {
+      // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
       switchPromise = new Promise<void>((resolve) => {
-        setSwitchRequest({
-          side,
-          reason: "uTurn",
-          onSwitch: (index: number) => {
-            switchPokemon(side, index);
-            setSwitchRequest(null);
-            resolve();
-          },
-        });
+        switchPokemon(side, switchIndex);
+        resolve();
       });
-      shouldWaitForSwitch = true;
+
+    } else {
+      if (side === 'my') {
+        console.log('내가 유턴 사용');
+        switchPromise = new Promise<void>((resolve) => {
+          setSwitchRequest({
+            side,
+            reason: "uTurn",
+            onSwitch: (index: number) => {
+              switchPokemon(side, index);
+              setSwitchRequest(null);
+              resolve();
+            },
+          });
+        });
+        shouldWaitForSwitch = true;
+      }
+
     }
   }
 
@@ -83,6 +100,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           const target = side === 'my' ? attacker : deffender; // 자기자신
           const stat = statChange.stat;
           const change = statChange.change;
+          const activeTeam = side === 'my' ? myTeam : enemyTeam;
           const activeIndex = side === 'my' ? activeMy : activeEnemy;
           updatePokemon(side, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
           console.log(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
@@ -129,10 +147,11 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             }
             const stat = statChange.stat;
             const change = statChange.change;
+            const activeTeam = targetSide === 'my' ? myTeam : enemyTeam;
             const activeIndex = targetSide === 'my' ? activeMy : activeEnemy;
             updatePokemon(targetSide, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
-            console.log(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
-            addLog(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
+            console.log(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
+            addLog(`${activeTeam[activeIndex]}의 ${stat}이/가 ${change}랭크 변했다!`)
           });
         }
         if (effect.status) {

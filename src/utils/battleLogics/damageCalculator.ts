@@ -79,7 +79,9 @@ export async function calculateMoveDamage({
     const statusResult = applyStatusEffectBefore(myPokeStatus, rate, moveInfo, side);
     rate = statusResult.rate; // 화상 적용 
     if (!statusResult.isHit) {
-      addLog(`${attacker}의 기술은 실패했다!`);
+      addLog(`${attacker.base.name}의 기술은 실패했다!`);
+      console.log(`${attacker.base.name}의 기술은 실패했다!`);
+
       return { success: false }; // 바로 함수 종료 
     }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
   }
@@ -112,6 +114,7 @@ export async function calculateMoveDamage({
     if (!hitSuccess) {
       isHit = false;
       addLog(`${attacker}의 공격은 빗나갔다!`)
+      console.log(`${attacker}의 공격은 빗나갔다!`)
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
@@ -140,19 +143,25 @@ export async function calculateMoveDamage({
 
   if (moveInfo.category === '변화' && isHit) { // 변화기술일 경우
     if (types === 0) {
-      wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
+      wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`); console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
       updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')) // pp 깎기
       return;
     }
-    addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
+    addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+    console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+
     return { success: true }; // 변화기술은 성공으로 처리
   }
 
-  addLog(`${side}는 ${moveName}을/를 사용했다!`)
-  if (types >= 2) { wasEffective = 1; addLog(`${attacker.base.name}의 공격은 효과가 굉장했다!`) };
-  if (types > 0 && types <= 0.5) { wasEffective = -1; addLog(`${attacker.base.name}의 공격은 효과가 별로였다...`) };
+  addLog(`${side}는 ${moveName}을/를 사용했다!`);
+  console.log(`${side}는 ${moveName}을/를 사용했다!`);
+  if (types >= 2) { wasEffective = 1; addLog(`${attacker.base.name}의 공격은 효과가 굉장했다!`); console.log(`${attacker.base.name}의 공격은 효과가 굉장했다!`); };
+  if (types > 0 && types <= 0.5) {
+    wasEffective = -1; addLog(`${attacker.base.name}의 공격은 효과가 별로였다...`);
+    console.log(`${attacker.base.name}의 공격은 효과가 별로였다...`);
+  };
   if (types === 0) {
-    wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
+    wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`); console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
     updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')) // pp 깎기
     return;
   }
@@ -236,12 +245,14 @@ export async function calculateMoveDamage({
     myPokeRank.attack = Math.max(0, myPokeRank.attack);
     myPokeRank.spAttack = Math.max(0, myPokeRank.spAttack);
     // 급소 맞출 시에는 내 공격 랭크 다운 무효 
-    addLog(`${moveName}은/는 급소에 맞았다!`)
+    addLog(`${moveName}은/는 급소에 맞았다!`);
+    console.log(`${moveName}은/는 급소에 맞았다!`);
   } else if (isCritical) {
     rate *= 1.5 // 그 외에는 1.5배 
     myPokeRank.attack = Math.max(0, myPokeRank.attack);
     myPokeRank.spAttack = Math.max(0, myPokeRank.spAttack);
-    addLog(`${moveName}은/는 급소에 맞았다!`)
+    addLog(`${moveName}은/는 급소에 맞았다!`);
+    console.log(`${moveName}은/는 급소에 맞았다!`);
   }
 
   // 13. 데미지 계산
@@ -252,30 +263,35 @@ export async function calculateMoveDamage({
     if (!(deffender.base.ability?.name === '천진')) {
       if (moveName === '바디프레스') {
         attackStat *= calculateRankEffect(myPokeRank.defense);
-        addLog(`${attacker.base.name}의 방어 랭크 변화가 적용되었다!`)
+        addLog(`${attacker.base.name}의 방어 랭크 변화가 적용되었다!`);
+        console.log(`${attacker.base.name}의 방어 랭크 변화가 적용되었다!`);
       } else {
         attackStat *= calculateRankEffect(myPokeRank.attack);
-        addLog(`${attacker.base.name}의 공격 랭크 변화가 적용되었다!`)
+        addLog(`${attacker.base.name}의 공격 랭크 변화가 적용되었다!`);
+        console.log(`${attacker.base.name}의 공격 랭크 변화가 적용되었다!`);
       }
     }
   }
   if (myPokeRank.spAttack && moveInfo.category === '특수') {
     if (!(deffender.base.ability?.name === '천진')) {
       attackStat *= calculateRankEffect(myPokeRank.spAttack);
-      addLog(`${attacker.base.name}의 특수공격 랭크 변화가 적용되었다!`)
+      addLog(`${attacker.base.name}의 특수공격 랭크 변화가 적용되었다!`);
+      console.log(`${attacker.base.name}의 특수공격 랭크 변화가 적용되었다!`);
     }
   }
   if (opPokeRank.defense && moveInfo.category === '물리') {
     if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.some((effect) => effect.rank_nullification))) {
       // 공격자가 천진도 아니고, 기술이 랭크업 무시하는 기술도 아닐 경우에만 업데이트. (둘 중 하나라도 만족하면 안함)
       defenseStat *= calculateRankEffect(opPokeRank.defense);
-      addLog(`${deffender.base.name}의 방어 랭크 변화가 적용되었다!`)
+      addLog(`${deffender.base.name}의 방어 랭크 변화가 적용되었다!`);
+      console.log(`${deffender.base.name}의 방어 랭크 변화가 적용되었다!`);
     }
   }
   if (opPokeRank.spDefense && moveInfo.category === '특수') {
     if (!(attacker.base.ability?.name === '천진') && !(moveInfo.effects?.some((effect) => effect.rank_nullification))) {
       defenseStat *= calculateRankEffect(opPokeRank.spDefense);
-      addLog(`${deffender.base.name}의 특수방어 랭크 변화가 적용되었다!`)
+      addLog(`${deffender.base.name}의 특수방어 랭크 변화가 적용되었다!`);
+      console.log(`${deffender.base.name}의 특수방어 랭크 변화가 적용되었다!`);
     }
   }
   // 내구력 계산
@@ -300,6 +316,7 @@ export async function calculateMoveDamage({
 
   if (!isHit) {
     addLog(`${attacker.base.name}의 공격은 빗나갔다!`);
+    console.log(`${attacker.base.name}의 공격은 빗나갔다!`);
     if (moveInfo.demeritEffects?.some((d_effect) => d_effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
       let dmg: number;
       moveInfo.demeritEffects.forEach((d_effect) => {
@@ -323,6 +340,7 @@ export async function calculateMoveDamage({
       })
       updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
       addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
+      console.log(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
     }
     return;
   }
@@ -350,7 +368,8 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   if (moveInfo.category === '변화') {
     if (moveInfo.target === 'self') { // 자신에게 거는 기술일 경우 
-      addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
+      addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+      console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
       moveInfo.effects?.forEach((effect) => {
         if (effect.statChange) { // 랭크업 기술일 경우 
           effect.statChange.forEach((statChange) => {
@@ -361,11 +380,13 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
     } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 
       if (moveInfo.trap) {
         addTrap(side, moveInfo.trap);
-        addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
+        addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+        console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
       }
       if (moveInfo.field) {
         setField(moveInfo.field);
-        addLog(`${side}는 필드를 ${moveInfo.name}로 바꿨다!`)
+        addLog(`${side}는 필드를 ${moveInfo.name}로 바꿨다!`);
+        console.log(`${side}는 필드를 ${moveInfo.name}로 바꿨다!`);
       }
     }
   }

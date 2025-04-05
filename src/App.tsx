@@ -14,6 +14,7 @@ function App() {
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
   const [watchCount, setWatchCount] = useState(1);
+  const { addLog } = useBattleStore.getState();
 
   const handleSelect = useCallback(
     (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number) => {
@@ -60,7 +61,11 @@ function App() {
       setEnemyTeam(aiBattleTeam);
       setIsSelected(true); // 화면 전환 트리거
       applyAppearance(myBattleTeam[0], "my");
+      addLog(`my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
+      console.log(`my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
       applyAppearance(aiBattleTeam[0], "enemy");
+      addLog(`enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
+      console.log(`enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
     },
     [setMyTeam, setEnemyTeam]
   );
