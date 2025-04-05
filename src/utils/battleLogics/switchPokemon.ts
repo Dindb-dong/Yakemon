@@ -26,18 +26,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   const switchingPokemon = team[currentIndex]; // 현재 교체하고자 하는 포켓몬
   let next = team[newIndex];
 
-  // 1. 현재 포켓몬 비활성화
-  updatePokemon(side, currentIndex, (switchingPokemon) => setActive(switchingPokemon, false));
-  // 재앙 제거 
-  if (String(switchingPokemon.base.ability?.appear?.includes('disaster'))) {
-    removeDisaster(String(switchingPokemon.base.ability?.name));
-  }
-  // 오라 제거
-  if (String(switchingPokemon.base.ability?.appear?.includes('aura_change'))) {
-    removeAura(String(switchingPokemon.base.ability?.name));
-  }
-
-  // 2. 랭크업 초기화
+  // 1. 랭크업 초기화, 상태이상 제거 
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
   // 비메이저 상태이상 제거
   for (const status in unMainStatusCondition) {
@@ -47,6 +36,17 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     for (const status in mainStatusCondition) {
       updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
+  }
+
+  // 2. 현재 포켓몬 비활성화
+  updatePokemon(side, currentIndex, (switchingPokemon) => setActive(switchingPokemon, false));
+  // 재앙 제거 
+  if (String(switchingPokemon.base.ability?.appear?.includes('disaster'))) {
+    removeDisaster(String(switchingPokemon.base.ability?.name));
+  }
+  // 오라 제거
+  if (String(switchingPokemon.base.ability?.appear?.includes('aura_change'))) {
+    removeAura(String(switchingPokemon.base.ability?.name));
   }
 
   // 3. 새 포켓몬 활성화

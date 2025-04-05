@@ -3,7 +3,7 @@ import { mockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
 
 type Props = {
-  onSelect: (playerPokemons: PokemonInfo[]) => void;
+  onSelect: (playerPokemons: PokemonInfo[], watchMode?: boolean) => void;
 };
 
 function PokemonSelect({ onSelect }: Props) {
@@ -35,6 +35,15 @@ function PokemonSelect({ onSelect }: Props) {
       <br />
       <button disabled={selected.length !== 3} onClick={() => onSelect(selected)}>
         배틀 시작
+      </button>
+      <button
+        disabled={selected.length !== 3}
+        onClick={() => {
+          // 관전 모드일 경우 상태 전달
+          onSelect(selected, true);
+        }}
+      >
+        관전 모드 시작
       </button>
     </div>
   );

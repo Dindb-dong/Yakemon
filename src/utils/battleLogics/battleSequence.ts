@@ -37,7 +37,8 @@ function isSwitchAction(action: BattleAction): action is { type: "switch", index
 
 export async function battleSequence(
   myAction: BattleAction,
-  enemyAction: BattleAction
+  enemyAction: BattleAction,
+  watchMode?: boolean
 ) {
   const { addLog, myTeam, enemyTeam, activeEnemy, activeMy } = useBattleStore.getState();
   const myPokemon = myTeam[activeMy];

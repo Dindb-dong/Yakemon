@@ -11,18 +11,22 @@ import LogPanel from "./LogPanel";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
 
-export const aiChooseAction = () => {
+export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog } = useBattleStore.getState();
-  const userPokemon = myTeam[activeMy];
-  const aiPokemon = enemyTeam[activeEnemy];
-
-  const userSpeed = userPokemon.base.speed * calculateRankEffect(userPokemon.rank.speed);
-  const aiSpeed = aiPokemon.base.speed * calculateRankEffect(aiPokemon.rank.speed);
+  const mineTeam = side === 'my' ? myTeam : enemyTeam;
+  const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+  const leftPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const rightPokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy]; // ai 입장에서 자기포켓몬
+  const myPokemon = side === 'enemy' ? rightPokemon : leftPokemon; // 왼쪽 플레이어는 leftPokemon이 자기거 
+  const enemyPokemon = side === 'enemy' ? leftPokemon : rightPokemon; // 완쪽 플레이어는 rightPokemon이 상대포켓몬 
+  // 이 아래에서부터는 rightPokemon -> myPokemon, leftPokemon -> enemyPokemon으로 변경 
+  const userSpeed = enemyPokemon.base.speed * calculateRankEffect(enemyPokemon.rank.speed);
+  const aiSpeed = myPokemon.base.speed * calculateRankEffect(myPokemon.rank.speed);
   const isEnemyFaster = aiSpeed > userSpeed;
   const roll = Math.random();
-  const aiHpRation = aiPokemon.currentHp / aiPokemon.base.hp; // ai 포켓몬의 체력 비율 
-  const userHpRation = userPokemon.currentHp / userPokemon.base.hp; // ai 포켓몬의 체력 비율 
-  const usableMoves = aiPokemon.base.moves.filter((m) => aiPokemon.pp[m.name] > 0);
+  const aiHpRation = myPokemon.currentHp / myPokemon.base.hp; // ai 포켓몬의 체력 비율 
+  const userHpRation = enemyPokemon.currentHp / enemyPokemon.base.hp; // 유저 포켓몬의 체력 비율 
+  const usableMoves = myPokemon.base.moves.filter((m) => myPokemon.pp[m.name] > 0);
 
   const typeEffectiveness = (attackerTypes: string[], defenderTypes: string[]) => {
     return attackerTypes.reduce((maxEff, atk) => {
@@ -35,8 +39,8 @@ export const aiChooseAction = () => {
     let bestScore = -1;
 
     usableMoves.forEach((move) => {
-      const stab = aiPokemon.base.types.includes(move.type) ? 1.5 : 1;
-      const effectiveness = calculateTypeEffectiveness(move.type, userPokemon.base.types);
+      const stab = myPokemon.base.types.includes(move.type) ? 1.5 : 1;
+      const effectiveness = calculateTypeEffectiveness(move.type, enemyPokemon.base.types);
       const basePower = move.power ?? 0;
       const score = basePower * stab * effectiveness;
 
@@ -88,8 +92,8 @@ export const aiChooseAction = () => {
     return rankUpMoves[0];
   };
 
-  const aiTouser = typeEffectiveness(aiPokemon.base.types, userPokemon.base.types); // 무조건 1 이상이요? ㅋㅋ 
-  const userToai = typeEffectiveness(userPokemon.base.types, aiPokemon.base.types);
+  const aiTouser = typeEffectiveness(myPokemon.base.types, enemyPokemon.base.types);
+  const userToai = typeEffectiveness(enemyPokemon.base.types, myPokemon.base.types);
   const bestMove = getBestMove();
   const rankUpMove = getRankUpMove();
   const uturnMove = getUtrunMove();
@@ -99,22 +103,23 @@ export const aiChooseAction = () => {
 
   const getSwitchIndex = (targetFor: "offense" | "defense") => {
     const isOffense = targetFor === "offense";
-    return enemyTeam.findIndex((p, i) => {
+    return mineTeam.findIndex((p, i) => {
       if (i === activeEnemy || p.currentHp <= 0) return false;
-      const eff = typeEffectiveness(p.base.types, isOffense ? userPokemon.base.types : []);
+      const eff = typeEffectiveness(p.base.types, isOffense ? enemyPokemon.base.types : []);
+
       return isOffense ? eff > 1.5 : eff < 1;
     });
   };
 
-  const hasSwitchOption = enemyTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
+  const hasSwitchOption = mineTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
   const isAi_lowHp = aiHpRation < 0.35;
   const isAi_highHp = aiHpRation > 0.75;
   const isUser_lowHp = userHpRation < 0.35;
   const isUser_highHp = aiHpRation > 0.75;
 
   // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
-  if (aiPokemon.currentHp <= 0) {
-    const switchIn = enemyTeam.findIndex((p, i) => i !== activeEnemy && p.currentHp > 0);
+  if (myPokemon.currentHp <= 0) {
+    const switchIn = getSwitchIndex("offense");
     return { type: "switch" as const, index: switchIn };
   }
 
@@ -282,7 +287,12 @@ function Battle() {
   } = useBattleStore.getState();
 
 
+  const [watchMode, setWatchMode] = useState<boolean>(false);
+  const leftPokemon = myTeam[activeMy];
+  const rightPokemon = enemyTeam[activeEnemy];
 
+  const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
+  const [isTurnProcessing, setIsTurnProcessing] = useState(false);
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
   const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
   const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
@@ -309,15 +319,34 @@ function Battle() {
     }
   }, [isSwitchWaiting, switchRequest]);
 
-  const userPokemon = myTeam[activeMy];
-  const aiPokemon = enemyTeam[activeEnemy];
+  useEffect(() => {
+    if (watchMode && !isGameOver && !isTurnProcessing) {
+      const timer = setTimeout(() => {
+        executeSimulationTurn();
+      }, 100); // 0.1초마다 턴 진행
+      return () => clearTimeout(timer);
+    }
+  }, [turn, watchMode, isTurnProcessing]);
 
-  const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
-  const [isTurnProcessing, setIsTurnProcessing] = useState(false);
+
 
   // 어느 한 팀이 다 기절했을 때에 게임 끝 
   const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
+  const executeSimulationTurn = async () => {
+    if (isTurnProcessing) {
+      console.log('턴 프로세스 진행중')
+      return;
+    }
 
+    setIsTurnProcessing(true);
+    const leftAction = aiChooseAction("my");
+    const rightAction = aiChooseAction("enemy");
+
+    await battleSequence(leftAction, rightAction, watchMode);
+
+    setTurn(turn + 1);
+    setIsTurnProcessing(false);
+  };
   const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
     if (isTurnProcessing) {
       console.log('턴 프로세스 진행중')
@@ -325,7 +354,7 @@ function Battle() {
     };
 
     setIsTurnProcessing(true);
-    const aiAction = aiChooseAction();
+    const aiAction = aiChooseAction('enemy');
 
     await battleSequence(playerAction, aiAction);
 
@@ -337,9 +366,9 @@ function Battle() {
   if (isGameOver) {
     let winner: string = '승리';
     if (myTeam.some((p) => p.currentHp > 0)) {
-      winner = '승리';
+      winner = '왼쪽 플레이어 승리';
     } else if (enemyTeam.some((p) => p.currentHp > 0)) {
-      winner = '패배';
+      winner = '오른쪽 플레이어 승리';
     }
     return (
       <div>
@@ -372,10 +401,10 @@ function Battle() {
       }
       <TurnBanner turn={turn} />
       <div className="main-area">
-        <PokemonArea my={userPokemon} enemy={aiPokemon} />
+        <PokemonArea my={leftPokemon} enemy={rightPokemon} />
         <div className="side-panel">
           <ActionPanel
-            myPokemon={userPokemon}
+            myPokemon={leftPokemon}
             myTeam={myTeam}
             activeMy={activeMy}
             isTurnProcessing={isTurnProcessing}

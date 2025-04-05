@@ -13,7 +13,7 @@ function App() {
   const { setMyTeam, setEnemyTeam } = useBattleStore();
 
   const handleSelect = useCallback(
-    (playerPokemons: PokemonInfo[]) => {
+    (playerPokemons: PokemonInfo[], watchMode?: boolean) => {
       // AI 포켓몬 랜덤 선택
       //const aiCandidates = mockPokemon.filter(p => !playerPokemons.includes(p));
       const aiCandidates = [mockPokemon[0], mockPokemon[1], mockPokemon[2]];

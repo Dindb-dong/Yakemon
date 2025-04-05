@@ -9,7 +9,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectivenessWithAbility, isTypeImmune } from "./calculateTypeEffectiveness";
 import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
-import { changeHp, changeRank, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
+import { addStatus, changeHp, changeRank, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { addTrap, setField } from "./updateEnvironment";
 
@@ -86,7 +86,7 @@ export async function calculateMoveDamage({
 
   // 0-2. 자신에게 거는 기술이나 필드 등에 적용하는 기술 효과 처리 
   if (moveInfo.target === 'self' || moveInfo.target === 'none') {
-    applyChangeEffect(moveInfo, side, myPokemon, opponentPokemon)
+    applyChangeEffect(moveInfo, side)
     isHit = true; // 무조건 적중 처리
     return { success: true }; // 바로 함수 종료
   }
@@ -136,6 +136,16 @@ export async function calculateMoveDamage({
     }
     // 마지막에 또 곱해줘도 상관없음. 0이였으면 어차피 0이니까.
     types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
+  }
+
+  if (moveInfo.category === '변화' && isHit) { // 변화기술일 경우
+    if (types === 0) {
+      wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`);
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')) // pp 깎기
+      return;
+    }
+    addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
+    return { success: true }; // 변화기술은 성공으로 처리
   }
 
   addLog(`${side}는 ${moveName}을/를 사용했다!`)
@@ -334,11 +344,13 @@ export async function calculateMoveDamage({
 
 }
 // 자신에게 거는 기술이나 필드에 거는 기술 등의 변화 기술 효과 처리 함수 
-function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker: PokemonInfo, deffender: PokemonInfo) {
+function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: PokemonInfo, deffender?: PokemonInfo) {
   const { updatePokemon, activeMy, activeEnemy, addLog } = useBattleStore.getState();
   const activeMine = side === 'my' ? activeMy : activeEnemy;
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   if (moveInfo.category === '변화') {
     if (moveInfo.target === 'self') { // 자신에게 거는 기술일 경우 
+      addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
       moveInfo.effects?.forEach((effect) => {
         if (effect.statChange) { // 랭크업 기술일 경우 
           effect.statChange.forEach((statChange) => {
@@ -349,7 +361,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker: P
     } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 
       if (moveInfo.trap) {
         addTrap(side, moveInfo.trap);
-        addLog(`${side}는 ${moveInfo.name}을/를 설치했다!`)
+        addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
       }
       if (moveInfo.field) {
         setField(moveInfo.field);

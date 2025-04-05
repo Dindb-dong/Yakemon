@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { RankState } from "./RankState";
 import { FieldType } from "./Field";
+import { StatusState } from "./Status";
 
 type StatChange = {
   target: 'opponent' | 'self';
@@ -11,7 +12,7 @@ type StatChange = {
 
 type MoveEffect = {
   chance: number; // 발동 확률, 0.1 ~ 1
-  status?: '화상' | '마비' | '독' | '맹독' | '얼음' | '잠듦' | '혼란' | '풀죽음' | '앵콜' | '트집' | '도발' | '씨뿌리기' | '사슬묶기' | '회복봉인' | '헤롱헤롱';
+  status?: StatusState;
   recoil?: number; // 반동, 0.1 ~ 1
   fail?: number; // 공격 빗나갔을 때 데미지 비율, 0.1 ~ 1
   heal?: number; // 흡혈 또는 자힐, 0.1 ~ 1 
