@@ -11,6 +11,7 @@ import LogPanel from "./LogPanel";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
 import { applyOffensiveAbilityEffectBeforeDamage } from "../utils/battleLogics/applyBeforeDamage";
+import { getBestSwitchIndex } from "../utils/battleLogics/getBestSwitchIndex";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
@@ -127,26 +128,16 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const healMove = getHealMove();
   const supportMove = usableMoves.find((m) => m.category === "변화" && m !== rankUpMove);
 
-  const getSwitchIndex = (targetFor: "offense" | "defense") => {
-    const isOffense = targetFor === "offense";
-    return mineTeam.findIndex((p, i) => {
-      if (i === activeEnemy || p.currentHp <= 0) return false;
-      const eff = typeEffectiveness(p.base.types, isOffense ? enemyPokemon.base.types : []);
-
-      return isOffense ? eff > 1.5 : eff < 1;
-    });
-  };
-
   const hasSwitchOption = mineTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
   const isAi_lowHp = aiHpRation < 0.3;
   const isAi_highHp = aiHpRation > 0.8;
   const isUser_lowHp = userHpRation < 0.3;
   const isUser_highHp = aiHpRation > 0.8;
+  const switchIndex = getBestSwitchIndex(side);
 
   // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
   if (myPokemon.currentHp <= 0) {
-    const switchIn = getSwitchIndex("offense");
-    return { type: "switch" as const, index: switchIn };
+    return { type: "switch" as const, index: switchIndex };
   }
 
   // === 2. 플레이어가 더 빠를 경우 ===
@@ -161,10 +152,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         return speedUpMove;
       }
       if (roll < 0.6 && (hasSwitchOption)) {
-        const switchIdx = getSwitchIndex("offense");
-        if (switchIdx !== -1) {
+        if (switchIndex !== -1) {
           addLog(`${side}는 느리고 불리하므로 교체 선택`);
-          return { type: "switch" as const, index: switchIdx };
+          return { type: "switch" as const, index: switchIndex };
         }
       }
       addLog(`${side}는 최고 위력기를 선택`);
@@ -172,10 +162,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     } else if (aiTouser > 1) {
       // ai가 느리지만 상성 유리
       if (isAi_lowHp && hasSwitchOption) {
-        const switchIdx = getSwitchIndex("defense");
-        if (switchIdx !== -1) {
+        if (switchIndex !== -1) {
           addLog(`${side}는 느리고 상성은 유리하지만 체력이 낮아 교체를 시도한다!`);
-          return { type: "switch" as const, index: switchIdx };
+          return { type: "switch" as const, index: switchIndex };
         }
       }
 
@@ -199,10 +188,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
           addLog(`${side}는 상성은 유리하지만 상대의 교체를 예상하고 유턴을 사용한다!`);
           return uturnMove;
         }
-        const switchIdx = getSwitchIndex("defense");
-        if (switchIdx !== -1) {
+        if (switchIndex !== -1) {
           addLog(`${side}는 상대의 교체를 예상하고 맞교체한다!`);
-          return { type: "switch" as const, index: switchIdx };
+          return { type: "switch" as const, index: switchIndex };
         }
       }
 
@@ -214,10 +202,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         return speedUpMove;
       }
       if (roll < 0.3 && hasSwitchOption) {
-        const switchIdx = getSwitchIndex("offense");
-        if (switchIdx !== -1) {
+        if (switchIndex !== -1) {
           addLog(`${side}는 상대에게 유리한 포켓몬으로 교체한다!`);
-          return { type: "switch" as const, index: switchIdx };
+          return { type: "switch" as const, index: switchIndex };
         }
       }
       addLog(`${side}는 상성이 같아서 가장 강한 기술로 공격한다!`);
@@ -240,10 +227,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       return healMove;
     }
     if (roll < 0.1 && hasSwitchOption) {
-      const switchIdx = getSwitchIndex("defense");
-      if (switchIdx !== -1) {
+      if (switchIndex !== -1) {
         addLog(`${side}는 플레이어 교체 예상하고 맞교체`);
-        return { type: "switch" as const, index: switchIdx };
+        return { type: "switch" as const, index: switchIndex };
       }
     }
     if (roll < 0.2 && supportMove) {
@@ -271,10 +257,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       return supportMove;
     }
     if (roll < 0.55 && (hasSwitchOption || isAi_lowHp)) {
-      const switchIdx = getSwitchIndex("offense");
-      if (switchIdx !== -1) {
+      if (switchIndex !== -1) {
         addLog(`${side}는 빠르지만 상성상 유리한 포켓몬이 있으므로 교체`);
-        return { type: "switch" as const, index: switchIdx };
+        return { type: "switch" as const, index: switchIndex };
       }
     }
     addLog(`${side}는 가장 강한 공격 시도`);
@@ -289,10 +274,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       return attackUpMove;
     }
     if (roll < 0.3 && hasSwitchOption) {
-      const switchIdx = getSwitchIndex("offense");
-      if (switchIdx !== -1) {
+      if (switchIndex !== -1) {
         addLog(`${side}는 상대에게 유리한 포켓몬으로 교체`);
-        return { type: "switch" as const, index: switchIdx };
+        return { type: "switch" as const, index: switchIndex };
       }
     }
     addLog(`${side}는 더 빠르기에 가장 강한 공격 시도`);

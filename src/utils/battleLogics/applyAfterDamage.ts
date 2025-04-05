@@ -103,8 +103,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           const activeTeam = side === 'my' ? myTeam : enemyTeam;
           const activeIndex = side === 'my' ? activeMy : activeEnemy;
           updatePokemon(side, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
-          console.log(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
-          addLog(`${target.base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
+          console.log(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
+          addLog(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
         });
       }
       if (demerit.status) {

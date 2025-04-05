@@ -18,11 +18,11 @@ export function getBestSwitchIndex(side: "my" | "enemy"): number {
   // ✅ 교체 가능한 포켓몬 필터링
   const availableIndexes = team
     .map((p, i) => ({ ...p, index: i }))
-    .filter(p => p.currentHp > 0);
+    .filter(p => p.index !== activeIndex && p.currentHp > 0); // 지금 포켓몬과 다르고, 체력 남은 애. 
 
   // ✅ 1마리만 남은 경우
   if (availableIndexes.length === 1) {
-    return activeIndex;
+    return availableIndexes.findIndex((p) => p.currentHp > 0);
   }
 
   let strongCounter: number | null = null;

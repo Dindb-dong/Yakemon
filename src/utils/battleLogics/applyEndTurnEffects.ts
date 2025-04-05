@@ -14,6 +14,7 @@ export function applyEndTurnEffects() {
     updatePokemon,
     addLog,
     publicEnv,
+    turn, setTurn
   } = useBattleStore.getState();
 
   const { publicEffects, decrementTurns } = useDurationStore.getState();
@@ -99,4 +100,8 @@ export function applyEndTurnEffects() {
       addLog(`${pokemon.base.name}의 가속 특성 발동!`);
     }
   })
+
+  addLog(`${turn}번째 턴 종료`);
+  setTurn(turn + 1);
+  return;
 }
