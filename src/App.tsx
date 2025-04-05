@@ -20,6 +20,9 @@ function App() {
     (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number) => {
       setWatchMode(watchMode);
       setWatchCount(watchCount || 1);
+      if (watchMode) {
+        console.log('관전모드 시작');
+      }
 
       const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
         const pool = mockPokemon.filter(p => p.types.includes(type) && !exclude.includes(p));
@@ -32,7 +35,6 @@ function App() {
       let myBattleTeam: BattlePokemon[] = [];
 
       if (playerPokemons.length !== 3) {
-        console.log('관전모드 시작')
         console.log("선택된 포켓몬:", myRaw);
         myBattleTeam = myRaw.map((p, i) => {
           if (!p || !p.moves) {

@@ -113,8 +113,18 @@ export async function calculateMoveDamage({
     const hitSuccess = calculateAccuracy(accRate, moveInfo.accuracy, myPokeRank?.accuracy ?? 0, opPokeRank?.dodge ?? 0);
     if (!hitSuccess) {
       isHit = false;
-      addLog(`${attacker}의 공격은 빗나갔다!`)
-      console.log(`${attacker}의 공격은 빗나갔다!`)
+      addLog(`${attacker.base.name}의 공격은 빗나갔다!`)
+      console.log(`${attacker.base.name}의 공격은 빗나갔다!`)
+      if (moveInfo.demeritEffects?.some((d_effect) => d_effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
+        let dmg: number;
+        moveInfo.demeritEffects.forEach((d_effect) => {
+          if (d_effect.fail) {
+            dmg = d_effect.fail;
+          }
+        })
+        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
+        addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
+      }
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
@@ -305,30 +315,6 @@ export async function calculateMoveDamage({
 
   // 최종 데미지 계산 (내구력 비율 기반)
   const damage = Math.min(deffender.currentHp, Math.round((effectiveness / durability) * (opponentPokemon.hp))); // 소수점 반올림 
-  // •	상대 내구력: 20,000
-  // •	결정력: 50,000
-  // •	상대 체력: 100
-  //   계산
-  // •	effectiveness / durability = 50,000 / 20,000 = 2.5
-  // •	최종 데미지 = 2.5 × 100 = 250
-
-  // 14. 최종적으로 데미지 줬는지 여부 계산
-
-  if (!isHit) {
-    addLog(`${attacker.base.name}의 공격은 빗나갔다!`);
-    console.log(`${attacker.base.name}의 공격은 빗나갔다!`);
-    if (moveInfo.demeritEffects?.some((d_effect) => d_effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
-      let dmg: number;
-      moveInfo.demeritEffects.forEach((d_effect) => {
-        if (d_effect.fail) {
-          dmg = d_effect.fail;
-        }
-      })
-      updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
-      addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
-    }
-    return;
-  }
 
   if (wasNull) {
     if (moveInfo.effects?.some((effect) => effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
@@ -363,7 +349,8 @@ export async function calculateMoveDamage({
 }
 // 자신에게 거는 기술이나 필드에 거는 기술 등의 변화 기술 효과 처리 함수 
 function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: PokemonInfo, deffender?: PokemonInfo) {
-  const { updatePokemon, activeMy, activeEnemy, addLog } = useBattleStore.getState();
+  const { updatePokemon, activeMy, activeEnemy, addLog, myTeam, enemyTeam } = useBattleStore.getState();
+  const activeTeam = side === 'my' ? myTeam : enemyTeam;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   if (moveInfo.category === '변화') {
@@ -374,6 +361,8 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
         if (effect.statChange) { // 랭크업 기술일 경우 
           effect.statChange.forEach((statChange) => {
             updatePokemon(side, activeMine, (attacker) => changeRank(attacker, statChange.stat, statChange.change));
+            console.log(`${activeTeam[activeMine].base.name}의 ${statChange.stat}이/가 ${statChange.change}랭크 변했다!`);
+            addLog(`${activeTeam[activeMine].base.name}의 ${statChange.stat}이/가 ${statChange.change}랭크 변했다!`)
           })
         }
       })

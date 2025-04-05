@@ -87,7 +87,7 @@ export async function battleSequence(
   if (isSwitchAction(myAction)) {
     switchPokemon("my", myAction.index);
     if (isMoveAction(enemyAction)) {
-      await handleMove("enemy", enemyAction);
+      await handleMove("enemy", enemyAction, watchMode);
     }
     applyEndTurnEffects();
     return;
@@ -96,7 +96,7 @@ export async function battleSequence(
   if (isSwitchAction(enemyAction)) {
     switchPokemon("enemy", enemyAction.index);
     if (isMoveAction(myAction)) {
-      await handleMove("my", myAction);
+      await handleMove("my", myAction, watchMode);
     }
     applyEndTurnEffects();
     return;
@@ -104,7 +104,7 @@ export async function battleSequence(
 
   // === 3. 둘 다 기술 ===
   if (whoIsFirst === "my") {
-    await handleMove("my", myAction as MoveInfo);
+    await handleMove("my", myAction as MoveInfo, watchMode);
 
     // 상대가 쓰러졌는지 확인
     const updatedEnemy = useBattleStore.getState().enemyTeam[
@@ -115,9 +115,9 @@ export async function battleSequence(
       applyEndTurnEffects();
       return;
     }
-    await handleMove("enemy", enemyAction as MoveInfo);
+    await handleMove("enemy", enemyAction as MoveInfo, watchMode);
   } else { // 상대가 선공일 경우 
-    await handleMove("enemy", enemyAction as MoveInfo);
+    await handleMove("enemy", enemyAction as MoveInfo, watchMode);
 
     // 내가 쓰러졌는지 확인
     const updatedMe = useBattleStore.getState().myTeam[
@@ -129,13 +129,13 @@ export async function battleSequence(
       return;
     }
 
-    await handleMove("my", myAction as MoveInfo);
+    await handleMove("my", myAction as MoveInfo, watchMode);
   }
 
   applyEndTurnEffects();
 }
 
-async function handleMove(side: "my" | "enemy", move: MoveInfo) {
+async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: boolean) {
   const {
     myTeam,
     enemyTeam,
@@ -171,11 +171,12 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
         }
         // 트리플 기술은 데미지 누적 증가 (예시)
         move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
-        await applyAfterDamage(side, attacker, deffender, move, result.damage);
+        await applyAfterDamage(side, attacker, deffender, move, result.damage, watchMode);
       } else {
         break; // 빗나가면 반복 중단
       }
     }
+    return;
   } else if (isDoubleHit || isMultiHit) { // 첫타 맞으면 다 맞춤 
     // 리베로, 변환자재
     if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
@@ -195,13 +196,13 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
       for (let i = 0; i < hitCount - 1; i++) {
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
         if (result?.success) {
-          await applyAfterDamage(side, attacker, deffender, move, result?.damage);
+          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
         }
       }
       addLog("총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");
-
     }
+    return;
   }
   else { // 그냥 다른 기술들
     // 리베로, 변환자재
@@ -218,8 +219,9 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo) {
         addLog(`${attacker}는 혼란에서 회복했다!`);
         console.log(`${attacker}는 혼란에서 회복했다!`);
       }
-      await applyAfterDamage(side, attacker, deffender, move, result?.damage);
+      await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
     }
+    return;
   }
 }
 

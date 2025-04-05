@@ -7,12 +7,17 @@ import { useBattleStore } from "../../Context/useBattleStore";
 // 체력 변화
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
   const { addLog } = useBattleStore.getState();
-  const newHp = Math.max(0, pokemon.currentHp + amount);
-  if (newHp <= 0) {
+  const newHp = Math.round(Math.max(0, pokemon.currentHp + amount));
+  const result = { ...pokemon, currentHp: Math.min(pokemon.base.hp, newHp) };
+
+  if (result.currentHp <= 0) {
     addLog(`${pokemon.base.name}은/는 쓰러졌다!`);
-    console.log(`${pokemon.base.name}은/는 쓰러졌다!`);
+    console.log(`${pokemon.base.name}은/는 쓰러졌다! (currentHp: ${result.currentHp})`);
+  } else {
+    console.log(`${pokemon.base.name}의 남은 (currentHp: ${result.currentHp})`);
   }
-  return { ...pokemon, currentHp: Math.min(pokemon.base.hp, newHp) };
+
+  return result;
 }
 
 // 랭크 변경

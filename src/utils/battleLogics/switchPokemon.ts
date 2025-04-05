@@ -26,6 +26,12 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   const switchingPokemon = team[currentIndex]; // 현재 교체하고자 하는 포켓몬
   let next = team[newIndex];
 
+  if (newIndex === -1) {
+    console.log(`${side}는 더 이상 낼 포켓몬이 없음`);
+    addLog(`${side}는 더 이상 낼 포켓몬이 없음`);
+    return;
+  }
+
   // 1. 랭크업 초기화, 상태이상 제거 
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
   // 비메이저 상태이상 제거

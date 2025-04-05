@@ -20,9 +20,12 @@ export function getBestSwitchIndex(side: "my" | "enemy"): number {
     .map((p, i) => ({ ...p, index: i }))
     .filter(p => p.index !== activeIndex && p.currentHp > 0); // 지금 포켓몬과 다르고, 체력 남은 애. 
 
+  if (availableIndexes.length === 0) {
+    return -1;
+  }
   // ✅ 1마리만 남은 경우
   if (availableIndexes.length === 1) {
-    return availableIndexes.findIndex((p) => p.currentHp > 0);
+    return availableIndexes[0].index;
   }
 
   let strongCounter: number | null = null;

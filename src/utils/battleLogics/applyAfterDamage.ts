@@ -16,8 +16,8 @@ import { getBestSwitchIndex } from "./getBestSwitchIndex";
 
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
-export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number) {
-  await applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage);
+export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean) {
+  await applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage, watchMode);
 }
 
 function applyDefensiveAbilityEffectAfterDamage() {
@@ -41,51 +41,6 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
 
   let shouldWaitForSwitch = false;
   let switchPromise: Promise<void> | null = null;
-
-  if (usedMove.uTurn) {
-    const { setSwitchRequest } = useBattleStore.getState();
-    const availableIndexes = mineTeam
-      .map((p, i) => ({ ...p, index: i }))
-      .filter(p => p.currentHp > 0);
-
-    // ✅ 1마리만 남은 경우
-    if (availableIndexes.length === 1) {
-      return;
-    }
-    if (watchMode) {
-      console.log('관전 모드에서 유턴 사용');
-      const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
-      // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
-      switchPromise = new Promise<void>((resolve) => {
-        switchPokemon(side, switchIndex);
-        resolve();
-      });
-
-    } else {
-      if (side === 'my') {
-        console.log('내가 유턴 사용');
-        switchPromise = new Promise<void>((resolve) => {
-          setSwitchRequest({
-            side,
-            reason: "uTurn",
-            onSwitch: (index: number) => {
-              switchPokemon(side, index);
-              setSwitchRequest(null);
-              resolve();
-            },
-          });
-        });
-        shouldWaitForSwitch = true;
-      }
-
-    }
-  }
-
-  if (shouldWaitForSwitch && switchPromise) {
-    console.log('유턴 로직 실행중...2');
-    await switchPromise;
-    console.log('유턴 로직 실행중...5 (완료)');
-  }
   demeritEffect?.forEach((demerit) => {
     if (demerit && Math.random() < demerit.chance) {
       console.log(`${usedMove.name}의 디메리트 효과 발동!`)
@@ -134,7 +89,6 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         console.log(`${usedMove.name}의 부가효과 발동!`)
         if (effect.statChange) {
           effect.statChange.forEach((statChange) => {
-            const target = statChange.target === 'opponent' ? deffender : attacker; // 상대에게 적용할지, 자신에게 적용할지 결정
             let targetSide: 'my' | 'enemy' = 'enemy'; // 누구의 랭크를 변화시킬건지 정함. 
             if (side === 'my' && statChange.target === 'opponent') {
               targetSide = 'enemy';
@@ -151,12 +105,11 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             const activeIndex = targetSide === 'my' ? activeMy : activeEnemy;
             updatePokemon(targetSide, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
             console.log(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
-            addLog(`${activeTeam[activeIndex]}의 ${stat}이/가 ${change}랭크 변했다!`)
+            addLog(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
           });
         }
         if (effect.status) {
           // 상태이상 적용
-          // 아니 여기 원래 attacker가 아니라 deffender여야 하는데 이거 왜이러냐 이거?
           const status = effect.status;
           if (status === '화상' && deffender.base.types.includes('불')) { };
           if (status === '마비' && deffender.base.types.includes('전기')) { };
@@ -189,5 +142,56 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
       }
     })
   }
+  if (usedMove.uTurn) {
+    const { setSwitchRequest } = useBattleStore.getState();
+    const availableIndexes = mineTeam
+      .map((p, i) => ({ ...p, index: i }))
+      .filter((p, i) => p.currentHp > 0 && i !== activeMine); // 현재 포켓몬은 제외
 
+
+    // ✅ 1마리만 남은 경우
+    if (availableIndexes.length <= 1) {
+      return;
+    }
+    if (watchMode) {
+      console.log('관전 모드에서 유턴 사용');
+      const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
+      // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
+      switchPromise = new Promise<void>((resolve) => {
+        switchPokemon(side, switchIndex);
+        resolve();
+      });
+
+    } else if (side === 'my') {
+      console.log('내가 유턴 사용');
+      switchPromise = new Promise<void>((resolve) => {
+        setSwitchRequest({
+          side,
+          reason: "uTurn",
+          onSwitch: (index: number) => {
+            switchPokemon(side, index);
+            setSwitchRequest(null);
+            resolve();
+          },
+        });
+      });
+      shouldWaitForSwitch = true;
+    }
+    else {
+      // ✅ AI가 유턴 사용한 경우 자동 교체!
+      console.log('ai가 유턴 사용');
+      const switchIndex = getBestSwitchIndex(side);
+      switchPromise = new Promise<void>((resolve) => {
+        switchPokemon(side, switchIndex);
+        resolve();
+      });
+    }
+
+  }
+
+  if (shouldWaitForSwitch && switchPromise) {
+    console.log('유턴 로직 실행중...2');
+    await switchPromise;
+    console.log('유턴 로직 실행중...5 (완료)');
+  }
 }
