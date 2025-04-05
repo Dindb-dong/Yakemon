@@ -7,6 +7,7 @@ import { useBattleStore } from "./Context/useBattleStore";
 import { PokemonInfo } from "./models/Pokemon";
 import { mockPokemon } from "./data/mockPokemon";
 import { applyAppearance } from "./utils/battleLogics/applyAppearance";
+import { BattlePokemon } from "./models/BattlePokemon";
 
 function App() {
   const [isSelected, setIsSelected] = useState(false);
@@ -27,16 +28,25 @@ function App() {
       const enemyRaw = ['불', '물', '풀'].map((type) =>
         getRandomByType(type, myRaw)
       );
-
+      let myBattleTeam: BattlePokemon[] = [];
       console.log("선택된 포켓몬:", playerPokemons);
       console.log("AI 포켓몬:", enemyRaw);
-
-      const myBattleTeam = playerPokemons.map((p, i) => {
-        if (!p || !p.moves) {
-          console.error(`playerPokemons[${i}]가 이상함:`, p);
-        }
-        return createBattlePokemon(p);
-      });
+      if (playerPokemons.length !== 3) {
+        console.log('관전모드 시작')
+        myBattleTeam = myRaw.map((p, i) => {
+          if (!p || !p.moves) {
+            console.error(`playerPokemons[${i}]가 이상함:`, p);
+          }
+          return createBattlePokemon(p);
+        });
+      } else {
+        myBattleTeam = playerPokemons.map((p, i) => {
+          if (!p || !p.moves) {
+            console.error(`playerPokemons[${i}]가 이상함:`, p);
+          }
+          return createBattlePokemon(p);
+        });
+      }
 
       const aiBattleTeam = enemyRaw.map((p, i) => {
         if (!p || !p.moves) {

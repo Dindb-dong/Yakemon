@@ -20,7 +20,7 @@ export function applyDefensiveAbilityEffectBeforeDamage(
   const opponentSide = side === 'my' ? 'enemy' : 'my';
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
-
+  console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
   let rate = 1;
   ability?.defensive?.forEach(
     (category: string) => {
@@ -79,6 +79,7 @@ export function applyOffensiveAbilityEffectBeforeDamage(
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   let rate = 1;
+
   ability?.offensive?.forEach(
     (category: string) => {
       switch (category) {
@@ -86,6 +87,24 @@ export function applyOffensiveAbilityEffectBeforeDamage(
         case "damage_buff":
           if (ability.name === '우격다짐' && usedMove.effects) {
             rate *= 1.3; // 우격다짐은 1.3배
+          }
+          if (ability.name === '이판사판' && usedMove.demeritEffects?.some(demerit => demerit.recoil)) {
+            rate *= 1.2; // 이판사판은 1.2배
+          }
+          if (ability.name === '철주먹' && usedMove.affiliation === '펀치') {
+            rate *= 1.2; // 철주먹은 1.2배
+          }
+          if (ability.name === '단단한발톱' && usedMove.isTouch) {
+            rate *= 1.3; // 단단한발톱은 1.3배
+          }
+          if (ability.name === '맹화' && usedMove.type === '불' && attacker.currentHp <= attacker.base.hp / 3) {
+            rate *= 1.5; // 맹화는 1.5배
+          }
+          if (ability.name === '급류' && usedMove.type === '물' && attacker.currentHp <= attacker.base.hp / 3) {
+            rate *= 1.5; // 급류는 1.5배
+          }
+          if (ability.name === '심록' && usedMove.type === '풀' && attacker.currentHp <= attacker.base.hp / 3) {
+            rate *= 1.5; // 심록은 1.5배
           }
           break;
         case "demerit":
@@ -95,6 +114,7 @@ export function applyOffensiveAbilityEffectBeforeDamage(
         case "type_change":
           if (ability.name === '변환자재') {
             updatePokemon(side, activeMine, (attacker) => setTypes(attacker, [usedMove.type])); // 사용하는 기술에 맞게 특성 변경 
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
           break;
         case "rank_buff":
@@ -106,5 +126,8 @@ export function applyOffensiveAbilityEffectBeforeDamage(
       }
     }
   )
+  if (rate > 1) {
+    console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+  }
   return rate;
 }

@@ -1,7 +1,7 @@
 import { useBattleStore } from "../../Context/useBattleStore";
 import { useDurationStore } from "../../Context/useDurationContext";
 import { StatusState } from "../../models/Status";
-import { changeHp, removeStatus } from "./updateBattlePokemon";
+import { changeHp, changeRank, removeStatus } from "./updateBattlePokemon";
 import { setField, setWeather } from "./updateEnvironment";
 
 // 매 턴 종료 시 적용할 모든 효과를 통합적으로 처리
@@ -81,4 +81,22 @@ export function applyEndTurnEffects() {
   // ⏳ TODO:
   // - 날씨 데미지 (모래바람 등)
   // - 유틸 특성 효과 (포이즌힐 등)
+  [myActive, enemyActive].forEach((pokemon, i) => {
+    const side = i === 0 ? "my" : "enemy";
+    const opponentSide = i === 0 ? "enemy" : "my";
+    const activeIndex = i === 0 ? activeMy : activeEnemy;
+    if (pokemon.base.ability?.name === "포이즌힐") {
+      if (pokemon.status.includes("독")) {
+        updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 3 / 16));
+        addLog(`${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
+      } else if (pokemon.status.includes("맹독")) {
+        updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 22 / 96));
+        addLog(`${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
+      }
+    }
+    if (pokemon.base.ability?.name === '가속') {
+      updatePokemon(side, activeIndex, (prev) => changeRank(prev, 'speed', 1));
+      addLog(`${pokemon.base.name}의 가속 특성 발동!`);
+    }
+  })
 }

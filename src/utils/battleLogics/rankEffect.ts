@@ -11,7 +11,6 @@ export function calculateRankEffect(rank: number): number {
     return 1 / 4; // 최대 하락 랭크
   } else {
     // 하락 랭크 계산 (rank는 음수)
-    console.log('랭크 적용된 스탯 비율:' + (2 / (Math.abs(rank * 1) + 2)))
     return (2 / (Math.abs(rank * 1) + 2));
   }
 }

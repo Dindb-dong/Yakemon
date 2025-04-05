@@ -14,8 +14,14 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
   const opponentPokemon = enemyTeam[activeEnemy];
   let mySpeed = myPokemon.base.speed;
   mySpeed *= calculateRankEffect(myPokemon.rank.speed);
+  if (myPokemon.status.includes('마비')) {
+    mySpeed *= 0.5;
+  }
   let opponentSpeed = opponentPokemon.base.speed;
   opponentSpeed *= calculateRankEffect(opponentPokemon.rank.speed);
+  if (opponentPokemon.status.includes('마비')) {
+    opponentSpeed *= 0.5;
+  }
   if (publicEnv.room === '트릭룸') {
     mySpeed *= -1;
     opponentSpeed *= -1;
@@ -41,8 +47,14 @@ export function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveInfo | v
       whoIsFirst = 'enemy';
     }
   } else if (aiMove && aiMove.priority) { // 상대만 우선도 가진 기술 사용 
+    if (aiMove.priority < 0) {
+      whoIsFirst = 'my';
+    }
     whoIsFirst = 'enemy';
   } else if (playerMove && playerMove.priority) { // 나만 우선도 가진 기술 사용
+    if (playerMove.priority < 0) {
+      whoIsFirst = 'enemy';
+    }
     whoIsFirst = 'my';
   }
   addLog(`${whoIsFirst}의 선공!`)

@@ -10,9 +10,10 @@ import ActionPanel from "./ActionPanel";
 import LogPanel from "./LogPanel";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
+import { applyOffensiveAbilityEffectBeforeDamage } from "../utils/battleLogics/applyBeforeDamage";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
-  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog } = useBattleStore.getState();
+  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
   const leftPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
@@ -20,9 +21,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const myPokemon = side === 'enemy' ? rightPokemon : leftPokemon; // 왼쪽 플레이어는 leftPokemon이 자기거 
   const enemyPokemon = side === 'enemy' ? leftPokemon : rightPokemon; // 완쪽 플레이어는 rightPokemon이 상대포켓몬 
   // 이 아래에서부터는 rightPokemon -> myPokemon, leftPokemon -> enemyPokemon으로 변경 
-  const userSpeed = enemyPokemon.base.speed * calculateRankEffect(enemyPokemon.rank.speed);
-  const aiSpeed = myPokemon.base.speed * calculateRankEffect(myPokemon.rank.speed);
-  const isEnemyFaster = aiSpeed > userSpeed;
+  const userSpeed = enemyPokemon.base.speed * calculateRankEffect(enemyPokemon.rank.speed) * (enemyPokemon.status.includes('마비') ? 0.5 : 1);
+  const aiSpeed = myPokemon.base.speed * calculateRankEffect(myPokemon.rank.speed) * (myPokemon.status.includes('마비') ? 0.5 : 1);
+  const isEnemyFaster = (publicEnv.room === '트릭룸') ? aiSpeed < userSpeed : aiSpeed > userSpeed;
   const roll = Math.random();
   const aiHpRation = myPokemon.currentHp / myPokemon.base.hp; // ai 포켓몬의 체력 비율 
   const userHpRation = enemyPokemon.currentHp / enemyPokemon.base.hp; // 유저 포켓몬의 체력 비율 
@@ -37,12 +38,15 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const getBestMove = (): MoveInfo => {
     let best: MoveInfo | null = null;
     let bestScore = -1;
+    let rate = 1;
 
     usableMoves.forEach((move) => {
       const stab = myPokemon.base.types.includes(move.type) ? 1.5 : 1;
+      rate = applyOffensiveAbilityEffectBeforeDamage(move, side);
+      // 필드 뻥튀기도 적용
       const effectiveness = calculateTypeEffectiveness(move.type, enemyPokemon.base.types);
       const basePower = move.power ?? 0;
-      const score = basePower * stab * effectiveness;
+      const score = basePower * stab * rate * effectiveness;
 
       if (score > bestScore) {
         bestScore = score;
@@ -54,18 +58,21 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   };
 
   const getSpeedUpMove = (): MoveInfo | null => {
+    const prankster = myPokemon.base.ability?.name === "심술꾸러기";
     return usableMoves.find((m) =>
       m.effects?.some((effect) =>
         effect.chance > 0.5 && (
           effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change > 0)
         ) || effect.statChange?.some((s) =>
           s.target === "opponent" &&
-          s.stat === "speed" && s.change < 0)
+          s.stat === "speed" && s.change < 0) ||
+        (prankster && effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change < 0))
       )
     ) || null;
   };
 
   const getAttackUpMove = (): MoveInfo | null => {
+    const prankster = myPokemon.base.ability?.name === "심술꾸러기";
     return usableMoves.find((m) =>
       m.effects?.some((effect) =>
         effect.chance > 0.5 &&
@@ -73,7 +80,14 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
           s.target === "self" &&
           (s.stat === "attack" || s.stat === "spAttack") &&
           s.change > 0
-        )
+        ) || effect.statChange?.some((s) =>
+          s.target === "opponent" &&
+          (s.stat === "defense" || s.stat === "spDefense") && s.change < 0) ||
+        (prankster && effect.statChange?.some((s) =>
+          s.target === "self" &&
+          (s.stat === "attack" || s.stat === "spAttack") &&
+          s.change < 0
+        ))
       )
     ) || null;
   };
@@ -81,6 +95,20 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const getUtrunMove = (): MoveInfo | null => {
     return usableMoves.find((m) =>
       m.uTurn && m.pp > 0
+    ) || null;
+  };
+
+  const getPriorityMove = (): MoveInfo | null => {
+    return usableMoves.find((m) =>
+      m.priority && m.pp > 0
+    ) || null;
+  };
+
+  const getHealMove = (): MoveInfo | null => {
+    return usableMoves.find((m) =>
+      m.effects?.some((effect) =>
+        effect.heal
+      )
     ) || null;
   };
 
@@ -99,6 +127,8 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const uturnMove = getUtrunMove();
   const speedUpMove = getSpeedUpMove();
   const attackUpMove = getAttackUpMove();
+  const priorityMove = getPriorityMove();
+  const healMove = getHealMove();
   const supportMove = usableMoves.find((m) => m.category === "변화" && m !== rankUpMove);
 
   const getSwitchIndex = (targetFor: "offense" | "defense") => {
@@ -112,10 +142,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   };
 
   const hasSwitchOption = mineTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
-  const isAi_lowHp = aiHpRation < 0.35;
-  const isAi_highHp = aiHpRation > 0.75;
-  const isUser_lowHp = userHpRation < 0.35;
-  const isUser_highHp = aiHpRation > 0.75;
+  const isAi_lowHp = aiHpRation < 0.3;
+  const isAi_highHp = aiHpRation > 0.8;
+  const isUser_lowHp = userHpRation < 0.3;
+  const isUser_highHp = aiHpRation > 0.8;
 
   // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
   if (myPokemon.currentHp <= 0) {
@@ -126,6 +156,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   // === 2. 플레이어가 더 빠를 경우 ===
   if (!isEnemyFaster) {
     if (userToai > 1) { // ai가 불리 
+      if (isUser_lowHp && priorityMove) {
+        addLog("AI는 플레이어 포켓몬의 빈틈을 포착하여 선공기 사용!");
+        return bestMove;
+      }
       if (roll < 0.2 && speedUpMove) {
         addLog("AI는 상대의 맞교체 또는 랭크업을 예측하고 스피드 상승을 시도!");
         return speedUpMove;
@@ -142,10 +176,6 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     } else if (aiTouser > 1) {
       // ai가 느리지만 상성 유리
       if (isAi_lowHp && hasSwitchOption) {
-        if (uturnMove) {
-          addLog("AI는 느리고 상성은 유리하지만 체력이 낮아 유턴으로 빠지려 한다!");
-          return uturnMove;
-        }
         const switchIdx = getSwitchIndex("defense");
         if (switchIdx !== -1) {
           addLog("AI는 느리고 상성은 유리하지만 체력이 낮아 교체를 시도한다!");
@@ -170,7 +200,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
       if (roll < 0.85 && hasSwitchOption) {
         if (uturnMove) {
-          addLog("AI는 상성은 유리하지만, 턴 이득을 위해 유턴을 사용한다!");
+          addLog("AI는 상성은 유리하지만 상대의 교체를 예상하고 유턴을 사용한다!");
           return uturnMove;
         }
         const switchIdx = getSwitchIndex("defense");
@@ -182,7 +212,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
       addLog("AI는 예측샷으로 최고 위력기를 사용한다!");
       return bestMove;
-    } else {
+    } else { // 상성 같은 경우 
       if (isAi_highHp && speedUpMove) {
         addLog("AI는 스피드 상승을 시도한다!");
         return speedUpMove;
@@ -209,8 +239,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       addLog("AI는 플레이어 포켓몬의 빈틈을 포착!");
       return bestMove;
     }
-    if (bestMove && !(userToai > 1)) { // 상대 때릴 유리한 기술 있으면 그냥 때리기 
-      return bestMove;
+    if (isAi_lowHp && healMove) { // 상대 때릴 유리한 기술 있으면 그냥 때리기 
+      addLog("AI는 빠르지만 체력이 낮으므로 회복 기술 사용!");
+      return healMove;
     }
     if (roll < 0.1 && hasSwitchOption) {
       const switchIdx = getSwitchIndex("defense");
