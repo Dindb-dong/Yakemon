@@ -43,7 +43,10 @@ export async function battleSequence(
   const { addLog, myTeam, enemyTeam, activeEnemy, activeMy } = useBattleStore.getState();
   const myPokemon = myTeam[activeMy];
   const aiPokemon = enemyTeam[activeEnemy];
-  console.log('우선도 및 스피드 계산중...')
+  // 1.5초 대기
+  setTimeout(() => {
+    addLog("우선도 및 스피드 계산중...");
+  }, 1500);
 
   // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
   if (aiPokemon.currentHp <= 0 && isSwitchAction(enemyAction)) {

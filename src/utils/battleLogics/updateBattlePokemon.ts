@@ -25,7 +25,15 @@ export function changeRank(
     } else {
       manager.increaseState(stat as keyof RankState, Math.abs(amount));
     }
-  } else if (amount > 0) {
+  } else if (pokemon.base.ability?.name === '오기') {
+    if (amount > 0) {
+      manager.increaseState(stat as keyof RankState, amount);
+    } else {
+      manager.increaseState('spAttack', 2);
+      manager.decreaseState(stat as keyof RankState, Math.abs(amount));
+    }
+  }
+  else if (amount > 0) {
     manager.increaseState(stat as keyof RankState, amount);
   } else {
     manager.decreaseState(stat as keyof RankState, Math.abs(amount));

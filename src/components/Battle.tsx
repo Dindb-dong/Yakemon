@@ -16,10 +16,8 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
-  const leftPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-  const rightPokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy]; // ai 입장에서 자기포켓몬
-  const myPokemon = side === 'enemy' ? rightPokemon : leftPokemon; // 왼쪽 플레이어는 leftPokemon이 자기거 
-  const enemyPokemon = side === 'enemy' ? leftPokemon : rightPokemon; // 완쪽 플레이어는 rightPokemon이 상대포켓몬 
+  const myPokemon = mineTeam[side === 'my' ? activeMy : activeEnemy];
+  const enemyPokemon = opponentTeam[side === 'my' ? activeEnemy : activeMy];
   // 이 아래에서부터는 rightPokemon -> myPokemon, leftPokemon -> enemyPokemon으로 변경 
   const userSpeed = enemyPokemon.base.speed * calculateRankEffect(enemyPokemon.rank.speed) * (enemyPokemon.status.includes('마비') ? 0.5 : 1);
   const aiSpeed = myPokemon.base.speed * calculateRankEffect(myPokemon.rank.speed) * (myPokemon.status.includes('마비') ? 0.5 : 1);
@@ -157,74 +155,74 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   if (!isEnemyFaster) {
     if (userToai > 1) { // ai가 불리 
       if (isUser_lowHp && priorityMove) {
-        addLog("AI는 플레이어 포켓몬의 빈틈을 포착하여 선공기 사용!");
+        addLog(`${side}는 플레이어 포켓몬의 빈틈을 포착하여 선공기 사용!`);
         return bestMove;
       }
       if (roll < 0.2 && speedUpMove) {
-        addLog("AI는 상대의 맞교체 또는 랭크업을 예측하고 스피드 상승을 시도!");
+        addLog(`${side}는 상대의 맞교체 또는 랭크업을 예측하고 스피드 상승을 시도!`);
         return speedUpMove;
       }
       if (roll < 0.6 && (hasSwitchOption)) {
         const switchIdx = getSwitchIndex("offense");
         if (switchIdx !== -1) {
-          addLog("AI는 느리고 불리하므로 교체 선택");
+          addLog(`${side}는 느리고 불리하므로 교체 선택`);
           return { type: "switch" as const, index: switchIdx };
         }
       }
-      addLog("AI는 최고 위력기를 선택");
+      addLog(`${side}는 최고 위력기를 선택`);
       return bestMove;
     } else if (aiTouser > 1) {
       // ai가 느리지만 상성 유리
       if (isAi_lowHp && hasSwitchOption) {
         const switchIdx = getSwitchIndex("defense");
         if (switchIdx !== -1) {
-          addLog("AI는 느리고 상성은 유리하지만 체력이 낮아 교체를 시도한다!");
+          addLog(`${side}는 느리고 상성은 유리하지만 체력이 낮아 교체를 시도한다!`);
           return { type: "switch" as const, index: switchIdx };
         }
       }
 
       if (speedUpMove && isAi_highHp) {
-        addLog("AI는 느리지만 상성이 유리하고 체력이 높아 스피드 상승을 시도한다!");
+        addLog(`${side}는 느리지만 상성이 유리하고 체력이 높아 스피드 상승을 시도한다!`);
         return speedUpMove;
       }
 
       if (roll < 0.4) {
-        addLog("AI는 상성 우위를 살려 가장 강한 기술로 공격한다!");
+        addLog(`${side}는 상성 우위를 살려 가장 강한 기술로 공격한다!`);
         return bestMove;
       }
 
       if (roll < 0.6 && supportMove) {
-        addLog("AI는 변화를 시도한다!");
+        addLog(`${side}는 변화를 시도한다!`);
         return supportMove;
       }
 
       if (roll < 0.85 && hasSwitchOption) {
         if (uturnMove) {
-          addLog("AI는 상성은 유리하지만 상대의 교체를 예상하고 유턴을 사용한다!");
+          addLog(`${side}는 상성은 유리하지만 상대의 교체를 예상하고 유턴을 사용한다!`);
           return uturnMove;
         }
         const switchIdx = getSwitchIndex("defense");
         if (switchIdx !== -1) {
-          addLog("AI는 상대의 교체를 예상하고 맞교체한다!");
+          addLog(`${side}는 상대의 교체를 예상하고 맞교체한다!`);
           return { type: "switch" as const, index: switchIdx };
         }
       }
 
-      addLog("AI는 예측샷으로 최고 위력기를 사용한다!");
+      addLog(`${side}는 예측샷으로 최고 위력기를 사용한다!`);
       return bestMove;
     } else { // 상성 같은 경우 
       if (isAi_highHp && speedUpMove) {
-        addLog("AI는 스피드 상승을 시도한다!");
+        addLog(`${side}는 스피드 상승을 시도한다!`);
         return speedUpMove;
       }
       if (roll < 0.3 && hasSwitchOption) {
         const switchIdx = getSwitchIndex("offense");
         if (switchIdx !== -1) {
-          addLog("AI는 상대에게 유리한 포켓몬으로 교체한다!");
+          addLog(`${side}는 상대에게 유리한 포켓몬으로 교체한다!`);
           return { type: "switch" as const, index: switchIdx };
         }
       }
-      addLog("AI는 상성이 같아서 가장 강한 기술로 공격한다!");
+      addLog(`${side}는 상성이 같아서 가장 강한 기술로 공격한다!`);
       return bestMove;
     }
   }
@@ -232,38 +230,38 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   // === 3. AI가 더 빠를 경우 ===
   if (aiTouser > 1) { // ai가 상성 유리 
     if (isAi_highHp && attackUpMove) {
-      addLog("AI는 빠르므로 공격 상승 기술 사용!");
+      addLog(`${side}는 빠르므로 공격 상승 기술 사용!`);
       return attackUpMove;
     }
     if (isUser_lowHp) { // 막타치기 로직 
-      addLog("AI는 플레이어 포켓몬의 빈틈을 포착!");
+      addLog(`${side}는 플레이어 포켓몬의 빈틈을 포착!`);
       return bestMove;
     }
     if (isAi_lowHp && healMove) { // 상대 때릴 유리한 기술 있으면 그냥 때리기 
-      addLog("AI는 빠르지만 체력이 낮으므로 회복 기술 사용!");
+      addLog(`${side}는 빠르지만 체력이 낮으므로 회복 기술 사용!`);
       return healMove;
     }
     if (roll < 0.1 && hasSwitchOption) {
       const switchIdx = getSwitchIndex("defense");
       if (switchIdx !== -1) {
-        addLog("AI는 플레이어 교체 예상하고 맞교체");
+        addLog(`${side}는 플레이어 교체 예상하고 맞교체`);
         return { type: "switch" as const, index: switchIdx };
       }
     }
     if (roll < 0.2 && supportMove) {
-      addLog("AI는 변화 기술 사용");
+      addLog(`${side}는 변화 기술 사용`);
       return supportMove;
     }
-    addLog("AI는 가장 강한 기술로 공격");
+    addLog(`${side}는 가장 강한 기술로 공격`);
     return bestMove;
 
   } else if (userToai > 1) { // ai가 빠르고 상성은 불리 
     if (isUser_lowHp) {
-      addLog("AI는 플레이어 포켓몬의 빈틈을 포착!");
+      addLog(`${side}는 플레이어 포켓몬의 빈틈을 포착!`);
       return bestMove;
     }
     if (uturnMove) {
-      addLog("AI는 빠르지만 불리하므로 유턴으로 교체!");
+      addLog(`${side}는 빠르지만 불리하므로 유턴으로 교체!`);
       return uturnMove;
     }
     if (isAi_lowHp) {
@@ -271,40 +269,40 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       return bestMove;
     }
     if (roll < 0.15 && supportMove) {
-      addLog("AI는 변화 기술을 사용");
+      addLog(`${side}는 변화 기술을 사용`);
       return supportMove;
     }
     if (roll < 0.55 && (hasSwitchOption || isAi_lowHp)) {
       const switchIdx = getSwitchIndex("offense");
       if (switchIdx !== -1) {
-        addLog("AI는 빠르지만 상성상 유리한 포켓몬이 있으므로 교체");
+        addLog(`${side}는 빠르지만 상성상 유리한 포켓몬이 있으므로 교체`);
         return { type: "switch" as const, index: switchIdx };
       }
     }
-    addLog("AI는 가장 강한 공격 시도");
+    addLog(`${side}는 가장 강한 공격 시도`);
     return bestMove;
   } else {
     if (isUser_lowHp) {
-      addLog("AI는 플레이어 포켓몬의 빈틈을 포착!");
+      addLog(`${side}는 플레이어 포켓몬의 빈틈을 포착!`);
       return bestMove;
     }
     if (isAi_highHp && attackUpMove) {
-      addLog("AI는 공격 상승 기술 사용");
+      addLog(`${side}는 공격 상승 기술 사용`);
       return attackUpMove;
     }
     if (roll < 0.3 && hasSwitchOption) {
       const switchIdx = getSwitchIndex("offense");
       if (switchIdx !== -1) {
-        addLog("AI는 상대에게 유리한 포켓몬으로 교체");
+        addLog(`${side}는 상대에게 유리한 포켓몬으로 교체`);
         return { type: "switch" as const, index: switchIdx };
       }
     }
-    addLog("AI는 더 빠르기에 가장 강한 공격 시도");
+    addLog(`${side}는 더 빠르기에 가장 강한 공격 시도`);
     return bestMove;
   }
 };
 
-function Battle({ watchMode = false, watchCount = 1 }) {
+function Battle({ watchMode, watchCount }) {
   const {
     myTeam,
     enemyTeam,
@@ -357,8 +355,13 @@ function Battle({ watchMode = false, watchCount = 1 }) {
       const runAIvsAI = async () => {
         setIsTurnProcessing(true);
         const leftAction = aiChooseAction("my");
+        console.log('왼쪽 플레이어 행동:', leftAction);
         const rightAction = aiChooseAction("enemy");
+        console.log('오른쪽 플레이어 행동:', rightAction);
         await battleSequence(leftAction, rightAction);
+        setTimeout(() => {
+          console.log(`${turn}턴 종료`)
+        }, 10000);
         setTurn(turn + 1);
         setIsTurnProcessing(false);
       };

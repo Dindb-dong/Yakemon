@@ -29,10 +29,10 @@ function App() {
         getRandomByType(type, myRaw)
       );
       let myBattleTeam: BattlePokemon[] = [];
-      console.log("선택된 포켓몬:", playerPokemons);
-      console.log("AI 포켓몬:", enemyRaw);
+
       if (playerPokemons.length !== 3) {
         console.log('관전모드 시작')
+        console.log("선택된 포켓몬:", myRaw);
         myBattleTeam = myRaw.map((p, i) => {
           if (!p || !p.moves) {
             console.error(`playerPokemons[${i}]가 이상함:`, p);
@@ -40,6 +40,7 @@ function App() {
           return createBattlePokemon(p);
         });
       } else {
+        console.log("선택된 포켓몬:", playerPokemons);
         myBattleTeam = playerPokemons.map((p, i) => {
           if (!p || !p.moves) {
             console.error(`playerPokemons[${i}]가 이상함:`, p);
@@ -47,7 +48,7 @@ function App() {
           return createBattlePokemon(p);
         });
       }
-
+      console.log("AI 포켓몬:", enemyRaw);
       const aiBattleTeam = enemyRaw.map((p, i) => {
         if (!p || !p.moves) {
           console.error(`aiPokemons[${i}]가 이상함:`, p);
