@@ -45,15 +45,20 @@ export function setRoom(room: string) {
 export function addTrap(side: "my" | "enemy", newTrap: string) {
   const env = side === "my" ? useBattleStore.getState().myEnv : useBattleStore.getState().enemyEnv;
   const setter = side === "my" ? useBattleStore.getState().setMyEnv : useBattleStore.getState().setEnemyEnv;
+  console.log("트랩이 설치되려한다!");
   if (env.trap.includes('독압정') && newTrap === '독압정') {
-    const memorizedTrap = env.trap.filter((v) => v != newTrap);
+    const memorizedTrap = env.trap.filter((v) => v !== newTrap);
     memorizedTrap.push('맹독압정');
+    console.log(`맹독압정이 설치되었다!`);
+    useBattleStore.getState().addLog(`맹독압정이 설치되었다!`);
     setter({
       //trap: [...env.trap[env.trap.length]]
       trap: memorizedTrap,
-    })
+    });
   }
   else if (!env.trap.includes(newTrap)) {
+    console.log(`${newTrap}이 설치되었다!`);
+    useBattleStore.getState().addLog(`${newTrap}이 설치되었다!`);
     setter({ trap: [...env.trap, newTrap] });
   }
 }

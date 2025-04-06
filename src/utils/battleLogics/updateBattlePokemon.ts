@@ -60,7 +60,7 @@ export function resetRank(pokemon: BattlePokemon): BattlePokemon {
 export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜']
-  const { publicEnv } = useBattleStore.getState();
+  const { publicEnv, addLog } = useBattleStore.getState();
   if (status === '독' || status === '맹독') {
     if (pokemon.base.ability?.name === '면역' || pokemon.base.types.includes('독') || pokemon.base.types.includes('강철')) {
       return { ...pokemon };
@@ -94,6 +94,8 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePo
 
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);
+  console.log(`${pokemon}은 ${status} 상태에 빠졌다!`);
+  addLog(`${pokemon}은 ${status} 상태에 빠졌다!`)
   return { ...pokemon, status: manager.getStatus() };
 }
 

@@ -353,6 +353,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
   const activeTeam = side === 'my' ? myTeam : enemyTeam;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
   if (moveInfo.category === '변화') {
     if (moveInfo.target === 'self') { // 자신에게 거는 기술일 경우 
       addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`);
@@ -368,7 +369,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
       })
     } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 
       if (moveInfo.trap) {
-        addTrap(side, moveInfo.trap);
+        addTrap(opponentSide, moveInfo.trap);
         addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`);
         console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
       }

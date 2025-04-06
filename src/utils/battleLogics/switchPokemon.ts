@@ -66,14 +66,16 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
 
   // 4. 트랩 데미지 적용
   if (env.trap.length > 0) {
-    const { updated: trapped, log: trapLog, status_condition: trapCondition } = applyTrapDamage(next, env.trap);
+    const { updated: trapped, log: trapLog, status_condition: trapCondition } = await applyTrapDamage(next, env.trap);
     updatePokemon(side, newIndex, (prev) => trapped);
     // 독압정 등일 경우 상태이상 적용
     if (trapCondition) {
+      console.log('트랩 효과 적용')
       if (trapCondition === '독압정 제거') {
         removeTrap(side, '독압정')
+      } else {
+        updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState))
       }
-      updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState))
     }
     if (trapLog) addLog(trapLog); console.log(trapLog);
     next = trapped;

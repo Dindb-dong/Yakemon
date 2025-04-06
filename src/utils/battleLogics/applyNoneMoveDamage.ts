@@ -4,14 +4,14 @@ import { calculateTypeEffectiveness } from "../typeRalation";
 import { removeTrap } from "./updateEnvironment";
 
 // 스텔스락 = 바위타입 기술과 동일하게 상성 적용
-export function applyTrapDamage(
+export async function applyTrapDamage(
   pokemon: BattlePokemon,
   trap: string[]
-): { updated: BattlePokemon; log?: string, status_condition?: string } {
+): Promise<{ updated: BattlePokemon; log?: string; status_condition?: string; }> {
   let damage = 0;
   let log: string | undefined;
 
-  let status_condition: string;
+  let status_condition: string = "";
 
   const types = pokemon.base.types;
   if (pokemon.base.ability?.name !== '매직가드') {
@@ -48,5 +48,5 @@ export function applyTrapDamage(
 
   const updated = { ...pokemon, currentHp: Math.max(0, pokemon.currentHp - damage) };
 
-  return { updated, log };
+  return { updated, log, status_condition };
 }
