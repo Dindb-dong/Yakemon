@@ -17,6 +17,26 @@ const statDisplayMap: Record<string, string> = {
   critical: "급소율",
 };
 
+function getHpImagePath(dexNum: number, hpRatio: number, isEnemy: boolean): string {
+  let folder = "green_hp";
+  let file = `${String(dexNum).padStart(4, "0")}.png`;
+
+  if (hpRatio <= 0.25) {
+    folder = "red_hp";
+    file = `${String(dexNum).padStart(4, "0")}_r2_c2.png`;
+  } else if (hpRatio <= 0.5) {
+    folder = "yellow_hp";
+    file = `${String(dexNum).padStart(4, "0")}_r1_c3.png`;
+  }
+
+  // 도감번호 크면 *_2 폴더에서 가져오기
+  if (dexNum > 995) {
+    folder += "_2";
+  }
+
+  return `/assets/${folder}/${String(dexNum).padStart(4, "0")}/${file}`;
+}
+
 function getHpColorClass(currentHp: number, maxHp: number) {
   const ratio = currentHp / maxHp;
   if (ratio <= 0.25) return "hp-red";
@@ -37,6 +57,11 @@ function PokemonArea({ my, enemy }: Props) {
       {my &&
         <div className="pokemon-card">
           <h5>{my.base.name} (내 포켓몬)</h5>
+          <img
+            src={getHpImagePath(my.base.id, my.currentHp / my.base.hp, false)}
+            alt={my.base.name}
+            className="pokemon-image"
+          />
           <p>HP: {my.currentHp} / {my.base.hp}</p>
           <div className="hp-bar-container">
             <div
@@ -51,6 +76,11 @@ function PokemonArea({ my, enemy }: Props) {
       {enemy &&
         <div className="pokemon-card">
           <h5>{enemy.base.name} (상대 포켓몬)</h5>
+          <img
+            src={getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp, true)}
+            alt={enemy.base.name}
+            className="pokemon-image"
+          />
           <p>HP:</p>
           <div className="hp-bar-container">
             <div

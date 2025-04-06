@@ -1670,7 +1670,7 @@ export const mockPokemon: PokemonInfo[] = [
         name: '플레어송',
         type: '불',
         category: '특수',
-        power: 100,
+        power: 80,
         pp: 10,
         isTouch: false,
         affiliation: null,
@@ -1721,7 +1721,7 @@ export const mockPokemon: PokemonInfo[] = [
     hp: 104, attack: 75, defense: 100, spAttack: 110, spDefense: 75, speed: 66, level: 50,
   },
   {
-    id: 907,
+    id: 908,
     name: '마스카나',
     types: ['풀', '악'],
     moves: [

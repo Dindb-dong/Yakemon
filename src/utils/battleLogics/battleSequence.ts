@@ -22,6 +22,7 @@ import { decrementConfusionTurn } from "../../Context/useDurationContext";
 import { hasAbility } from "./helpers";
 import { setAbility, setTypes } from "./updateBattlePokemon";
 import { useEffect } from "react";
+import { getBestSwitchIndex } from "./getBestSwitchIndex";
 
 type BattleAction = MoveInfo | { type: "switch", index: number };
 
@@ -46,24 +47,24 @@ export async function battleSequence(
   addLog("우선도 및 스피드 계산중...");
   console.log("우선도 및 스피드 계산중...");
 
-  // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
-  if (aiPokemon.currentHp <= 0 && isSwitchAction(enemyAction)) {
-    switchPokemon("enemy", enemyAction.index);
-    const updatedEnemy = useBattleStore.getState().enemyTeam[
-      useBattleStore.getState().activeEnemy
-    ];
-    if (updatedEnemy.currentHp <= 0) return; // 남은 포켓몬이 없으면 턴 종료
-    return;
-  }
+  // // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
+  // if (aiPokemon.currentHp <= 0 && isSwitchAction(enemyAction)) {
+  //   switchPokemon("enemy", enemyAction.index);
+  //   const updatedEnemy = useBattleStore.getState().enemyTeam[
+  //     useBattleStore.getState().activeEnemy
+  //   ];
+  //   if (updatedEnemy.currentHp <= 0) return; // 남은 포켓몬이 없으면 턴 종료
+  //   return;
+  // }
 
-  if (myPokemon.currentHp <= 0 && isSwitchAction(myAction)) {
-    switchPokemon("my", myAction.index);
-    const updatedMine = useBattleStore.getState().myTeam[
-      useBattleStore.getState().activeMy
-    ];
-    if (updatedMine.currentHp <= 0) return;
-    return;
-  }
+  // if (myPokemon.currentHp <= 0 && isSwitchAction(myAction)) {
+  //   switchPokemon("my", myAction.index);
+  //   const updatedMine = useBattleStore.getState().myTeam[
+  //     useBattleStore.getState().activeMy
+  //   ];
+  //   if (updatedMine.currentHp <= 0) return;
+  //   return;
+  // }
 
   const whoIsFirst = await calculateOrder(
     isMoveAction(myAction) ? myAction : undefined,
@@ -218,6 +219,13 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       if (recovered) {
         addLog(`${attacker}는 혼란에서 회복했다!`);
         console.log(`${attacker}는 혼란에서 회복했다!`);
+      }
+      if (watchMode && deffender.currentHp <= 0) {
+        const switchIndex = getBestSwitchIndex(opponentSide);
+        switchPokemon(opponentSide, switchIndex);
+      } else if (!watchMode && side === 'enemy') {
+        const switchIndex = getBestSwitchIndex('enemy');
+        switchPokemon('enemy', switchIndex);
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
     }

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
 import SwapPanel from "./SwapPanel";
+import { useBattleStore } from "../Context/useBattleStore";
 
 type ActionPanelParams = {
   myPokemon: BattlePokemon,
@@ -15,6 +16,10 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }
 
   // ✅ 현재 모드: 'fight' | 'switch' | null (초기값은 null)
   const [currentTab, setCurrentTab] = useState<"fight" | "switch" | null>(null);
+  const { turn } = useBattleStore.getState();
+  useEffect(() => {
+    setCurrentTab(null);
+  }, [turn])
 
   const isMobile = window.innerWidth <= 768;
 

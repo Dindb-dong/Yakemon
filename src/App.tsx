@@ -14,12 +14,14 @@ function App() {
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
   const [watchCount, setWatchCount] = useState(1);
+  const [watchDelay, setWatchDelay] = useState(1.5);
   const { addLog } = useBattleStore.getState();
 
   const handleSelect = useCallback(
-    (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number) => {
+    (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => {
       setWatchMode(watchMode);
       setWatchCount(watchCount || 1);
+      setWatchDelay(watchDelay || 1.5);
       if (watchMode) {
         console.log('관전모드 시작');
       }
@@ -77,7 +79,7 @@ function App() {
       {!isSelected ? (
         <PokemonSelect onSelect={handleSelect} />
       ) : (
-        <Battle watchMode={watchMode} watchCount={watchCount} />
+        <Battle watchMode={watchMode} watchCount={watchCount} watchDelay={watchDelay} />
       )}
     </div>
   );

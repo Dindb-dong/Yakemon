@@ -12,6 +12,7 @@ import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
 import { applyOffensiveAbilityEffectBeforeDamage } from "../utils/battleLogics/applyBeforeDamage";
 import { getBestSwitchIndex } from "../utils/battleLogics/getBestSwitchIndex";
+import { switchPokemon } from "../utils/battleLogics/switchPokemon";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
@@ -204,9 +205,13 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         addLog(`${side}는 스피드 상승을 시도한다!`);
         return speedUpMove;
       }
+      if (isAi_highHp && userHpRation < 0.5) {
+        addLog(`${side}는 상대의 체력이 적고 상성이 같아서 가장 강한 기술로 공격한다!`);
+        return bestMove;
+      }
       if (roll < 0.2 && hasSwitchOption) {
         if (switchIndex !== -1) {
-          addLog(`${side}는 상대에게 유리한 포켓몬으로 교체한다!`);
+          addLog(`${side}는 상성이 같지만 느려서 상대에게 유리한 포켓몬으로 교체한다!`);
           return { type: "switch" as const, index: switchIndex };
         }
       }
@@ -304,7 +309,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     }
     if (roll < 0.3 && hasSwitchOption) {
       if (switchIndex !== -1) {
-        addLog(`${side}는 상대에게 유리한 포켓몬으로 교체`);
+        addLog(`${side}는 빠르지만 상대의 약점을 찌르기 위해 상대에게 유리한 포켓몬으로 교체`);
         return { type: "switch" as const, index: switchIndex };
       }
     }
@@ -313,7 +318,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   }
 };
 
-function Battle({ watchMode, watchCount }) {
+function Battle({ watchMode, watchCount, watchDelay }) {
   const {
     myTeam,
     enemyTeam,
@@ -331,7 +336,6 @@ function Battle({ watchMode, watchCount }) {
   const [currentWatch, setCurrentWatch] = useState(0);
   const leftPokemon = myTeam[activeMy];
   const rightPokemon = enemyTeam[activeEnemy];
-
   const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
   const [isTurnProcessing, setIsTurnProcessing] = useState(false);
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
@@ -367,6 +371,12 @@ function Battle({ watchMode, watchCount }) {
     if (watchMode && !isTurnProcessing && !isGameOver && !isRunningRef.current) {
       isRunningRef.current = true; // 실행 중 플래그 설정
       const runAIvsAI = async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(() => {
+            console.log('asdsad');
+            resolve()
+          }, watchDelay * 1000)
+        })
 
         setIsTurnProcessing(true);
         const leftAction = aiChooseAction("my");
@@ -374,8 +384,6 @@ function Battle({ watchMode, watchCount }) {
         const rightAction = aiChooseAction("enemy");
         console.log('오른쪽 플레이어 행동:', rightAction);
         await battleSequence(leftAction, rightAction, watchMode);
-
-
         console.log(`${turn}턴 종료`);
         addLog(`${turn}번째 턴 종료`);
         setTurn(turn + 1);
@@ -395,16 +403,14 @@ function Battle({ watchMode, watchCount }) {
 
   const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
     if (!watchMode) {
-      if (isTurnProcessing) {
-        console.log('턴 프로세스 진행중')
-        return
-      };
 
       setIsTurnProcessing(true);
       const aiAction = aiChooseAction('enemy');
 
       await battleSequence(playerAction, aiAction);
-
+      console.log(`${turn}턴 종료`);
+      addLog(`${turn}번째 턴 종료`);
+      setTurn(turn + 1);
       setSelectedMove(null);
       setIsTurnProcessing(false);
     }
@@ -413,9 +419,16 @@ function Battle({ watchMode, watchCount }) {
   if (isGameOver) {
     let winner: string = '승리';
     if (myTeam.some((p) => p.currentHp > 0)) {
-      winner = '왼쪽 플레이어 승리';
+      winner = 'AI에게 승리!';
     } else if (enemyTeam.some((p) => p.currentHp > 0)) {
-      winner = '오른쪽 플레이어 승리';
+      winner = 'AI에게 패배...';
+    }
+    if (watchMode) {
+      if (myTeam.some((p) => p.currentHp > 0)) {
+        winner = '왼쪽 플레이어 승리';
+      } else if (enemyTeam.some((p) => p.currentHp > 0)) {
+        winner = '오른쪽 플레이어 승리';
+      }
     }
     return (
       <div>
