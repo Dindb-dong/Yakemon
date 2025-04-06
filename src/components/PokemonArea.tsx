@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
 
 type Props = {
@@ -17,24 +17,44 @@ const statDisplayMap: Record<string, string> = {
   critical: "급소율",
 };
 
-function getHpImagePath(dexNum: number, hpRatio: number, isEnemy: boolean): string {
-  let folder = "green_hp";
-  let file = `${String(dexNum).padStart(4, "0")}.png`;
+export async function getHpImagePath(dexNum: number, hpRatio: number): Promise<string> {
+  const paddedDex = String(dexNum).padStart(4, "0");
 
-  if (hpRatio <= 0.25) {
-    folder = "red_hp";
-    file = `${String(dexNum).padStart(4, "0")}_r2_c2.png`;
-  } else if (hpRatio <= 0.5) {
-    folder = "yellow_hp";
-    file = `${String(dexNum).padStart(4, "0")}_r1_c3.png`;
-  }
+  const getCandidatePath = (): string => {
+    let folder = "green_hp";
+    let file = `${paddedDex}.png`;
 
-  // 도감번호 크면 *_2 폴더에서 가져오기
-  if (dexNum > 995) {
-    folder += "_2";
-  }
+    if (hpRatio <= 0.25) {
+      folder = "red_hp";
+      file = `${paddedDex}_r2_c2.png`;
+    } else if (hpRatio <= 0.5) {
+      folder = "yellow_hp";
+      file = `${paddedDex}_r1_c3.png`;
+    }
 
-  return `/assets/${folder}/${String(dexNum).padStart(4, "0")}/${file}`;
+    if (dexNum > 995) {
+      folder += "_2";
+    }
+
+    return `/assets/${folder}/${paddedDex}/${file}`;
+  };
+
+  const fallbackPath = `/assets/green_hp/${paddedDex}/${paddedDex}.png`;
+
+  const candidate = getCandidatePath();
+
+  // 이미지 존재 확인
+  const imageExists = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
+  };
+
+  const exists = await imageExists(candidate);
+  return exists ? candidate : fallbackPath;
 }
 
 function getHpColorClass(currentHp: number, maxHp: number) {
@@ -52,13 +72,23 @@ function formatRankChanges(rank: BattlePokemon["rank"]) {
 }
 
 function PokemonArea({ my, enemy }: Props) {
+  const [myImg, setMyImg] = useState("");
+  const [enemyImg, setEnemyImg] = useState("");
+
+  useEffect(() => {
+    getHpImagePath(my.base.id, my.currentHp / my.base.hp).then(setMyImg);
+  }, [my]);
+
+  useEffect(() => {
+    getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp).then(setEnemyImg);
+  }, [enemy]);
   return (
     <div className="pokemon-area">
       {my &&
         <div className="pokemon-card">
           <h5>{my.base.name} (내 포켓몬)</h5>
           <img
-            src={getHpImagePath(my.base.id, my.currentHp / my.base.hp, false)}
+            src={myImg}
             alt={my.base.name}
             className="pokemon-image"
           />
@@ -77,7 +107,7 @@ function PokemonArea({ my, enemy }: Props) {
         <div className="pokemon-card">
           <h5>{enemy.base.name} (상대 포켓몬)</h5>
           <img
-            src={getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp, true)}
+            src={enemyImg}
             alt={enemy.base.name}
             className="pokemon-image"
           />

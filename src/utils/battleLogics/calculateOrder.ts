@@ -46,16 +46,24 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
     } else if (priorityDiff < 0) { // 상대 우선도가 높을 때 
       whoIsFirst = 'enemy';
     }
-  } else if (aiMove && aiMove.priority) { // 상대만 우선도 가진 기술 사용 
+  }
+  else if (aiMove && aiMove.priority) { // 상대만 우선도 가진 기술 사용 
     if (aiMove.priority < 0) {
+      console.log('무조건 느리게 공격하는 기술 사용')
       whoIsFirst = 'my';
-    }
-    whoIsFirst = 'enemy';
-  } else if (playerMove && playerMove.priority) { // 나만 우선도 가진 기술 사용
-    if (playerMove.priority < 0) {
+    } else {
       whoIsFirst = 'enemy';
     }
-    whoIsFirst = 'my';
+
+  }
+  else if (playerMove && playerMove.priority) { // 나만 우선도 가진 기술 사용
+    if (playerMove.priority < 0) {
+      console.log('무조건 느리게 공격하는 기술 사용')
+      whoIsFirst = 'enemy';
+    } else {
+      whoIsFirst = 'my';
+    }
+
   }
   addLog(`${whoIsFirst}의 선공!`)
   console.log(`${whoIsFirst}의 선공!`);

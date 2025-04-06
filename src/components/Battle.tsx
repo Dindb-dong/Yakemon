@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useBattleStore } from "../Context/useBattleStore";
 import Result from "./Result";
 import { MoveInfo } from "../models/Move";
-import { battleSequence } from "../utils/battleLogics/battleSequence";
+import { battleSequence, removeFaintedPokemon } from "../utils/battleLogics/battleSequence";
 import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon"
 import TurnBanner from "./TurnBanner";
 import PokemonArea from "./PokemonArea";
@@ -13,6 +13,7 @@ import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
 import { applyOffensiveAbilityEffectBeforeDamage } from "../utils/battleLogics/applyBeforeDamage";
 import { getBestSwitchIndex } from "../utils/battleLogics/getBestSwitchIndex";
 import { switchPokemon } from "../utils/battleLogics/switchPokemon";
+import { applyAppearance } from "../utils/battleLogics/applyAppearance";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
@@ -144,7 +145,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
   // === 2. 플레이어가 더 빠를 경우 ===
   if (!isEnemyFaster) {
-    if (userToai > 1) { // ai가 불리 (근데 약점 찌를수도 있음)
+    if (userToai > 1 && !(aiTouser > 1)) { // ai가 확실히 불리
       if (isUser_veryLowHp && priorityMove) {
         addLog(`${side}는 상대 포켓몬의 빈틈을 포착하여 선공기 사용!`);
         return bestMove;
@@ -164,7 +165,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       return bestMove;
     } else if (aiTouser > 1 && !(userToai > 1)) {
       // ai가 느리지만 상성 확실히 유리 
-      if (isAi_lowHp && hasSwitchOption) {
+      if (roll < 0.4 && isAi_lowHp && hasSwitchOption) {
         if (switchIndex !== -1) {
           addLog(`${side}는 느리고 상성은 유리하지만 체력이 낮아 교체를 시도한다!`);
           return { type: "switch" as const, index: switchIndex };
@@ -191,7 +192,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         return supportMove;
       }
 
-      if (roll < 0.85 && hasSwitchOption) {
+      if (roll < 0.75 && hasSwitchOption) {
         if (switchIndex !== -1) {
           addLog(`${side}는 상대의 교체를 예상하고 맞교체한다!`);
           return { type: "switch" as const, index: switchIndex };
@@ -377,6 +378,22 @@ function Battle({ watchMode, watchCount, watchDelay }) {
             resolve()
           }, watchDelay * 1000)
         })
+        if (watchMode && myTeam[activeMy].currentHp <= 0 && enemyTeam[activeEnemy].currentHp > 0) { // 관전모드이고, 왼쪽만 쓰러졌을 경우 
+          console.log('my는 포켓몬이 쓰러졌기에 새 포켓몬을 냄')
+          const switchIndex = getBestSwitchIndex('my');
+          switchPokemon('my', switchIndex);
+        } else if (watchMode && myTeam[activeMy].currentHp > 0 && enemyTeam[activeEnemy].currentHp <= 0) { // 관전모드이고, 오른쪽만 쓰러졌을 경우
+          console.log('enemy는 포켓몬이 쓰러졌기에 새 포켓몬을 냄')
+          const switchIndex = getBestSwitchIndex('enemy');
+          switchPokemon('enemy', switchIndex);
+        } else if (watchMode && myTeam[activeMy].currentHp <= 0 && enemyTeam[activeEnemy].currentHp <= 0) { // 관전모드이고, 양쪽 다 쓰러졌을 경우
+          // 둘 다 랜덤으로 냄
+          console.log('양쪽 포켓몬이 다 쓰러졌기에 새 포켓몬을 냄')
+          const { activeMy: newActiveMy } = useBattleStore.getState()
+          removeFaintedPokemon('my');
+          removeFaintedPokemon('enemy');
+          applyAppearance(myTeam[newActiveMy], 'my');
+        }
 
         setIsTurnProcessing(true);
         const leftAction = aiChooseAction("my");
@@ -400,20 +417,51 @@ function Battle({ watchMode, watchCount, watchDelay }) {
       }, 1000);
     }
   }, [turn, isGameOver, watchMode, currentWatch]);
+  let isFainted: boolean = false;
+  isFainted = myTeam[activeMy].currentHp <= 0 ? true : false;
+
+  useEffect(() => {
+    if (isFainted) {
+      setIsSwitchModalOpen(true);
+      setPendingSwitch(() => (index) => {
+        console.log("my 포켓몬이 쓰러져서 교체 실행")
+        switchPokemon('my', index)
+        clearSwitchRequest();
+        setIsSwitchModalOpen(false);
+      });
+    }
+
+  }, [isFainted])
 
   const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
     if (!watchMode) {
-
       setIsTurnProcessing(true);
       const aiAction = aiChooseAction('enemy');
 
       await battleSequence(playerAction, aiAction);
+
       console.log(`${turn}턴 종료`);
       addLog(`${turn}번째 턴 종료`);
       setTurn(turn + 1);
       setSelectedMove(null);
+      // 🔥 최신 상태 다시 불러오기!
+      const { enemyTeam: updatedEnemyTeam, activeEnemy: updatedActiveEnemy } = useBattleStore.getState();
+      const faintedEnemy = updatedEnemyTeam[updatedActiveEnemy];
+
+      if (!watchMode && faintedEnemy.currentHp <= 0) {
+        // 관전모드 아니고 ai 포켓몬을 쓰러뜨렸을 경우 
+        console.log('ai 포켓몬 쓰러져서 교체')
+        const switchIndex = getBestSwitchIndex('enemy');
+        switchPokemon('enemy', switchIndex);
+      }
       setIsTurnProcessing(false);
     }
+  };
+
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [viewingIndex, setViewingIndex] = useState<number | null>(null);
+  const toggleView = (index: number) => {
+    setViewingIndex((prev) => (prev === index ? null : index));
   };
 
   if (isGameOver) {
@@ -443,20 +491,79 @@ function Battle({ watchMode, watchCount, watchDelay }) {
     <div className="battle-layout">
       {
         isSwitchModalOpen && (
-          <div className="switch-modal">
-            <h3>어느 포켓몬으로 교체하시겠습니까?</h3>
-            {myTeam.map((poke, index) =>
-              index !== activeMy && poke.currentHp > 0 ? (
-                <button key={index} onClick={() => {
-                  if (pendingSwitch) {
-                    pendingSwitch(index); // index 넘겨주기
-                  }
-                }}>
-                  {poke.base.name}
-                </button>
-              ) : null
-            )}
+          <div style={{
+            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
+            justifyContent: "center", alignItems: "center", zIndex: 9999
+          }}>
+            <div className="switch-modal">
+              {isFainted && <h3>포켓몬이 쓰러졌습니다... 어느 포켓몬으로 교체하시겠습니까?</h3>}
+              {!isFainted && <h3>어느 포켓몬으로 교체하시겠습니까?</h3>}
+              {myTeam.map((poke, i) => {
+                const isCurrent = i === activeMy;
+                const isFainted = poke.currentHp <= 0;
+                const isSelected = i === selectedIndex;
+                const isViewing = i === viewingIndex;
+
+                return (
+                  <div key={poke.base.name} className="swap-slot">
+                    <button
+                      disabled={isTurnProcessing || isFainted || isSwitchWaiting}
+                      onClick={() => setSelectedIndex(i)}
+                    >
+                      {poke.base.name} {isCurrent ? "(현재)" : ""}
+                    </button>
+
+                    {isSelected && (
+                      <div style={{ marginTop: "0.5rem" }}>
+                        <button onClick={() => toggleView(i)}>
+                          {isViewing ? "닫기" : "상세보기"}
+                        </button>
+                        <button disabled={isCurrent} onClick={() => {
+                          if (pendingSwitch) {
+                            pendingSwitch(i); // index 넘겨주기
+                          }
+                        }} style={{ marginLeft: "0.5rem" }}>
+                          교체하기
+                        </button>
+
+                        {isViewing && (
+                          <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
+                            <p>체력: {poke.currentHp} / {poke.base.hp}</p>
+                            <p>상태이상: {poke.status.join(", ") || "없음"}</p>
+                            <p>위치: {poke.position || "없음"}</p>
+                            <div>
+                              <strong>기술 PP</strong>
+                              <ul>
+                                {poke.base.moves.map((m) => (
+                                  <li key={m.name}>
+                                    {m.name}: {poke.pp[m.name]}, ({m.power}, {m.accuracy}), {m.type}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {/* {myTeam.map((poke, index) =>
+                index !== activeMy && poke.currentHp > 0 ? (
+                  <button key={index} onClick={() => {
+                    if (pendingSwitch) {
+                      pendingSwitch(index); // index 넘겨주기
+                    }
+
+                  }}>
+                    {poke.base.name}
+                  </button>
+                ) : null
+              )} */}
+            </div>
           </div>
+
         )
       }
       <TurnBanner turn={turn} />

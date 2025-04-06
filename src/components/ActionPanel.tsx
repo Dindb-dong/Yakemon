@@ -36,7 +36,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }
           <button
             className="action-toggle-btn"
             onClick={() => setCurrentTab("switch")}
-            disabled={isFainted || isTurnProcessing}
+            disabled={isTurnProcessing}
           >교체</button>
         </div>
       )}

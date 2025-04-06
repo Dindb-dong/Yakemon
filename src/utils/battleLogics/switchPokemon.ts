@@ -85,5 +85,6 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   const wncp = side === 'my' ? '나' : '상대';
   console.log(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
   addLog(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
+  applyAppearance(next, side);
   return;
 }

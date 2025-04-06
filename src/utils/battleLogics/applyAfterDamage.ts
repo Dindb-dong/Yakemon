@@ -62,25 +62,25 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           addLog(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
         });
       }
-      if (demerit.status) {
-        // 상태이상 적용
-        // 아니 여기 원래 attacker가 아니라 deffender여야 하는데 이거 왜이러냐 이거?
-        const status = demerit.status;
-        if (status === '화상' && deffender.base.types.includes('불')) { };
-        if (status === '마비' && deffender.base.types.includes('전기')) { };
-        if (status === '얼음' && deffender.base.types.includes('얼음')) { };
-        if (status === '독' && deffender.base.types.includes('독')) { };
-        if (status === '맹독' && deffender.base.types.includes('독')) { };
-        if (status === '풀죽음' || status === '도발' || status === '앵콜' || status === '잠듦') {
-          applyStatusWithDuration(opponentSide, activeOpponent, status);
-        } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
-          applyConfusionStatus(opponentSide, activeOpponent);
-        } else {
-          updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
-        }
-        addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
-        console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
-      }
+      // if (demerit.status) {
+      //   // 상태이상 적용
+      //   // 아니 여기 원래 attacker가 아니라 deffender여야 하는데 이거 왜이러냐 이거?
+      //   const status = demerit.status;
+      //   if (status === '화상' && deffender.base.types.includes('불')) { };
+      //   if (status === '마비' && deffender.base.types.includes('전기')) { };
+      //   if (status === '얼음' && deffender.base.types.includes('얼음')) { };
+      //   if (status === '독' && deffender.base.types.includes('독')) { };
+      //   if (status === '맹독' && deffender.base.types.includes('독')) { };
+      //   if (status === '풀죽음' || status === '도발' || status === '앵콜' || status === '잠듦') {
+      //     applyStatusWithDuration(opponentSide, activeOpponent, status);
+      //   } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
+      //     applyConfusionStatus(opponentSide, activeOpponent);
+      //   } else {
+      //     updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
+      //   }
+      //   addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+      //   console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+      // }
     }
   })
   if (attacker.base.ability?.name !== '우격다짐' && usedMove.target === 'opponent') { // 우격다짐일 때에는 부가효과 적용안함.
@@ -111,20 +111,26 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         if (effect.status) {
           // 상태이상 적용
           const status = effect.status;
-          if (status === '화상' && deffender.base.types.includes('불')) { };
-          if (status === '마비' && deffender.base.types.includes('전기')) { };
-          if (status === '얼음' && deffender.base.types.includes('얼음')) { };
-          if (status === '독' && deffender.base.types.includes('독')) { };
-          if (status === '맹독' && deffender.base.types.includes('독')) { };
-          if (status === '풀죽음' || status === '도발' || status === '앵콜' || status === '잠듦') {
+          let noStatusCondition: boolean = false;
+          if (status === '화상' && deffender.base.types.includes('불')) { noStatusCondition = true };
+          if (status === '마비' && deffender.base.types.includes('전기')) { noStatusCondition = true };
+          if (status === '얼음' && deffender.base.types.includes('얼음')) { noStatusCondition = true };
+          if (status === '독' && (deffender.base.types.includes('독') || deffender.base.types.includes('강철'))) { noStatusCondition = true };
+          if (status === '맹독' && (deffender.base.types.includes('독') || deffender.base.types.includes('강철'))) { noStatusCondition = true };
+          if (status === '풀죽음' || status === '앵콜' || status === '잠듦') {
             applyStatusWithDuration(opponentSide, activeOpponent, status);
+          } else if (status === '도발' || status === '헤롱헤롱' && !(deffender.base.ability?.name === '둔감')) {
+            applyConfusionStatus(opponentSide, activeOpponent);
           } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
             applyConfusionStatus(opponentSide, activeOpponent);
           } else {
             updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
           }
-          addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
-          console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+
+          if (!noStatusCondition) {
+            addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+            console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+          }
         }
         if (effect.heal && appliedDameage && appliedDameage > 0) {
           const deal = appliedDameage;

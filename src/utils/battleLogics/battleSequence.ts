@@ -220,20 +220,13 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         addLog(`${attacker}는 혼란에서 회복했다!`);
         console.log(`${attacker}는 혼란에서 회복했다!`);
       }
-      if (watchMode && deffender.currentHp <= 0) {
-        const switchIndex = getBestSwitchIndex(opponentSide);
-        switchPokemon(opponentSide, switchIndex);
-      } else if (!watchMode && side === 'enemy') {
-        const switchIndex = getBestSwitchIndex('enemy');
-        switchPokemon('enemy', switchIndex);
-      }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
     }
     return;
   }
 }
 
-function removeFaintedPokemon(side: 'my' | 'enemy') {
+export function removeFaintedPokemon(side: 'my' | 'enemy') {
   const {
     myTeam,
     enemyTeam,
