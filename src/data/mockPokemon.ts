@@ -398,7 +398,7 @@ export const mockPokemon: PokemonInfo[] = [
           chance: 1, statChange:
             [{ target: "self", stat: "attack", change: 1 }, { target: "self", stat: "speed", change: 1 }]
         }],
-        target: "opponent"
+        target: "self"
       },
       {
         name: "아쿠아브레이크",
