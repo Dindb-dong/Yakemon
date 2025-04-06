@@ -163,8 +163,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
       console.log('관전 모드에서 유턴 사용');
       const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
       // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
-      switchPromise = new Promise<void>((resolve) => {
-        switchPokemon(side, switchIndex);
+      switchPromise = new Promise<void>(async (resolve) => {
+        await switchPokemon(side, switchIndex);
         resolve();
       });
 
@@ -174,8 +174,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         setSwitchRequest({
           side,
           reason: "uTurn",
-          onSwitch: (index: number) => {
-            switchPokemon(side, index);
+          onSwitch: async (index: number) => {
+            await switchPokemon(side, index);
             setSwitchRequest(null);
             resolve();
           },
@@ -187,8 +187,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
       // ✅ AI가 유턴 사용한 경우 자동 교체!
       console.log('ai가 유턴 사용');
       const switchIndex = getBestSwitchIndex(side);
-      switchPromise = new Promise<void>((resolve) => {
-        switchPokemon(side, switchIndex);
+      switchPromise = new Promise<void>(async (resolve) => {
+        await switchPokemon(side, switchIndex);
         resolve();
       });
     }

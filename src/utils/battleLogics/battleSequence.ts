@@ -74,11 +74,11 @@ export async function battleSequence(
   // === 1. 둘 다 교체 ===
   if (isSwitchAction(myAction) && isSwitchAction(enemyAction)) {
     if (whoIsFirst === "my") {
-      switchPokemon("my", myAction.index);
-      switchPokemon("enemy", enemyAction.index);
+      await switchPokemon("my", myAction.index);
+      await switchPokemon("enemy", enemyAction.index);
     } else {
-      switchPokemon("enemy", enemyAction.index);
-      switchPokemon("my", myAction.index);
+      await switchPokemon("enemy", enemyAction.index);
+      await switchPokemon("my", myAction.index);
     }
     applyEndTurnEffects();
     return;
@@ -86,7 +86,7 @@ export async function battleSequence(
 
   // === 2. 한 쪽만 교체 ===
   if (isSwitchAction(myAction)) {
-    switchPokemon("my", myAction.index);
+    await switchPokemon("my", myAction.index);
     if (isMoveAction(enemyAction)) {
       await handleMove("enemy", enemyAction, watchMode);
     }
@@ -95,7 +95,7 @@ export async function battleSequence(
   }
 
   if (isSwitchAction(enemyAction)) {
-    switchPokemon("enemy", enemyAction.index);
+    await switchPokemon("enemy", enemyAction.index);
     if (isMoveAction(myAction)) {
       await handleMove("my", myAction, watchMode);
     }
@@ -226,7 +226,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
   }
 }
 
-export function removeFaintedPokemon(side: 'my' | 'enemy') {
+export async function removeFaintedPokemon(side: 'my' | 'enemy') {
   const {
     myTeam,
     enemyTeam,
@@ -234,15 +234,24 @@ export function removeFaintedPokemon(side: 'my' | 'enemy') {
   const team = side === "my" ? myTeam : enemyTeam;
   const nextIndex = team.findIndex(p => p.currentHp > 0);
   if (nextIndex !== -1) {
-    switchPokemon(side, nextIndex);
+    await switchPokemon(side, nextIndex);
   }
 }
 
 function getHitCount(move: MoveInfo): number {
   move.effects?.forEach((effect => {
-    if (effect.doubleHit) return 2;
-    if (effect.tripleHit) return 3;
-    if (effect.multiHit) return 1;
+    if (effect.doubleHit) {
+      console.log('2회 공격 시도');
+      return 2;
+    }
+    if (effect.tripleHit) {
+      console.log('3회 공격 시도');
+      return 3;
+    }
+    if (effect.multiHit) {
+      console.log('다회 공격 시도');
+      return 1;
+    }
   }))
 
 

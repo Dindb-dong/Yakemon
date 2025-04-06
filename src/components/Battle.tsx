@@ -390,11 +390,11 @@ function Battle({ watchMode, watchCount, watchDelay }) {
         if (watchMode && myTeam[activeMy].currentHp <= 0 && enemyTeam[activeEnemy].currentHp > 0) { // 관전모드이고, 왼쪽만 쓰러졌을 경우 
           console.log('my는 포켓몬이 쓰러졌기에 새 포켓몬을 냄')
           const switchIndex = getBestSwitchIndex('my');
-          switchPokemon('my', switchIndex);
+          await switchPokemon('my', switchIndex);
         } else if (watchMode && myTeam[activeMy].currentHp > 0 && enemyTeam[activeEnemy].currentHp <= 0) { // 관전모드이고, 오른쪽만 쓰러졌을 경우
           console.log('enemy는 포켓몬이 쓰러졌기에 새 포켓몬을 냄')
           const switchIndex = getBestSwitchIndex('enemy');
-          switchPokemon('enemy', switchIndex);
+          await switchPokemon('enemy', switchIndex);
         } else if (watchMode && myTeam[activeMy].currentHp <= 0 && enemyTeam[activeEnemy].currentHp <= 0) { // 관전모드이고, 양쪽 다 쓰러졌을 경우
           // 둘 다 랜덤으로 냄
           console.log('양쪽 포켓몬이 다 쓰러졌기에 새 포켓몬을 냄')
@@ -432,9 +432,9 @@ function Battle({ watchMode, watchCount, watchDelay }) {
   useEffect(() => {
     if (isFainted) {
       setIsSwitchModalOpen(true);
-      setPendingSwitch(() => (index) => {
+      setPendingSwitch(() => async (index) => {
         console.log("my 포켓몬이 쓰러져서 교체 실행")
-        switchPokemon('my', index)
+        await switchPokemon('my', index)
         clearSwitchRequest();
         setIsSwitchModalOpen(false);
       });
@@ -461,7 +461,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
         // 관전모드 아니고 ai 포켓몬을 쓰러뜨렸을 경우 
         console.log('ai 포켓몬 쓰러져서 교체')
         const switchIndex = getBestSwitchIndex('enemy');
-        switchPokemon('enemy', switchIndex);
+        await switchPokemon('enemy', switchIndex);
       }
       setIsTurnProcessing(false);
     }
@@ -499,7 +499,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
 
     <div className="battle-layout">
       {
-        isSwitchModalOpen && (
+        (isSwitchModalOpen && !watchMode) && (
           <div style={{
             position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
@@ -517,7 +517,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
                 return (
                   <div key={poke.base.name} className="swap-slot">
                     <button
-                      disabled={isTurnProcessing || isFainted || isSwitchWaiting}
+                      disabled={isFainted}
                       onClick={() => setSelectedIndex(i)}
                     >
                       {poke.base.name} {isCurrent ? "(현재)" : ""}
