@@ -42,11 +42,20 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     let rate = 1;
 
     usableMoves.forEach((move) => {
+
       const stab = myPokemon.base.types.includes(move.type) ? 1.5 : 1;
       rate = applyOffensiveAbilityEffectBeforeDamage(move, side);
       // 필드 뻥튀기도 적용
       const effectiveness = calculateTypeEffectiveness(move.type, enemyPokemon.base.types);
-      const basePower = move.power ?? 0;
+      let basePower: number;
+      move.effects?.forEach((m) => {
+        if (m.doubleHit) {
+          basePower = 2 * move.power;
+        } else if (m.multiHit) {
+          basePower = 3 * move.power;
+        }
+      })
+      basePower = move.power ?? 0;
       const score = basePower * stab * rate * effectiveness;
 
       if (score > bestScore) {
