@@ -19,14 +19,18 @@ export async function applyTrapDamage(
       if (item === "스텔스락") {
         const multiplier = calculateTypeEffectiveness("바위", types);
         damage += Math.floor(pokemon.base.hp * 0.125 * multiplier);
-        if (damage) log = `${pokemon.base.name} 은 ${item}의 피해를 입었다!`;
+        if (damage) {
+          log = `${pokemon.base.name} 은 ${item}의 피해를 입었다!`;
+          console.log(`${pokemon.base.name} 은 ${item}의 피해를 입었다!`)
+        }
       }
       if (item === "독압정") {
         if (types.includes("비행") || types.includes("고스트") || types.includes("강철") || types.includes("독")) {
           log = "독압정은 영향을 주지 않았다!";
           continue;
-        } else if (pokemon.status.includes('독') || pokemon.status.includes('맹독')) {
+        } else if (pokemon.base.types.includes('독')) {
           status_condition = '독압정 제거'
+          log = "독압정은 제거됐다!";
         } else {
           status_condition = '독'
           log = `${item}이 ${pokemon.base.name}에게 ${status_condition}을 유발했다!`;
@@ -36,8 +40,9 @@ export async function applyTrapDamage(
         if (types.includes("비행") || types.includes("고스트") || types.includes("강철")) {
           log = "맹독압정은 영향을 주지 않았다!";
           continue;
-        } else if (pokemon.status.includes('독') || pokemon.status.includes('맹독') || types.includes("독")) {
+        } else if (pokemon.base.types.includes('독')) {
           status_condition = '맹독압정 제거'
+          log = "맹독압정은 제거됐다!";
         } else {
           status_condition = '맹독'
           if (status_condition) log = `${item}이 ${pokemon.base.name}에게 ${status_condition}을 유발했다!`;

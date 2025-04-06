@@ -33,7 +33,9 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   }
 
   // 1. 랭크업 초기화, 상태이상 제거 
+  console.log('1. 랭크업 초기화 ')
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
+
   // 비메이저 상태이상 제거
   for (const status in unMainStatusCondition) {
     updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
@@ -45,6 +47,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   }
 
   // 2. 현재 포켓몬 비활성화
+  console.log('2. 현재 포켓몬 비활성화')
   updatePokemon(side, currentIndex, (switchingPokemon) => setActive(switchingPokemon, false));
   // 재앙 제거 
   if (String(switchingPokemon.base.ability?.appear?.includes('disaster'))) {
@@ -56,6 +59,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   }
 
   // 3. 새 포켓몬 활성화
+  console.log('3. 새 포켓몬 활성화')
   updatePokemon(side, newIndex, (newPokemon) => setActive(newPokemon, true));
 
   if (side === "my") {
@@ -65,6 +69,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   }
 
   // 4. 트랩 데미지 적용
+  console.log('4. 트랩 데미지 적용')
   if (env.trap.length > 0) {
     const { updated: trapped, log: trapLog, status_condition: trapCondition } = await applyTrapDamage(next, env.trap);
     updatePokemon(side, newIndex, (prev) => trapped);
@@ -72,6 +77,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     if (trapCondition) {
       console.log('트랩 효과 적용')
       if (trapCondition === '독압정 제거') {
+        console.log('독압정 제거됨')
         removeTrap(side, '독압정')
       } else {
         updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState))
@@ -82,6 +88,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   }
 
   // 5. 등장 특성 적용
+  console.log('5. 등장 특성 적용')
   const wncp = side === 'my' ? '나' : '상대';
   console.log(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
   addLog(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');

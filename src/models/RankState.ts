@@ -33,6 +33,7 @@ export class RankManager {
       dodge: 0,
       critical: 0,
     };
+    console.log("랭크가 리셋됐다!")
     this.state = this.clampState(reset);
     return this.state;
   }
@@ -48,6 +49,7 @@ export class RankManager {
       ...this.state,
       [whichState]: (this.state[whichState] ?? 0) + rank, // 💡 혹시 undefined일 수도 있으므로
     };
+    console.log(`${whichState}이/가 ${rank}만큼 올랐다!`)
     this.state = this.clampState(updatedState);
   }
 
@@ -61,7 +63,7 @@ export class RankManager {
       ...this.state,
       [whichState]: this.state[whichState] - rank,
     };
-
+    console.log(`${whichState}이/가 ${rank}만큼 내려갔다!`)
     // 업데이트된 state를 clamping 처리 후 저장
     this.state = this.clampState(updatedState);
   }

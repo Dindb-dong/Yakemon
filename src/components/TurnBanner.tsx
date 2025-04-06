@@ -15,8 +15,8 @@ function TurnBanner({ turn }: { turn: number }) {
   } = publicEnv;
 
   const activeEffects: string[] = [];
-  const activeMyEnv: string[] = [];
-  const activeEnemyEnv: string[] = [];
+  const activeMyTrap: string[] = [`트랩: `];
+  const activeEnemyTrap: string[] = [];
 
   // 남은 턴 가져오는 함수
   const getRemainingTurn = (effectName: string): string => {
@@ -36,7 +36,12 @@ function TurnBanner({ turn }: { turn: number }) {
   //   activeEffects.push(`🌪️ 재앙: ${disaster.join(", ")}`);
   if (myEnv.trap) {
     myEnv.trap.forEach((t) => {
-
+      activeMyTrap.push(`${t}, `)
+    })
+  }
+  if (enemyEnv.trap) {
+    enemyEnv.trap.forEach((t) => {
+      activeEnemyTrap.push(`${t}, `)
     })
   }
 

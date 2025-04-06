@@ -38,12 +38,14 @@ export function applyEndTurnEffects() {
       const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
       addLog(`${pokemon.base.name}은 맹독의 피해를 입었다!`);
+      console.log(`${pokemon.base.name}은 맹독의 피해를 입었다!`);
     }
     if (pokemon.status.includes("독")) {
       const damage = Math.floor(pokemon.base.hp / 8);
       const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
       addLog(`${pokemon.base.name}은 독의 피해를 입었다!`);
+      console.log(`${pokemon.base.name}은 독의 피해를 입었다!`);
     }
     if (pokemon.status.includes("씨뿌리기")) {
       const damage = Math.floor(pokemon.base.hp / 8);
@@ -52,6 +54,7 @@ export function applyEndTurnEffects() {
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, damaged);
       updatePokemon(opponentSide, i === 0 ? activeEnemy : activeMy, healed);
       addLog(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
+      console.log(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
     }
   });
 
