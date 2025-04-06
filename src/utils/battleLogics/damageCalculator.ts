@@ -115,16 +115,15 @@ export async function calculateMoveDamage({
       isHit = false;
       addLog(`${attacker.base.name}의 공격은 빗나갔다!`)
       console.log(`${attacker.base.name}의 공격은 빗나갔다!`)
-      if (moveInfo.demeritEffects?.some((d_effect) => d_effect.fail)) { // 무릎차기, 점프킥 등 빗나가면 반동.
-        let dmg: number;
-        moveInfo.demeritEffects.forEach((d_effect) => {
-          if (d_effect.fail) {
-            dmg = d_effect.fail;
-          }
-        })
-        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
-        addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
-      }
+      // 무릎차기, 점프킥 등 빗나가면 반동.
+      let dmg: number;
+      moveInfo.demeritEffects?.forEach((d_effect) => {
+        if (d_effect.fail) {
+          dmg = d_effect.fail;
+          updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
+          addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
+        }
+      })
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
@@ -173,6 +172,16 @@ export async function calculateMoveDamage({
   if (types === 0) {
     wasNull = true; addLog(`${attacker.base.name}의 공격은 효과가 없었다...`); console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
     updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')) // pp 깎기
+    // 무릎차기, 점프킥 등 빗나가면 반동.
+    let dmg: number;
+    moveInfo.demeritEffects?.forEach((d_effect) => {
+      if (d_effect.fail) {
+        dmg = d_effect.fail;
+        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - (attacker.base.hp * dmg)));
+        addLog(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
+      }
+    })
+
     return;
   }
 

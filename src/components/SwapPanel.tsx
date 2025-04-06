@@ -29,7 +29,7 @@ function SwapPanel({ team, activeIndex, isProcessing, onSwitch }: Props) {
         return (
           <div key={poke.base.name} className="swap-slot">
             <button
-              disabled={isProcessing || isCurrent || isFainted || isSwitchWaiting}
+              disabled={isProcessing || isFainted || isSwitchWaiting}
               onClick={() => setSelectedIndex(i)}
             >
               {poke.base.name} {isCurrent ? "(현재)" : ""}
@@ -40,14 +40,14 @@ function SwapPanel({ team, activeIndex, isProcessing, onSwitch }: Props) {
                 <button onClick={() => toggleView(i)}>
                   {isViewing ? "닫기" : "상세보기"}
                 </button>
-                <button onClick={() => onSwitch(i)} style={{ marginLeft: "0.5rem" }}>
+                <button disabled={isCurrent} onClick={() => onSwitch(i)} style={{ marginLeft: "0.5rem" }}>
                   교체하기
                 </button>
 
                 {isViewing && (
                   <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
                     <p>체력: {poke.currentHp} / {poke.base.hp}</p>
-                    <p>상태: {poke.status.join(", ") || "없음"}</p>
+                    <p>상태이상: {poke.status.join(", ") || "없음"}</p>
                     <p>위치: {poke.position || "없음"}</p>
                     <div>
                       <strong>기술 PP</strong>

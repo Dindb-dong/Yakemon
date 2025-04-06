@@ -198,12 +198,12 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
       addLog(`${side}는 예측샷으로 최고 위력기를 사용한다!`);
       return bestMove;
-    } else { // 상성 같은 경우 
+    } else { // 느리고 상성 같은 경우 
       if (isAi_highHp && speedUpMove) {
         addLog(`${side}는 스피드 상승을 시도한다!`);
         return speedUpMove;
       }
-      if (roll < 0.3 && hasSwitchOption) {
+      if (roll < 0.2 && hasSwitchOption) {
         if (switchIndex !== -1) {
           addLog(`${side}는 상대에게 유리한 포켓몬으로 교체한다!`);
           return { type: "switch" as const, index: switchIndex };
@@ -447,7 +447,11 @@ function Battle({ watchMode, watchCount }) {
       }
       <TurnBanner turn={turn} />
       <div className="main-area">
-        <PokemonArea my={leftPokemon} enemy={rightPokemon} />
+        <div className="pokemon_log">
+          <PokemonArea my={leftPokemon} enemy={rightPokemon} />
+          <LogPanel logs={logs} />
+        </div>
+
         <div className="side-panel">
           <ActionPanel
             myPokemon={leftPokemon}
@@ -456,7 +460,7 @@ function Battle({ watchMode, watchCount }) {
             isTurnProcessing={isTurnProcessing}
             onAction={watchMode ? () => { } : executeTurn}
           />
-          <LogPanel logs={logs} />
+
         </div>
       </div>
     </div>

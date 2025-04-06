@@ -26,16 +26,23 @@
   gap: 1rem;
 }
 
-.pokemon-area {
-  flex: 3;
+.pokemon_log {
+  flex: 2;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pokemon-area {
+  flex: 1;
+  display: flex;
 }
 
 .pokemon-card {
   border: 1px solid #ccc;
   padding: 1rem;
   width: 48%;
+  height: 90%;
 }
 
 .side-panel {
@@ -50,6 +57,7 @@
 }
 
 .log-panel {
+  flex: 1;
   max-height: 150px;
   overflow-y: auto;
   background: #f7f7f7;
@@ -68,6 +76,7 @@
 }
 
 .swap-panel {
+  flex: 1;
   padding: 0.5rem;
   background: #fefefe;
   border: 1px solid #ddd;
@@ -84,7 +93,7 @@
   font-size: 0.95rem;
   border: none;
   border-radius: 4px;
-  background-color: #1976d2;
+  background-color: #74b7fb;
   color: white;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
@@ -124,6 +133,7 @@
 
 /* 기술 선택 버튼 그리드 */
 .move-grid {
+  flex: 1;
   display: grid;
   padding: 0.5rem;
   background: #fefefe;
@@ -156,6 +166,21 @@
   background-color: #aaa;
   color: #eee;
   cursor: not-allowed;
+}
+
+.move-button .move-name {
+  font-weight: bold;
+  display: block;
+  font-size: 1.1em;
+}
+
+.move-button .move-pp,
+.move-button .move-power,
+.move-button .move-accuracy {
+  display: block;
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 2px;
 }
 
 .move-name {
@@ -229,13 +254,122 @@
   }
   .action-panel {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
   }
-  .action-panel > div {
-    width: 50%;
+  .swap-slot {
+    flex-direction: row;
+  }
+  .swap-panel {
+    flex-direction: row;
   }
   .move-grid {
-    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    grid-template-columns: (4,1fr);
+    width: 100%;
+  }
+
+  .move-button {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    height: 90%;
+    width: 100%; /* 👉 가로 꽉 차게 */
+    box-sizing: border-box;
+  }
+
+  .move-button .move-name {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .move-button .move-pp,
+  .move-button .move-power,
+  .move-button .move-accuracy,
+  .move-button .move-type {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .action-toggle {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.75rem;
+  }
+  
+  .action-toggle-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    background-color: #6c9ffb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .action-toggle-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .action-toggle-btn:hover:not(:disabled) {
+    background-color: #1565c0;
+  }
+}
+
+
+/* === 매우 작은 화면 (예: 480px 이하 스마트폰) === */
+@media (max-width: 480px) {
+  .move-grid {
+    display: grid;
+    grid-template-columns: (4,1fr); 
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .move-button {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    width: 100%; /* 👉 가로 꽉 차게 */
+    box-sizing: border-box;
+  }
+
+  .move-button .move-name {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .move-button .move-pp,
+  .move-button .move-power,
+  .move-button .move-accuracy,
+  .move-button .move-type {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .action-toggle {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0.75rem;
+  }
+  
+  .action-toggle-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    background-color: #6c9ffb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .action-toggle-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .action-toggle-btn:hover:not(:disabled) {
+    background-color: #1565c0;
   }
 }

@@ -1478,7 +1478,7 @@ export const mockPokemon: PokemonInfo[] = [
         affiliation: null,
         accuracy: 90,
         criticalRate: 0,
-        effects: [{ chance: 1, fail: 0.5 }], // 빗맞을 시 반동
+        demeritEffects: [{ chance: 1, fail: 0.5 }], // 빗맞을 시 반동
         target: 'opponent',
       },
       {
