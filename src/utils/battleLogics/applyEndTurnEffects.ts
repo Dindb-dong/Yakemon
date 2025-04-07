@@ -14,13 +14,27 @@ export function applyEndTurnEffects() {
     updatePokemon,
     addLog,
     publicEnv,
-    turn, setTurn
   } = useBattleStore.getState();
 
   const { publicEffects, decrementTurns } = useDurationStore.getState();
 
   const myActive = myTeam[activeMy]; // 내 포켓몬 
   const enemyActive = enemyTeam[activeEnemy]; // 상대 포켓몬
+
+  // === 필드 효과 ===
+  [myActive, enemyActive].forEach((pokemon, i) => {
+    const side = i === 0 ? "my" : "enemy";
+    if (publicEnv.field === '그래스필드') {
+      console.log('그래스필드 효과 적용 시작')
+      if (!(pokemon.base.types.includes('비행')) && (pokemon.position !== '하늘') && pokemon.currentHp > 0) { // 떠있지 않으면 회복 
+        const heal = Math.floor(pokemon.base.hp / 16);
+        const healed = (prev: any) => changeHp(prev, heal);
+        updatePokemon(side, i === 0 ? activeMy : activeEnemy, healed);
+        addLog(`➕ ${pokemon.base.name}은/는 그래스필드로 회복했다!`);
+        console.log(`${pokemon.base.name}은/는 그래스필드로 회복했다!`);
+      }
+    }
+  });
 
   // === 상태이상 효과 처리 ===
   [myActive, enemyActive].forEach((pokemon, i) => {
@@ -31,20 +45,20 @@ export function applyEndTurnEffects() {
       const damage = Math.floor(pokemon.base.hp / 16);
       const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
-      addLog(`${pokemon.base.name}은 화상으로 ${damage}의 데미지를 입었다!`);
+      addLog(`🔥 ${pokemon.base.name}은 화상으로 ${damage}의 데미지를 입었다!`);
     }
     if (pokemon.status.includes("맹독")) {
       const damage = Math.floor(pokemon.base.hp / 6);
       const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
-      addLog(`${pokemon.base.name}은 맹독의 피해를 입었다!`);
+      addLog(`🍄 ${pokemon.base.name}은 맹독의 피해를 입었다!`);
       console.log(`${pokemon.base.name}은 맹독의 피해를 입었다!`);
     }
     if (pokemon.status.includes("독")) {
       const damage = Math.floor(pokemon.base.hp / 8);
       const updated = (pokemon) => changeHp(pokemon, -damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
-      addLog(`${pokemon.base.name}은 독의 피해를 입었다!`);
+      addLog(`🍄 ${pokemon.base.name}은 독의 피해를 입었다!`);
       console.log(`${pokemon.base.name}은 독의 피해를 입었다!`);
     }
     if (pokemon.status.includes("씨뿌리기")) {
@@ -53,7 +67,7 @@ export function applyEndTurnEffects() {
       const healed = (prev) => changeHp(prev, damage);
       updatePokemon(side, i === 0 ? activeMy : activeEnemy, damaged);
       updatePokemon(opponentSide, i === 0 ? activeEnemy : activeMy, healed);
-      addLog(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
+      addLog(`🌱 ${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
       console.log(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
     }
   });
@@ -64,12 +78,12 @@ export function applyEndTurnEffects() {
   // ✅ [NEW] '풀죽음', '앵콜', '도발' 등 my/enemy 쪽 효과 만료 처리
   expired.my.forEach((effectName) => {
     updatePokemon("my", activeMy, (p) => removeStatus(p, effectName as StatusState));
-    addLog(`내 포켓몬의 ${effectName} 상태가 해제되었다!`);
+    addLog(`🏋️‍♂️ 내 포켓몬의 ${effectName} 상태가 해제되었다!`);
   });
 
   expired.enemy.forEach((effectName) => {
     updatePokemon("enemy", activeEnemy, (p) => removeStatus(p, effectName as StatusState));
-    addLog(`상대 포켓몬의 ${effectName} 상태가 해제되었다!`);
+    addLog(`🏋️‍♂️ 상대 포켓몬의 ${effectName} 상태가 해제되었다!`);
   });
 
   if (publicEnv.weather && expired.public.includes(publicEnv.weather)) {
@@ -92,15 +106,15 @@ export function applyEndTurnEffects() {
     if (pokemon.base.ability?.name === "포이즌힐") {
       if (pokemon.status.includes("독")) {
         updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 3 / 16));
-        addLog(`${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
+        addLog(`➕ ${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
       } else if (pokemon.status.includes("맹독")) {
         updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 22 / 96));
-        addLog(`${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
+        addLog(`➕ ${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
       }
     }
     if (pokemon.base.ability?.name === '가속') {
       updatePokemon(side, activeIndex, (prev) => changeRank(prev, 'speed', 1));
-      addLog(`${pokemon.base.name}의 가속 특성 발동!`);
+      addLog(`🦅 ${pokemon.base.name}의 가속 특성 발동!`);
     }
   })
   return;

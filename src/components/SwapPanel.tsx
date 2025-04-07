@@ -29,7 +29,7 @@ function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
         return (
           <div key={poke.base.name} className="swap-slot">
             <button
-              onClick={() => setSelectedIndex(i)}
+              onClick={() => setSelectedIndex(i)} disabled={isFainted || watchMode}
             >
               {poke.base.name} {isCurrent ? "(현재)" : ""}
             </button>
@@ -45,11 +45,12 @@ function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
 
                 {isViewing && (
                   <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
+                    <p>타입: {poke.base.types.join(", ")}</p>
                     <p>체력: {poke.currentHp} / {poke.base.hp}</p>
                     <p>상태이상: {poke.status.join(", ") || "없음"}</p>
                     <p>위치: {poke.position || "없음"}</p>
                     <div>
-                      <strong>기술 PP</strong>
+                      <strong>기술 정보</strong>
                       <ul>
                         {poke.base.moves.map((m) => (
                           <li key={m.name}>

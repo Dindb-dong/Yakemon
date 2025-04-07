@@ -11,7 +11,7 @@ export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon 
   const result = { ...pokemon, currentHp: Math.min(pokemon.base.hp, newHp) };
 
   if (result.currentHp <= 0) {
-    addLog(`${pokemon.base.name}은/는 쓰러졌다!`);
+    addLog(`😭 ${pokemon.base.name}은/는 쓰러졌다!`);
     console.log(`${pokemon.base.name}은/는 쓰러졌다! (currentHp: ${result.currentHp})`);
   } else {
     console.log(`${pokemon.base.name}의 남은 (currentHp: ${result.currentHp})`);
@@ -95,7 +95,7 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePo
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);
   console.log(`${pokemon}은 ${status} 상태에 빠졌다!`);
-  addLog(`${pokemon}은 ${status} 상태에 빠졌다!`)
+  addLog(`🍄 ${pokemon}은 ${status} 상태에 빠졌다!`)
   return { ...pokemon, status: manager.getStatus() };
 }
 

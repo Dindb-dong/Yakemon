@@ -33,7 +33,15 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
   }
 
   whoIsFirst = speedDiff >= 0 ? 'my' : 'enemy';
-
+  if (playerMove && playerMove.name === '그래스슬라이더') {
+    if (publicEnv.field !== '그래스필드') {
+      playerMove.priority = 0;
+    }
+  } else if (aiMove && aiMove.name === '그래스슬라이더') {
+    if (publicEnv.field !== '그래스필드') {
+      aiMove.priority = 0;
+    }
+  }
   // 이 아래는 우선도 있는 기술이 사용됐을 경우에만. 
   if (playerMove && playerMove.priority && aiMove && aiMove.priority) { // 둘 다 우선도 가진 기술 사용했을 경우 
     const myPriority = playerMove.priority
@@ -65,7 +73,7 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
     }
 
   }
-  addLog(`${whoIsFirst}의 선공!`)
+  addLog(`🦅 ${whoIsFirst}의 선공!`)
   console.log(`${whoIsFirst}의 선공!`);
   return whoIsFirst;
 }

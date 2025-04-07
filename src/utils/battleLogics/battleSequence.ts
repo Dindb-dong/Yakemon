@@ -159,14 +159,14 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
         updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
         updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
-        addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+        addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
         console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
       }
       const result = await calculateMoveDamage({ moveName: move.name, side });
       if (result?.success) {
         const recovered = decrementConfusionTurn(side, activeIndex);
         if (recovered) {
-          addLog(`${attacker}는 혼란에서 회복했다!`);
+          addLog(`🏋️‍♂️ ${attacker}는 혼란에서 회복했다!`);
           console.log(`${attacker}는 혼란에서 회복했다!`);
 
         }
@@ -196,7 +196,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);
       if (recovered) {
-        addLog(`${attacker}는 혼란에서 회복했다!`);
+        addLog(`🏋️‍♂️ ${attacker}는 혼란에서 회복했다!`);
         console.log(`${attacker}는 혼란에서 회복했다!`);
       }
       const hitCount = getHitCount(move);
@@ -212,7 +212,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
           // })
         }
       }
-      addLog("총 " + hitCount + "번 맞았다!");
+      addLog("📊 총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");
     }
     return;
@@ -222,14 +222,14 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
     if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
       updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
       updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
-      addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+      addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
       console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
     const result = await calculateMoveDamage({ moveName: move.name, side });
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);
       if (recovered) {
-        addLog(`${attacker}는 혼란에서 회복했다!`);
+        addLog(`🏋️‍♂️ ${attacker}는 혼란에서 회복했다!`);
         console.log(`${attacker}는 혼란에서 회복했다!`);
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);

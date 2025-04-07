@@ -34,7 +34,7 @@
 }
 
 .pokemon-area {
-  flex: 1;
+  flex: 0.7;
   display: flex;
 }
 
@@ -61,8 +61,8 @@
 }
 
 .log-panel {
-  flex: 1;
-  max-height: 150px;
+  flex: 0.8;
+  max-height: 120px;
   overflow-y: auto;
   background: #f7f7f7;
   padding: 0.5rem;
@@ -135,20 +135,41 @@
   margin-left: 0.5rem;
 }
 
+.hint-toggle {
+  background-color: #2d8fff86;
+  width: 40%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-self: center;
+  font-size: 0.7rem;
+  transition: background-color 0.2s ease-in-out;
+  align-self: center;
+  margin-bottom: 3%;
+}
+
+.hint-toggle:hover:not(:disabled) {
+  background-color: #2d8fff;
+}
+
 /* 기술 선택 버튼 그리드 */
 .move-grid {
   flex: 1;
   display: grid;
-  padding: 0.5rem;
   background: #fefefe;
   grid-template-columns: repeat(2, 1fr); /* 2개씩 정렬 */
   gap: 0.75rem;
   margin-bottom: 1rem;
-  margin-right: auto;
 }
 
 .move-button {
-  background-color: #e0e0e0;
+  background-color: #f1f1f1;
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 1rem;
@@ -240,6 +261,22 @@
   text-align: center;
 }
 
+.move-button.effective {
+  background-color: #fff7cc; /* 연한 노랑 */
+}
+
+.move-button.very-effective {
+  background-color: #ffe066; /* 노랑 */
+}
+
+.move-button.not-effective {
+  background-color: #9b9b9b; /* 연한 회색 */
+}
+
+.move-button.no-effect {
+  background-color: #393939; /* 어두운 회색 */
+}
+
 .hp-bar-container {
   width: 100%;
   height: 12px;
@@ -280,6 +317,29 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes shakeAndFlash {
+  0%   { transform: translateX(0); background-color: transparent; }
+  25%  { transform: translateX(-4px); background-color: rgba(255, 0, 0, 0.2); }
+  50%  { transform: translateX(4px); background-color: rgba(255, 0, 0, 0.4); }
+  75%  { transform: translateX(-2px); background-color: rgba(255, 0, 0, 0.2); }
+  100% { transform: translateX(0); background-color: transparent; }
+}
+
+.damage-effect {
+  animation: shakeAndFlash 0.4s ease-in-out;
+}
+
+.heal-effect {
+  animation: healFlash 0.4s ease-in-out;
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+@keyframes healFlash {
+  0%   { background-color: rgba(0, 255, 0, 0.15); }
+  50%  { background-color: rgba(0, 255, 0, 0.3); }
+  100% { background-color: rgba(0, 255, 0, 0.1); }
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
   .main-area {
@@ -296,6 +356,7 @@
   }
   .action-panel {
     display: flex;
+    flex:1;
     flex-direction: column;
     justify-content: space-between;
   }
@@ -356,6 +417,10 @@
   
   .action-toggle-btn:hover:not(:disabled) {
     background-color: #1565c0;
+  }
+
+  .log-panel {
+    max-height: 80px;
   }
 }
 

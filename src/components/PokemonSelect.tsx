@@ -2,10 +2,56 @@ import React, { useEffect, useState } from "react";
 import { mockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
 import TutorialModal from "./TutorialModal";
+import { getHpImagePath } from "./PokemonArea";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => void;
 };
+
+function PokemonDetailModal({
+  pokemon,
+  onClose,
+  onSelect,
+  isAlreadySelected
+}: {
+  pokemon: PokemonInfo;
+  onClose: () => void;
+  onSelect: (p: PokemonInfo) => void;
+  isAlreadySelected: boolean;
+}) {
+  return (
+    <div style={{
+      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex", justifyContent: "center", alignItems: "center"
+    }}>
+      <div style={{ background: "#fff", padding: "2rem", borderRadius: "10px", width: "400px", fontSize: "0.8rem" }}>
+        <h2>{pokemon.name}</h2>
+        <p>타입: {pokemon.types.join(", ")}</p>
+        <p>체력: {pokemon.hp}</p>
+        <p>공격력: {pokemon.attack}</p>
+        <p>방어력: {pokemon.defense}</p>
+        <p>특수공격력: {pokemon.spAttack}</p>
+        <p>특수방어력: {pokemon.spDefense}</p>
+        <p>스피드: {pokemon.speed}</p>
+        <p>기술:</p>
+        <ul>
+          {pokemon.moves.map((m) => (
+            <li key={m.name}>{m.name} (위력: {m.power}, PP: {m.pp}, 타입: {m.type}, 명중율: {m.accuracy})</li>
+          ))}
+        </ul>
+
+        <div style={{ marginTop: "1rem" }}>
+          {!isAlreadySelected && (
+            <button onClick={() => onSelect(pokemon)} style={{ marginRight: "1rem" }}>
+              등록하기
+            </button>
+          )}
+          <button onClick={onClose}>닫기</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function PokemonSelect({ onSelect }: Props) {
   useEffect(() => {
@@ -15,10 +61,29 @@ function PokemonSelect({ onSelect }: Props) {
     }
   }, []);
 
+  useEffect(() => {
+    const loadThumbnails = async () => {
+      const result: Record<number, string> = {};
+      for (const p of mockPokemon) {
+        const url = await getHpImagePath(p.id, 1); // 체력 100% 기준
+        result[p.id] = url;
+      }
+      setThumbnails(result);
+    };
+    loadThumbnails();
+  }, []);
+
   const [selected, setSelected] = useState<PokemonInfo[]>([]);
   const [watchCount, setWatchCount] = useState(1); // 관전 반복 횟수
   const [watchDelay, setWatchDelay] = useState(1.5);
   const [showTutorial, setShowTutorial] = useState(true); // 모달 보일지 여부
+  const [thumbnails, setThumbnails] = useState<Record<number, string>>({});
+  const [selectedPokemonInfo, setSelectedPokemonInfo] = useState<PokemonInfo | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const openDetailModal = (pokemon: PokemonInfo) => {
+    setSelectedPokemonInfo(pokemon);
+    setShowDetailModal(true);
+  };
 
   const tutorialPages = [
     <div><h3>안녕하세요!</h3><p>본 웹페이지는 연세대학교 인공지능학회 YAI소속</p><p> 기초심화RL팀의 토이프로젝트에서 탄생했습니다.</p></div>,
@@ -54,7 +119,7 @@ function PokemonSelect({ onSelect }: Props) {
             return (
               <button
                 key={p.id}
-                onClick={() => handleSelect(p)}
+                onClick={() => openDetailModal(p)}
                 style={{
                   backgroundColor: selected.includes(p) ? "#00bcd4" : "#eee",
                   margin: "0.5rem",
@@ -65,7 +130,23 @@ function PokemonSelect({ onSelect }: Props) {
                   minWidth: "80px",
                 }}
               >
-                {p.name}
+                <div style={{ flexDirection: "row", display: "flex" }}>
+                  <img
+                    src={thumbnails[p.id]}
+                    alt={p.name}
+                    style={{ width: "25px", height: "25px", objectFit: "contain", marginRight: 10, borderRadius: 6 }}
+                  />
+
+                  <div style={{ flexDirection: "column", display: "flex" }}>
+                    <div style={{ fontSize: "0.7rem", color: "#333" }}>
+                      {p.types.join(", ")}
+                    </div>
+
+                    {p.name}
+                  </div>
+                </div>
+
+
                 {selectedIndex >= 0 && (
                   <div
                     style={{
@@ -144,8 +225,23 @@ function PokemonSelect({ onSelect }: Props) {
           </div>
         </div>
 
-      </div></>
+      </div>
+      {showDetailModal && selectedPokemonInfo && (
+        <PokemonDetailModal
+          pokemon={selectedPokemonInfo}
+          onClose={() => setShowDetailModal(false)}
+          onSelect={(pokemon) => {
+            if (selected.length < 3 && !selected.includes(pokemon)) {
+              setSelected([...selected, pokemon]);
+            }
+            setShowDetailModal(false);
+          }}
+          isAlreadySelected={selected.includes(selectedPokemonInfo)}
+        />
+      )}</>
+
   );
+
 }
 
 export default PokemonSelect;

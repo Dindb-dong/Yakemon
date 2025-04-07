@@ -428,7 +428,7 @@ export const mockPokemon: PokemonInfo[] = [
       },
       {
         name: "엄청난힘",
-        type: "노말",
+        type: "격투",
         category: "물리",
         power: 120,
         pp: 5,
@@ -675,7 +675,7 @@ export const mockPokemon: PokemonInfo[] = [
       },
       {
         name: "플레어드라이브",
-        type: "불꽃",
+        type: "불",
         category: "물리",
         power: 120,
         pp: 15,
@@ -1206,17 +1206,16 @@ export const mockPokemon: PokemonInfo[] = [
         target: 'opponent',
       },
       {
-        name: '독압정',
-        type: '독',
-        category: '변화',
-        power: 0,
-        pp: 20,
+        name: "하이드로펌프",
+        type: "물",
+        category: "특수",
+        power: 110,
+        pp: 5,
         isTouch: false,
         affiliation: null,
-        accuracy: 100,
+        accuracy: 80,
         criticalRate: 0,
-        trap: '독압정',
-        target: 'none',
+        target: "opponent"
       },
       {
         name: '냉동빔',

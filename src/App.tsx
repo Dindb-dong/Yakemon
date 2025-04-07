@@ -8,6 +8,7 @@ import { PokemonInfo } from "./models/Pokemon";
 import { mockPokemon } from "./data/mockPokemon";
 import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 import { BattlePokemon } from "./models/BattlePokemon";
+import BottomBar from "./components/BottomBar";
 
 function App() {
   const [isSelected, setIsSelected] = useState(false);
@@ -66,10 +67,10 @@ function App() {
       setEnemyTeam(aiBattleTeam);
       setIsSelected(true); // 화면 전환 트리거
       applyAppearance(myBattleTeam[0], "my");
-      addLog(`my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
+      addLog(`🐶 my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
       console.log(`my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
       applyAppearance(aiBattleTeam[0], "enemy");
-      addLog(`enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
+      addLog(`🐱 enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
       console.log(`enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
     },
     [setMyTeam, setEnemyTeam]
@@ -78,9 +79,15 @@ function App() {
   return (
     <div className="app">
       {!isSelected ? (
-        <PokemonSelect onSelect={handleSelect} />
+        <div>
+          <PokemonSelect onSelect={handleSelect} />
+          <BottomBar></BottomBar>
+        </div>
       ) : (
-        <Battle watchMode={watchMode} watchCount={watchCount} watchDelay={watchDelay} />
+        <div>
+          <Battle watchMode={watchMode} watchCount={watchCount} watchDelay={watchDelay} />
+          <BottomBar></BottomBar>
+        </div>
       )}
     </div>
   );
