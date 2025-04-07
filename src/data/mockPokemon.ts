@@ -1855,6 +1855,6 @@ export const mockPokemon: PokemonInfo[] = [
     ],
     sex: 'male',
     ability: { id: 124, name: '자기과신', offensive: ['rank_change'] },
-    hp: 85, attack: 120, defense: 80, spAttack: 85, spDefense: 75, speed: 105, level: 50,
+    hp: 85, attack: 120, defense: 80, spAttack: 85, spDefense: 75, speed: 85, level: 50,
   }
 ]

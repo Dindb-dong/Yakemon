@@ -60,6 +60,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
                   if (effectiveness === 4 && move.category !== '변화') effectivenessClass = "very-effective";
                   else if (effectiveness === 2 && move.category !== '변화') effectivenessClass = "effective";
                   else if (effectiveness === 0.5 && move.category !== '변화') effectivenessClass = "not-effective";
+                  else if (effectiveness === 0.25 && move.category !== '변화') effectivenessClass = "not-very-effective";
                   else if (effectiveness === 0 && move.category !== '변화') effectivenessClass = "no-effect";
 
                   return (

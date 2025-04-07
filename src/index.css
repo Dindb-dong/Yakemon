@@ -273,6 +273,10 @@
   background-color: #9b9b9b; /* 연한 회색 */
 }
 
+.move-button.not-very-effective {
+  background-color: #5d5d5d; /* 연한 회색 */
+}
+
 .move-button.no-effect {
   background-color: #393939; /* 어두운 회색 */
 }
