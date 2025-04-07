@@ -173,6 +173,12 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         // 트리플 기술은 데미지 누적 증가 (예시)
         move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
         await applyAfterDamage(side, attacker, deffender, move, result.damage, watchMode);
+        // await new Promise<void>((resolve) => {
+        //   setTimeout(() => {
+        //     console.log('gsdfv');
+        //     resolve()
+        //   }, 1000)
+        // })
       } else {
         break; // 빗나가면 반복 중단
       }
@@ -198,6 +204,12 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
         if (result?.success) {
           await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+          // await new Promise<void>((resolve) => {
+          //   setTimeout(() => {
+          //     console.log('gsdfv');
+          //     resolve()
+          //   }, 1000)
+          // })
         }
       }
       addLog("총 " + hitCount + "번 맞았다!");
@@ -221,6 +233,12 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         console.log(`${attacker}는 혼란에서 회복했다!`);
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+      // await new Promise<void>((resolve) => {
+      //   setTimeout(() => {
+      //     console.log('gsdfv');
+      //     resolve()
+      //   }, 1000)
+      // })
     }
     return;
   }

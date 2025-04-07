@@ -149,7 +149,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     })
   }
   if (usedMove.uTurn) {
-    const { setSwitchRequest } = useBattleStore.getState();
+    const { setSwitchRequest, clearSwitchRequest } = useBattleStore.getState();
     const availableIndexes = mineTeam
       .map((p, i) => ({ ...p, index: i }))
       .filter((p, i) => p.currentHp > 0 && i !== activeMine); // 현재 포켓몬은 제외
@@ -177,6 +177,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           onSwitch: async (index: number) => {
             await switchPokemon(side, index);
             setSwitchRequest(null);
+            clearSwitchRequest();
             resolve();
           },
         });
