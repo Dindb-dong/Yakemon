@@ -22,14 +22,14 @@ export async function getHpImagePath(dexNum: number, hpRatio: number): Promise<s
 
   const getCandidatePath = (): string => {
     let folder = "green_hp";
-    let file = `${paddedDex}.png`;
+    let file = `${paddedDex}.webp`;
 
     if (hpRatio <= 0.25) {
       folder = "red_hp";
-      file = `${paddedDex}_r2_c2.png`;
+      file = `${paddedDex}_r2_c2.webp`;
     } else if (hpRatio <= 0.5) {
       folder = "yellow_hp";
-      file = `${paddedDex}_r1_c3.png`;
+      file = `${paddedDex}_r1_c3.webp`;
     }
 
     if (dexNum > 995) {
@@ -39,11 +39,10 @@ export async function getHpImagePath(dexNum: number, hpRatio: number): Promise<s
     return `/assets/${folder}/${paddedDex}/${file}`;
   };
 
-  const fallbackPath = `/assets/green_hp/${paddedDex}/${paddedDex}.png`;
+  const fallbackPath = `/assets/green_hp/${paddedDex}/${paddedDex}.webp`;
 
   const candidate = getCandidatePath();
 
-  // 이미지 존재 확인
   const imageExists = (url: string): Promise<boolean> => {
     return new Promise((resolve) => {
       const img = new Image();
