@@ -5,12 +5,11 @@ import { useBattleStore } from "../Context/useBattleStore";
 type Props = {
   team: BattlePokemon[];
   activeIndex: number;
-  isProcessing: boolean;
   onSwitch: (index: number) => void;
   watchMode: boolean;
 };
 
-function SwapPanel({ team, activeIndex, isProcessing, onSwitch, watchMode }: Props) {
+function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [viewingIndex, setViewingIndex] = useState<number | null>(null);
   const { isSwitchWaiting } = useBattleStore.getState()
@@ -30,7 +29,6 @@ function SwapPanel({ team, activeIndex, isProcessing, onSwitch, watchMode }: Pro
         return (
           <div key={poke.base.name} className="swap-slot">
             <button
-              disabled={isProcessing || isFainted || isSwitchWaiting || watchMode}
               onClick={() => setSelectedIndex(i)}
             >
               {poke.base.name} {isCurrent ? "(현재)" : ""}

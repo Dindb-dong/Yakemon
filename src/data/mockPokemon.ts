@@ -835,7 +835,7 @@ export const mockPokemon: PokemonInfo[] = [
         category: "물리",
         power: 60,
         pp: 20,
-        isTouch: false,
+        isTouch: true,
         affiliation: null,
         accuracy: 100,
         criticalRate: 0,

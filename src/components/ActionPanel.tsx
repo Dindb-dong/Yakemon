@@ -79,7 +79,6 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
           <SwapPanel
             team={myTeam}
             activeIndex={activeMy}
-            isProcessing={isTurnProcessing}
             onSwitch={(index) => onAction({ type: "switch", index })}
             watchMode={watchMode}
           />
