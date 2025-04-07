@@ -9,9 +9,10 @@ type ActionPanelParams = {
   activeMy: number,
   isTurnProcessing: boolean,
   onAction: any;
+  watchMode: boolean;
 };
 
-function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }: ActionPanelParams) {
+function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, watchMode }: ActionPanelParams) {
   const isFainted = myPokemon.currentHp <= 0;
 
   // ✅ 현재 모드: 'fight' | 'switch' | null (초기값은 null)
@@ -50,7 +51,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }
                 key={move.name}
                 className="move-button"
                 onClick={() => onAction(move)}
-                disabled={isTurnProcessing || isFainted}
+                disabled={isTurnProcessing || isFainted || watchMode}
               >
                 <span className="move-name">{move.name}</span>
                 <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
@@ -80,6 +81,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction }
             activeIndex={activeMy}
             isProcessing={isTurnProcessing}
             onSwitch={(index) => onAction({ type: "switch", index })}
+            watchMode={watchMode}
           />
           {/* 모바일일 경우: 하단에 '싸운다' 버튼 보여줌 */}
           {isMobile && (

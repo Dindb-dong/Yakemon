@@ -589,6 +589,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
             activeMy={activeMy}
             isTurnProcessing={isTurnProcessing}
             onAction={watchMode ? () => { } : executeTurn}
+            watchMode={watchMode}
           />
 
         </div>
