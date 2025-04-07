@@ -27,12 +27,12 @@ function PokemonDetailModal({
       <div style={{ background: "#fff", padding: "2rem", borderRadius: "10px", width: "400px", fontSize: "0.8rem" }}>
         <h2>{pokemon.name}</h2>
         <p>타입: {pokemon.types.join(", ")}</p>
-        <p>체력: {pokemon.hp}</p>
-        <p>공격력: {pokemon.attack}</p>
-        <p>방어력: {pokemon.defense}</p>
-        <p>특수공격력: {pokemon.spAttack}</p>
-        <p>특수방어력: {pokemon.spDefense}</p>
-        <p>스피드: {pokemon.speed}</p>
+        <p>체력: {pokemon.hp + 75}</p>
+        <p>공격력: {pokemon.attack + 20}</p>
+        <p>방어력: {pokemon.defense + 20}</p>
+        <p>특수공격력: {pokemon.spAttack + 20}</p>
+        <p>특수방어력: {pokemon.spDefense + 20}</p>
+        <p>스피드: {pokemon.speed + 20}</p>
         <p>기술:</p>
         <ul>
           {pokemon.moves.map((m) => (
@@ -44,6 +44,11 @@ function PokemonDetailModal({
           {!isAlreadySelected && (
             <button onClick={() => onSelect(pokemon)} style={{ marginRight: "1rem" }}>
               등록하기
+            </button>
+          )}
+          {isAlreadySelected && (
+            <button onClick={() => onSelect(pokemon)} style={{ marginRight: "1rem" }}>
+              취소하기
             </button>
           )}
           <button onClick={onClose}>닫기</button>
@@ -233,6 +238,9 @@ function PokemonSelect({ onSelect }: Props) {
           onSelect={(pokemon) => {
             if (selected.length < 3 && !selected.includes(pokemon)) {
               setSelected([...selected, pokemon]);
+            } else if (selected.includes(pokemon)) {
+              const filterdSelected = selected.filter((p) => p !== pokemon);
+              setSelected([...filterdSelected]);
             }
             setShowDetailModal(false);
           }}
