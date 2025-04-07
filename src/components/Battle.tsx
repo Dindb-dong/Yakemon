@@ -164,7 +164,6 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         return speedUpMove;
       }
       if (roll < 0.4 && (hasSwitchOption)) {
-
         if (switchIndex !== -1) {
           addLog(`${side}는 느리고 불리하므로 교체 선택`);
           return { type: "switch" as const, index: switchIndex };
