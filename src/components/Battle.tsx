@@ -366,7 +366,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
     if (musicOn) AudioManager.getInstance().play(musicPrefix);
     else AudioManager.getInstance().mute(true);
     return () => AudioManager.getInstance().stop(); // 언마운트 시 정리
-  }, [musicOn]);
+  }, [musicPrefix]);
 
   const [currentWatch, setCurrentWatch] = useState(0);
   const leftPokemon = myTeam[activeMy];

@@ -1,30 +1,24 @@
-// utils/AudioManager.ts
-const audioFiles = (import.meta as any).glob('/public/sound/*.mp3', { eager: true });
-
-const categorizedTracks: Record<string, string[]> = {
-  main: [],
-  battle: [],
-  last_one: [],
-  win: [],
-  defeat: []
-};
-
-Object.keys(audioFiles).forEach((key) => {
-  const filePath = key.replace('/public', '');
-  const name = filePath.split('/').pop() || '';
-  if (name.startsWith('main')) categorizedTracks.main.push(filePath);
-  else if (name.startsWith('battle')) categorizedTracks.battle.push(filePath);
-  else if (name.startsWith('last_one')) categorizedTracks.last_one.push(filePath);
-  else if (name.startsWith('win')) categorizedTracks.win.push(filePath);
-  else if (name.startsWith('defeat')) categorizedTracks.defeat.push(filePath);
-});
-
 class AudioManager {
   private static instance: AudioManager;
   private audio?: HTMLAudioElement;
   private isMuted = false;
+  private categorizedTracks: Record<string, string[]> = {
+    main: [],
+    battle: [],
+    last_one: [],
+    win: [],
+    defeat: [],
+  };
 
-  private constructor() { }
+  private constructor() {
+    fetch("/sound-manifest.json")
+      .then(res => res.json())
+      .then(data => {
+        this.categorizedTracks = data;
+        console.log("🔊 오디오 목록 로드됨", data);
+      })
+      .catch(err => console.error("🎵 오디오 매니페스트 로드 실패:", err));
+  }
 
   static getInstance() {
     if (!AudioManager.instance) {
@@ -33,10 +27,10 @@ class AudioManager {
     return AudioManager.instance;
   }
 
-  play(category: keyof typeof categorizedTracks) {
+  play(category: keyof typeof this.categorizedTracks) {
     if (this.isMuted) return;
 
-    const files = categorizedTracks[category];
+    const files = this.categorizedTracks[category];
     if (!files || files.length === 0) return;
 
     const randomFile = files[Math.floor(Math.random() * files.length)];
