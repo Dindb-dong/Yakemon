@@ -128,8 +128,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           }
 
           if (!noStatusCondition) {
-            addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
-            console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
+            addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
+            console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
           }
         }
         if (effect.heal && appliedDameage && appliedDameage > 0) {
