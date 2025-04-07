@@ -292,6 +292,17 @@
   animation: shakeAndFlash 0.4s ease-in-out;
 }
 
+.heal-effect {
+  animation: healFlash 0.4s ease-in-out;
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+@keyframes healFlash {
+  0%   { background-color: rgba(0, 255, 0, 0.15); }
+  50%  { background-color: rgba(0, 255, 0, 0.3); }
+  100% { background-color: rgba(0, 255, 0, 0.1); }
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
   .main-area {

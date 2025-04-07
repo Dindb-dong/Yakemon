@@ -78,14 +78,20 @@ function PokemonArea({ my, enemy }: Props) {
   const [enemyPrevHp, setEnemyPrevHp] = useState(enemy.currentHp);
   const [myDamage, setMyDamage] = useState(false);
   const [enemyDamage, setEnemyDamage] = useState(false);
+  const [myHeal, setMyHeal] = useState(false);
+  const [enemyHeal, setEnemyHeal] = useState(false);
 
 
   useEffect(() => {
     getHpImagePath(my.base.id, my.currentHp / my.base.hp).then(setMyImg);
     if (my.currentHp < myPrevHp) {
       setMyDamage(true);
-      setTimeout(() => setMyDamage(false), 400); // 애니메이션 종료 후 클래스 제거
+      setTimeout(() => setMyDamage(false), 400);
+    } else if (my.currentHp > myPrevHp) {
+      setMyHeal(true);
+      setTimeout(() => setMyHeal(false), 400);
     }
+
     setMyPrevHp(my.currentHp);
   }, [my]);
 
@@ -94,13 +100,17 @@ function PokemonArea({ my, enemy }: Props) {
     if (enemy.currentHp < enemyPrevHp) {
       setEnemyDamage(true);
       setTimeout(() => setEnemyDamage(false), 400);
+    } else if (enemy.currentHp > enemyPrevHp) {
+      setEnemyHeal(true);
+      setTimeout(() => setEnemyHeal(false), 400);
     }
+
     setEnemyPrevHp(enemy.currentHp);
   }, [enemy]);
   return (
     <div className="pokemon-area">
       {my &&
-        <div className={`pokemon-card ${myDamage ? 'damage-effect' : ''}`}>
+        <div className={`pokemon-card ${myDamage ? 'damage-effect' : ''} ${myHeal ? 'heal-effect' : ''}`}>
           <h5>{my.base.name} (내 포켓몬)</h5>
           <img
             src={myImg}
@@ -119,7 +129,7 @@ function PokemonArea({ my, enemy }: Props) {
         </div>
       }
       {enemy &&
-        <div className={`pokemon-card ${enemyDamage ? 'damage-effect' : ''}`}>
+        <div className={`pokemon-card ${enemyDamage ? 'damage-effect' : ''} ${enemyHeal ? 'heal-effect' : ''}`}>
           <h5>{enemy.base.name} (상대 포켓몬)</h5>
           <img
             src={enemyImg}
