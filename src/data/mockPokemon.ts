@@ -428,7 +428,7 @@ export const mockPokemon: PokemonInfo[] = [
       },
       {
         name: "엄청난힘",
-        type: "노말",
+        type: "격투",
         category: "물리",
         power: 120,
         pp: 5,

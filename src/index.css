@@ -34,7 +34,7 @@
 }
 
 .pokemon-area {
-  flex: 1;
+  flex: 0.7;
   display: flex;
 }
 
@@ -61,8 +61,8 @@
 }
 
 .log-panel {
-  flex: 1;
-  max-height: 150px;
+  flex: 0.8;
+  max-height: 120px;
   overflow-y: auto;
   background: #f7f7f7;
   padding: 0.5rem;
@@ -280,6 +280,18 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes shakeAndFlash {
+  0%   { transform: translateX(0); background-color: transparent; }
+  25%  { transform: translateX(-4px); background-color: rgba(255, 0, 0, 0.2); }
+  50%  { transform: translateX(4px); background-color: rgba(255, 0, 0, 0.4); }
+  75%  { transform: translateX(-2px); background-color: rgba(255, 0, 0, 0.2); }
+  100% { transform: translateX(0); background-color: transparent; }
+}
+
+.damage-effect {
+  animation: shakeAndFlash 0.4s ease-in-out;
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
   .main-area {
@@ -356,6 +368,10 @@
   
   .action-toggle-btn:hover:not(:disabled) {
     background-color: #1565c0;
+  }
+
+  .log-panel {
+    max-height: 80px;
   }
 }
 

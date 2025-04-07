@@ -29,7 +29,7 @@ function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
         return (
           <div key={poke.base.name} className="swap-slot">
             <button
-              onClick={() => setSelectedIndex(i)}
+              onClick={() => setSelectedIndex(i)} disabled={isFainted}
             >
               {poke.base.name} {isCurrent ? "(현재)" : ""}
             </button>

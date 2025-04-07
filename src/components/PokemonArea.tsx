@@ -74,17 +74,33 @@ function PokemonArea({ my, enemy }: Props) {
   const [myImg, setMyImg] = useState("");
   const [enemyImg, setEnemyImg] = useState("");
 
+  const [myPrevHp, setMyPrevHp] = useState(my.currentHp);
+  const [enemyPrevHp, setEnemyPrevHp] = useState(enemy.currentHp);
+  const [myDamage, setMyDamage] = useState(false);
+  const [enemyDamage, setEnemyDamage] = useState(false);
+
+
   useEffect(() => {
     getHpImagePath(my.base.id, my.currentHp / my.base.hp).then(setMyImg);
+    if (my.currentHp < myPrevHp) {
+      setMyDamage(true);
+      setTimeout(() => setMyDamage(false), 400); // 애니메이션 종료 후 클래스 제거
+    }
+    setMyPrevHp(my.currentHp);
   }, [my]);
 
   useEffect(() => {
     getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp).then(setEnemyImg);
+    if (enemy.currentHp < enemyPrevHp) {
+      setEnemyDamage(true);
+      setTimeout(() => setEnemyDamage(false), 400);
+    }
+    setEnemyPrevHp(enemy.currentHp);
   }, [enemy]);
   return (
     <div className="pokemon-area">
       {my &&
-        <div className="pokemon-card">
+        <div className={`pokemon-card ${myDamage ? 'damage-effect' : ''}`}>
           <h5>{my.base.name} (내 포켓몬)</h5>
           <img
             src={myImg}
@@ -103,7 +119,7 @@ function PokemonArea({ my, enemy }: Props) {
         </div>
       }
       {enemy &&
-        <div className="pokemon-card">
+        <div className={`pokemon-card ${enemyDamage ? 'damage-effect' : ''}`}>
           <h5>{enemy.base.name} (상대 포켓몬)</h5>
           <img
             src={enemyImg}

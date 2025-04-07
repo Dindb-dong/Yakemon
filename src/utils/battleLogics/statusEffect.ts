@@ -33,7 +33,7 @@ export function applyStatusEffectBefore(
         // ✅ 잠듦 해제
         durationState.removeEffect(side, "잠듦");
         update(side, activeIndex, (prev) => removeStatus(prev, "잠듦"));
-        addLog(`${activeTeam[activeIndex].base.name}은/는 잠에서 깼다!`);
+        addLog(`🏋️‍♂️ ${activeTeam[activeIndex].base.name}은/는 잠에서 깼다!`);
         console.log(`${activeTeam[activeIndex]}.base.name은/는 잠에서 깼다!`);
         return { rate: currentRate, isHit: true };
       } else {
@@ -57,11 +57,11 @@ export function applyStatusEffectBefore(
   } else if (status.includes('얼음')) {
     if (Math.random() > 0.1 || move.type === '불') {
       update(side, activeIndex, (prev) => removeStatus(prev, '얼음'));
-      addLog(`${activeTeam[activeIndex].base.name}의 얼음이 녹았다!`);
+      addLog(`🏋️‍♂️ ${activeTeam[activeIndex].base.name}의 얼음이 녹았다!`);
       console.log(`${activeTeam[activeIndex].base.name}의 얼음이 녹았다!`);
       return { rate: currentRate, isHit: true };
     } else {
-      addLog(`${activeTeam[activeIndex].base.name}은/는 얼어있다!`);
+      addLog(`☃️ ${activeTeam[activeIndex].base.name}은/는 얼어있다!`);
       console.log(`${activeTeam[activeIndex].base.name}은/는 얼어있다!`);
       return { rate: currentRate, isHit: false };
     }
@@ -69,7 +69,7 @@ export function applyStatusEffectBefore(
     if (Math.random() > 0.5) {
       return { rate: currentRate, isHit: true };
     } else {
-      addLog(`${activeTeam[activeIndex].base.name}은/는 헤롱헤롱해있다!`);
+      addLog(`😍 ${activeTeam[activeIndex].base.name}은/는 헤롱헤롱해있다!`);
       console.log(`${activeTeam[activeIndex].base.name}은/는 헤롱헤롱해있다!`);
       return { rate: currentRate, isHit: false };
     }

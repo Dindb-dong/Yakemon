@@ -48,7 +48,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         // 반동 데미지 적용
         const recoilDamage = appliedDameage * demerit.recoil;
         updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
-        addLog(`${attacker.base.name}은/는 반동 데미지를 입었다!`);
+        addLog(`🤕 ${attacker.base.name}은/는 반동 데미지를 입었다!`);
       }
       if (demerit.statChange) {
         demerit.statChange.forEach((statChange) => {
@@ -59,7 +59,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           const activeIndex = side === 'my' ? activeMy : activeEnemy;
           updatePokemon(side, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
           console.log(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
-          addLog(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
+          addLog(`🔃 ${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
         });
       }
       // if (demerit.status) {
@@ -105,7 +105,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             const activeIndex = targetSide === 'my' ? activeMy : activeEnemy;
             updatePokemon(targetSide, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
             console.log(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
-            addLog(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
+            addLog(`🔃 ${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
           });
         }
         if (effect.status) {
@@ -128,7 +128,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           }
 
           if (!noStatusCondition) {
-            addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
+            addLog(`🍄 ${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
             console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
           }
         }
@@ -136,13 +136,13 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           const deal = appliedDameage;
           const healRate = effect.heal;
           updatePokemon(side, activeMine, (attacker) => changeHp(attacker, deal * healRate));
-          addLog(`${attacker.base.name}은/는 체력을 회복했다!`)
+          addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
         }
         if (effect.heal && !appliedDameage) {
           // 반피 회복 로직 
           const healRate = effect.heal;
           updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
-          addLog(`${attacker.base.name}은/는 체력을 회복했다!`)
+          addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
         }
 
       }

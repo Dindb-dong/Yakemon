@@ -73,7 +73,7 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
     }
 
   }
-  addLog(`${whoIsFirst}의 선공!`)
+  addLog(`🦅 ${whoIsFirst}의 선공!`)
   console.log(`${whoIsFirst}의 선공!`);
   return whoIsFirst;
 }
