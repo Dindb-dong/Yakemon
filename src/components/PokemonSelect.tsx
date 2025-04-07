@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { mockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
 import TutorialModal from "./TutorialModal";
+import { getHpImagePath } from "./PokemonArea";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => void;
@@ -15,10 +16,23 @@ function PokemonSelect({ onSelect }: Props) {
     }
   }, []);
 
+  useEffect(() => {
+    const loadThumbnails = async () => {
+      const result: Record<number, string> = {};
+      for (const p of mockPokemon) {
+        const url = await getHpImagePath(p.id, 1); // 체력 100% 기준
+        result[p.id] = url;
+      }
+      setThumbnails(result);
+    };
+    loadThumbnails();
+  }, []);
+
   const [selected, setSelected] = useState<PokemonInfo[]>([]);
   const [watchCount, setWatchCount] = useState(1); // 관전 반복 횟수
   const [watchDelay, setWatchDelay] = useState(1.5);
   const [showTutorial, setShowTutorial] = useState(true); // 모달 보일지 여부
+  const [thumbnails, setThumbnails] = useState<Record<number, string>>({});
 
   const tutorialPages = [
     <div><h3>안녕하세요!</h3><p>본 웹페이지는 연세대학교 인공지능학회 YAI소속</p><p> 기초심화RL팀의 토이프로젝트에서 탄생했습니다.</p></div>,
@@ -65,7 +79,23 @@ function PokemonSelect({ onSelect }: Props) {
                   minWidth: "80px",
                 }}
               >
-                {p.name}
+                <div style={{ flexDirection: "row", display: "flex" }}>
+                  <img
+                    src={thumbnails[p.id]}
+                    alt={p.name}
+                    style={{ width: "25px", height: "25px", objectFit: "contain", marginRight: 10, borderRadius: 6 }}
+                  />
+
+                  <div style={{ flexDirection: "column", display: "flex" }}>
+                    <div style={{ fontSize: "0.7rem", color: "#333" }}>
+                      {p.types.join(", ")}
+                    </div>
+
+                    {p.name}
+                  </div>
+                </div>
+
+
                 {selectedIndex >= 0 && (
                   <div
                     style={{

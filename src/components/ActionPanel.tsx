@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
 import SwapPanel from "./SwapPanel";
 import { useBattleStore } from "../Context/useBattleStore";
+import { calculateTypeEffectiveness } from "../utils/typeRalation";
 
 type ActionPanelParams = {
   myPokemon: BattlePokemon,
@@ -17,7 +18,9 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
 
   // ✅ 현재 모드: 'fight' | 'switch' | null (초기값은 null)
   const [currentTab, setCurrentTab] = useState<"fight" | "switch" | null>(null);
-  const { turn } = useBattleStore.getState();
+  const [hintMode, setHintMode] = useState<boolean>(true);
+  const { turn, enemyTeam, activeEnemy } = useBattleStore.getState();
+  const enemyTypes = enemyTeam[activeEnemy].base.types;
   useEffect(() => {
     setCurrentTab(null);
   }, [turn])
@@ -26,6 +29,9 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
 
   return (
     <div className="action-panel">
+      <button className="hint-toggle"
+        onClick={() => setHintMode(!hintMode)}
+      >타입 상성 힌트 모드 전환</button>
       {/* 모바일 전용: 처음엔 싸운다/교체 버튼만 보여줌 */}
       {isMobile && currentTab === null && (
         <div className="action-toggle">
@@ -46,21 +52,57 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
       {(!isMobile || currentTab === "fight") && (
         <>
           <div className="move-grid">
-            {myPokemon.base.moves.map((move) => (
-              <button
-                key={move.name}
-                className="move-button"
-                onClick={() => onAction(move)}
-                disabled={isTurnProcessing || isFainted || watchMode}
-              >
-                <span className="move-name">{move.name}</span>
-                <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
-                  myPokemon.base.moves.find((m) => m.name === move.name)?.pp ?? "?"}</span>
-                <span className="move-power">위력: {move.power}</span>
-                <span className="move-accuracy">명중율: {move.accuracy}</span>
-                <span className={`move-type ${move.type}`}>{move.type}</span>
-              </button>
-            ))}
+            {hintMode && (
+              <>
+                {myPokemon.base.moves.map((move) => {
+                  const effectiveness = calculateTypeEffectiveness(move.type, enemyTypes);
+                  let effectivenessClass = "";
+                  if (effectiveness === 4 && move.category !== '변화') effectivenessClass = "very-effective";
+                  else if (effectiveness === 2 && move.category !== '변화') effectivenessClass = "effective";
+                  else if (effectiveness === 0.5 && move.category !== '변화') effectivenessClass = "not-effective";
+                  else if (effectiveness === 0 && move.category !== '변화') effectivenessClass = "no-effect";
+
+                  return (
+                    <button
+                      key={move.name}
+                      className={`move-button ${effectivenessClass}`}
+                      onClick={() => onAction(move)}
+                      disabled={isTurnProcessing || isFainted || watchMode}
+                    >
+                      <span className="move-name">{move.name}</span>
+                      <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
+                        myPokemon.base.moves.find((m) => m.name === move.name)?.pp ?? "?"}</span>
+                      <span className="move-power">위력: {move.power}</span>
+                      <span className="move-accuracy">명중율: {move.accuracy}</span>
+                      <span className={`move-type ${move.type}`}>{move.type}</span>
+                    </button>
+                  );
+                })}</>
+            )
+            }
+            {!hintMode && (
+              <>
+                {myPokemon.base.moves.map((move) => {
+
+                  return (
+                    <button
+                      key={move.name}
+                      className={`move-button`}
+                      onClick={() => onAction(move)}
+                      disabled={isTurnProcessing || isFainted || watchMode}
+                    >
+                      <span className="move-name">{move.name}</span>
+                      <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
+                        myPokemon.base.moves.find((m) => m.name === move.name)?.pp ?? "?"}</span>
+                      <span className="move-power">위력: {move.power}</span>
+                      <span className="move-accuracy">명중율: {move.accuracy}</span>
+                      <span className={`move-type ${move.type}`}>{move.type}</span>
+                    </button>
+                  );
+                })}</>
+            )
+            }
+
           </div>
           {/* 모바일일 경우: 하단에 '교체' 버튼 보여줌 */}
           {isMobile && (

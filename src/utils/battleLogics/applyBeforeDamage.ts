@@ -27,23 +27,23 @@ export function applyDefensiveAbilityEffectBeforeDamage(
         case 'type_nullification':
           if (ability.name === '저수' && usedMove.type === '물') {
             rate = 0;
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
           } else if (ability.name === '흙먹기' && usedMove.type === '땅') {
             rate = 0;
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
           } else if (ability.name === '축전' && usedMove.type === '전기') {
             rate = 0;
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
           } else if (ability.name === '건조피부') {
             if (usedMove.type === '물') {
               rate = 0;
-              console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+              console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
               updatePokemon(opponentSide, activeOpponent, (deffender) => changeHp(deffender, Math.round(deffender.base.hp / 4)));
             } else if (usedMove.type === '불') {
-              console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+              console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
               rate *= 1.25;
             }
           }
@@ -52,10 +52,11 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           break;
         case 'damage_nullification':
           if (ability.name === '방진' && usedMove.affiliation === '가루') {
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            addLog(`🤪 ${deffender.base.name}의 ${ability?.name} 발동!`);
             rate = 0;
           } else if (ability.name === '방탄' && usedMove.affiliation === '폭탄') {
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             rate = 0;
           }
           // TODO: 방탄, 방진 등 추가하기.
