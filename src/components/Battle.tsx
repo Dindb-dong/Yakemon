@@ -14,6 +14,7 @@ import { applyOffensiveAbilityEffectBeforeDamage } from "../utils/battleLogics/a
 import { getBestSwitchIndex } from "../utils/battleLogics/getBestSwitchIndex";
 import { switchPokemon } from "../utils/battleLogics/switchPokemon";
 import { applyAppearance } from "../utils/battleLogics/applyAppearance";
+import AudioManager from "../utils/AudioManager";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
@@ -347,6 +348,25 @@ function Battle({ watchMode, watchCount, watchDelay }) {
     addLog
   } = useBattleStore.getState();
 
+  const [musicPrefix, setMusicPrefix] = useState("battle");
+  const [musicOn, setMusicOn] = useState(true);
+  useEffect(() => {
+    const checkLastOne = () => {
+      const aliveMy = myTeam.filter(p => p.currentHp > 0).length;
+      const aliveEnemy = enemyTeam.filter(p => p.currentHp > 0).length;
+      if (aliveMy === 1 || aliveEnemy === 1) {
+        setMusicPrefix("last_one");
+      }
+    };
+
+    checkLastOne();
+  }, [myTeam, enemyTeam, turn]);
+
+  useEffect(() => {
+    if (musicOn) AudioManager.getInstance().play(musicPrefix);
+    else AudioManager.getInstance().mute(true);
+    return () => AudioManager.getInstance().stop(); // 언마운트 시 정리
+  }, [musicPrefix]);
 
   const [currentWatch, setCurrentWatch] = useState(0);
   const leftPokemon = myTeam[activeMy];
@@ -514,6 +534,21 @@ function Battle({ watchMode, watchCount, watchDelay }) {
   return (
 
     <div className="battle-layout">
+      <button
+        onClick={() => {
+          setMusicOn((prev) => {
+            const newState = !prev;
+            AudioManager.getInstance().mute(!newState);
+            return newState;
+          });
+        }}
+        style={{
+          position: "fixed", top: 10, right: 10, zIndex: 9999,
+          padding: "0.5rem", background: musicOn ? "#3f51b5" : "#999", color: "white"
+        }}
+      >
+        {musicOn ? "브금 끄기" : "브금 켜기"}
+      </button>
       {
         (isSwitchModalOpen && !watchMode) && (
           <div style={{

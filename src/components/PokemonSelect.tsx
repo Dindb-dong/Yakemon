@@ -3,6 +3,7 @@ import { mockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
 import TutorialModal from "./TutorialModal";
 import { getHpImagePath } from "./PokemonArea";
+import AudioManager from "../utils/AudioManager";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => void;
@@ -59,6 +60,14 @@ function PokemonDetailModal({
 }
 
 function PokemonSelect({ onSelect }: Props) {
+  const [musicOn, setMusicOn] = useState(true);
+
+  useEffect(() => {
+    if (musicOn) AudioManager.getInstance().play("main");
+    else AudioManager.getInstance().mute(true);
+    return () => AudioManager.getInstance().stop(); // 언마운트 시 정리
+  }, [musicOn]);
+
   useEffect(() => {
     const hideTutorial = localStorage.getItem("hideTutorial");
     if (hideTutorial !== "true") {
@@ -114,8 +123,29 @@ function PokemonSelect({ onSelect }: Props) {
 
   return (
     <>
+      <button
+        onClick={() => {
+          setMusicOn((prev) => {
+            const newState = !prev;
+            AudioManager.getInstance().mute(!newState);
+            return newState;
+          });
+        }}
+        style={{
+          position: "fixed", top: 10, right: 10, zIndex: 9999,
+          padding: "0.5rem", background: musicOn ? "#3f51b5" : "#999", color: "white"
+        }}
+      >
+        {musicOn ? "브금 끄기" : "브금 켜기"}
+      </button>
       {showTutorial && (
-        <TutorialModal pages={tutorialPages} onClose={() => setShowTutorial(false)} />
+        <TutorialModal pages={tutorialPages} onClose={() => {
+          setShowTutorial(false);
+          if (musicOn) {
+            // 유저가 상호작용한 시점에서만 재생
+            AudioManager.getInstance().play("main");
+          }
+        }} />
       )}<div style={{ padding: "2rem" }}>
         <h2>내 포켓몬 3마리 선택</h2>
         <div style={{ display: "flex", flexWrap: "wrap" }}>
