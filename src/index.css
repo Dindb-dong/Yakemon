@@ -138,6 +138,7 @@
 .hint-toggle {
   background-color: #2d8fff86;
   width: 40%;
+  height: 40px;
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 0.5rem;
@@ -147,8 +148,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  justify-self: center;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   transition: background-color 0.2s ease-in-out;
   align-self: center;
   margin-bottom: 3%;
