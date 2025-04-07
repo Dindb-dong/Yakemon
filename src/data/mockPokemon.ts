@@ -675,7 +675,7 @@ export const mockPokemon: PokemonInfo[] = [
       },
       {
         name: "플레어드라이브",
-        type: "불꽃",
+        type: "불",
         category: "물리",
         power: 120,
         pp: 15,

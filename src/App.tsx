@@ -8,6 +8,7 @@ import { PokemonInfo } from "./models/Pokemon";
 import { mockPokemon } from "./data/mockPokemon";
 import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 import { BattlePokemon } from "./models/BattlePokemon";
+import BottomBar from "./components/BottomBar";
 
 function App() {
   const [isSelected, setIsSelected] = useState(false);
@@ -78,9 +79,15 @@ function App() {
   return (
     <div className="app">
       {!isSelected ? (
-        <PokemonSelect onSelect={handleSelect} />
+        <div>
+          <PokemonSelect onSelect={handleSelect} />
+          <BottomBar></BottomBar>
+        </div>
       ) : (
-        <Battle watchMode={watchMode} watchCount={watchCount} watchDelay={watchDelay} />
+        <div>
+          <Battle watchMode={watchMode} watchCount={watchCount} watchDelay={watchDelay} />
+          <BottomBar></BottomBar>
+        </div>
       )}
     </div>
   );

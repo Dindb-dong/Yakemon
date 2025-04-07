@@ -380,6 +380,12 @@ function Battle({ watchMode, watchCount, watchDelay }) {
     if (watchMode && !isTurnProcessing && !isGameOver && !isRunningRef.current) {
       isRunningRef.current = true; // 실행 중 플래그 설정
       const runAIvsAI = async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(() => {
+            console.log('asdsad');
+            resolve()
+          }, 1000)
+        })
         if (watchMode && myTeam[activeMy].currentHp <= 0 && enemyTeam[activeEnemy].currentHp > 0) { // 관전모드이고, 왼쪽만 쓰러졌을 경우 
           console.log('my는 포켓몬이 쓰러졌기에 새 포켓몬을 냄')
           const switchIndex = getBestSwitchIndex('my');
@@ -400,7 +406,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
           setTimeout(() => {
             console.log('asdsad');
             resolve()
-          }, 2000)
+          }, 1000)
         })
         setIsTurnProcessing(true);
         const leftAction = aiChooseAction("my");
@@ -454,18 +460,19 @@ function Battle({ watchMode, watchCount, watchDelay }) {
       // 🔥 최신 상태 다시 불러오기!
       const { enemyTeam: updatedEnemyTeam, activeEnemy: updatedActiveEnemy } = useBattleStore.getState();
       const faintedEnemy = updatedEnemyTeam[updatedActiveEnemy];
-      if (!watchMode && faintedEnemy.currentHp <= 0) {
-        // 관전모드 아니고 ai 포켓몬을 쓰러뜨렸을 경우 
-        console.log('ai 포켓몬 쓰러져서 교체')
-        const switchIndex = getBestSwitchIndex('enemy');
-        await switchPokemon('enemy', switchIndex);
-      }
       await new Promise<void>((resolve) => {
         setTimeout(() => {
           console.log('asdsad');
           resolve()
         }, 1000)
       })
+      if (!watchMode && faintedEnemy.currentHp <= 0) {
+        // 관전모드 아니고 ai 포켓몬을 쓰러뜨렸을 경우 
+        console.log('ai 포켓몬 쓰러져서 교체')
+        const switchIndex = getBestSwitchIndex('enemy');
+        await switchPokemon('enemy', switchIndex);
+      }
+
       setIsTurnProcessing(false);
     }
   };
