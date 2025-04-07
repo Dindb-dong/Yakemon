@@ -14,13 +14,27 @@ export function applyEndTurnEffects() {
     updatePokemon,
     addLog,
     publicEnv,
-    turn, setTurn
   } = useBattleStore.getState();
 
   const { publicEffects, decrementTurns } = useDurationStore.getState();
 
   const myActive = myTeam[activeMy]; // 내 포켓몬 
   const enemyActive = enemyTeam[activeEnemy]; // 상대 포켓몬
+
+  // === 필드 효과 ===
+  [myActive, enemyActive].forEach((pokemon, i) => {
+    const side = i === 0 ? "my" : "enemy";
+    if (publicEnv.field === '그래스필드') {
+      console.log('그래스필드 효과 적용 시작')
+      if (!(pokemon.base.types.includes('비행')) && (pokemon.position !== '하늘') && pokemon.currentHp > 0) { // 떠있지 않으면 회복 
+        const heal = Math.floor(pokemon.base.hp / 16);
+        const healed = (prev: any) => changeHp(prev, heal);
+        updatePokemon(side, i === 0 ? activeMy : activeEnemy, healed);
+        addLog(`${pokemon.base.name}은/는 그래스필드로 회복했다!`);
+        console.log(`${pokemon.base.name}은/는 그래스필드로 회복했다!`);
+      }
+    }
+  });
 
   // === 상태이상 효과 처리 ===
   [myActive, enemyActive].forEach((pokemon, i) => {

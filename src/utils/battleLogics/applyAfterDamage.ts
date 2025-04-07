@@ -201,4 +201,5 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     await switchPromise;
     console.log('유턴 로직 실행중...5 (완료)');
   }
+  return;
 }

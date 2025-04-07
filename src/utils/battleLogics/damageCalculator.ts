@@ -212,6 +212,7 @@ export async function calculateMoveDamage({
     // 필드가 깔려있고, 내 포켓몬이 땅에 있는 포켓몬일 때 
     if (filedEffect === '그래스필드') {
       if (moveInfo.type === '풀') {
+        console.log('그래스필드에서 기술이 강화됐다!')
         rate *= 1.3;
       } else if ((moveInfo.name === '지진') || (moveInfo.name === '땅고르기') || (moveInfo.name === '지진')) {
         rate *= 0.5;
