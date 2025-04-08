@@ -40,6 +40,10 @@ export function applyEndTurnEffects() {
   [myActive, enemyActive].forEach((pokemon, i) => {
     const side = i === 0 ? "my" : "enemy";
     const opponentSide = i === 0 ? "enemy" : "my";
+    const activeIndex = i === 0 ? activeMy : activeEnemy;
+    const team = i === 0 ? myTeam : enemyTeam;
+    const opponentTeam = i === 0 ? enemyTeam : myTeam;
+    const activeOpponent = i === 0 ? activeEnemy : activeMy;
     // 이렇게 효율적으로 처리할 수도 있구만! 
     if (pokemon.status.includes("화상")) {
       const damage = Math.floor(pokemon.base.hp / 16);
@@ -57,7 +61,7 @@ export function applyEndTurnEffects() {
     if (pokemon.status.includes("독")) {
       const damage = Math.floor(pokemon.base.hp / 8);
       const updated = (pokemon) => changeHp(pokemon, -damage);
-      updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
+      updatePokemon(side, activeIndex, updated);
       addLog(`🍄 ${pokemon.base.name}은 독의 피해를 입었다!`);
       console.log(`${pokemon.base.name}은 독의 피해를 입었다!`);
     }
@@ -65,8 +69,11 @@ export function applyEndTurnEffects() {
       const damage = Math.floor(pokemon.base.hp / 8);
       const damaged = (prev) => changeHp(prev, -damage);
       const healed = (prev) => changeHp(prev, damage);
-      updatePokemon(side, i === 0 ? activeMy : activeEnemy, damaged);
-      updatePokemon(opponentSide, i === 0 ? activeEnemy : activeMy, healed);
+      updatePokemon(side, activeIndex, damaged);
+      if (opponentTeam[activeOpponent].currentHp > 0) {
+        updatePokemon(opponentSide, activeOpponent, healed);
+      }
+      addLog(`🌱 ${opponentTeam[activeOpponent].base.name}은 씨뿌리기로 회복했다!`);
       addLog(`🌱 ${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
       console.log(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
     }
