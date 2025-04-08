@@ -23,6 +23,7 @@ import { hasAbility } from "./helpers";
 import { setAbility, setTypes } from "./updateBattlePokemon";
 import { useEffect } from "react";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
+import { delay } from "../delay";
 
 type BattleAction = MoveInfo | { type: "switch", index: number };
 
@@ -75,9 +76,11 @@ export async function battleSequence(
   if (isSwitchAction(myAction) && isSwitchAction(enemyAction)) {
     if (whoIsFirst === "my") {
       await switchPokemon("my", myAction.index);
+      await delay(1500);
       await switchPokemon("enemy", enemyAction.index);
     } else {
       await switchPokemon("enemy", enemyAction.index);
+      await delay(1500);
       await switchPokemon("my", myAction.index);
     }
     applyEndTurnEffects();
@@ -88,6 +91,7 @@ export async function battleSequence(
   if (isSwitchAction(myAction)) {
     await switchPokemon("my", myAction.index);
     if (isMoveAction(enemyAction)) {
+      await delay(1500);
       await handleMove("enemy", enemyAction, watchMode);
     }
     applyEndTurnEffects();
@@ -97,6 +101,7 @@ export async function battleSequence(
   if (isSwitchAction(enemyAction)) {
     await switchPokemon("enemy", enemyAction.index);
     if (isMoveAction(myAction)) {
+      await delay(1500);
       await handleMove("my", myAction, watchMode);
     }
     applyEndTurnEffects();
@@ -116,6 +121,7 @@ export async function battleSequence(
       applyEndTurnEffects();
       return;
     }
+    await delay(1500);
     await handleMove("enemy", enemyAction as MoveInfo, watchMode);
   } else { // 상대가 선공일 경우 
     await handleMove("enemy", enemyAction as MoveInfo, watchMode);
@@ -129,7 +135,7 @@ export async function battleSequence(
       applyEndTurnEffects();
       return;
     }
-
+    await delay(1500);
     await handleMove("my", myAction as MoveInfo, watchMode);
   }
 
@@ -144,8 +150,8 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
     activeEnemy,
     addLog, updatePokemon
   } = useBattleStore.getState();
-  const isMultiHit = move.effects?.some((effect) => effect.multiHit)
-  const isDoubleHit = move.effects?.some((effect) => effect.doubleHit)
+  const isMultiHit = move.effects?.some((effect) => effect.multiHit === true)
+  const isDoubleHit = move.effects?.some((effect) => effect.doubleHit === true)
   const isTripleHit = ["트리플킥", "트리플악셀"].includes(move.name);
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
@@ -193,6 +199,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
     const result = await calculateMoveDamage({ moveName: move.name, side });
+    console.log('1번째 타격!')
     if (result?.success) {
       const recovered = decrementConfusionTurn(side, activeIndex);
       if (recovered) {
@@ -200,7 +207,9 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         console.log(`${attacker}는 혼란에서 회복했다!`);
       }
       const hitCount = getHitCount(move);
+      console.log(hitCount)
       for (let i = 0; i < hitCount - 1; i++) {
+        console.log(`${i + 2}번째 타격!`)
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
         if (result?.success) {
           await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
@@ -257,21 +266,21 @@ export async function removeFaintedPokemon(side: 'my' | 'enemy') {
 }
 
 function getHitCount(move: MoveInfo): number {
+  let hitCount: number = 0;
   move.effects?.forEach((effect => {
     if (effect.doubleHit) {
       console.log('2회 공격 시도');
-      return 2;
+      hitCount = 2;
     }
     if (effect.tripleHit) {
       console.log('3회 공격 시도');
-      return 3;
+      hitCount = 3;
     }
     if (effect.multiHit) {
       console.log('다회 공격 시도');
-      return 1;
     }
   }))
-
+  if (hitCount > 0) return hitCount;
 
   const rand = Math.random();
   if (move.name === "스킬링크") return 5;
