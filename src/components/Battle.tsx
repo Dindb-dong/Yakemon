@@ -16,6 +16,7 @@ import { switchPokemon } from "../utils/battleLogics/switchPokemon";
 import { applyAppearance } from "../utils/battleLogics/applyAppearance";
 import AudioManager from "../utils/AudioManager";
 import { RLChooseAction } from "../utils/RL/RLChooseAction";
+import { delay } from "../utils/delay";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
@@ -438,14 +439,16 @@ function Battle({ watchMode, redMode, watchCount, watchDelay }) {
         setIsTurnProcessing(true);
         const leftAction = aiChooseAction("my");
         console.log('왼쪽 플레이어 행동:', leftAction);
-        const rightAction = aiChooseAction("enemy");
+        const rightAction = redMode ? await RLChooseAction('enemy') : aiChooseAction("enemy");
+        await delay(500)
         console.log('오른쪽 플레이어 행동:', rightAction);
         await battleSequence(leftAction, rightAction, watchMode);
         console.log(`${turn}턴 종료`);
         addLog(`${turn}번째 턴 종료`);
-        setTurn(turn + 1);
+
         setIsTurnProcessing(false);
         isRunningRef.current = false; // 실행 완료 후 해제
+        setTurn(turn + 1);
       };
       runAIvsAI();
 
@@ -456,7 +459,8 @@ function Battle({ watchMode, redMode, watchCount, watchDelay }) {
         window.location.reload(); // 또는 리셋 로직 함수로 대체
       }, 1000);
     }
-  }, [turn, isGameOver, watchMode, currentWatch]);
+  }, [turn, isGameOver, watchMode, currentWatch, isTurnProcessing]);
+
   let isFainted: boolean = false;
   isFainted = myTeam[activeMy].currentHp <= 0 ? true : false;
 
