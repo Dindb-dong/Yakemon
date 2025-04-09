@@ -14,17 +14,24 @@ function App() {
   const [isSelected, setIsSelected] = useState(false);
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
+  const [redMode, setRedMode] = useState(false);
   const [watchCount, setWatchCount] = useState(1);
   const [watchDelay, setWatchDelay] = useState(1.5);
   const { addLog } = useBattleStore.getState();
 
   const handleSelect = useCallback(
-    (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => {
+    (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => {
       setWatchMode(watchMode);
+      setRedMode(redMode);
       setWatchCount(watchCount || 1);
       setWatchDelay(watchDelay || 1.5);
       if (watchMode) {
         console.log('관전모드 시작');
+      }
+      if (redMode) {
+        console.log(
+          '레드모드 시작'
+        );
       }
 
       const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
@@ -32,9 +39,11 @@ function App() {
         return pool[Math.floor(Math.random() * pool.length)];
       };
       const myRaw = ['불', '물', '풀'].map((type) => getRandomByType(type));
-      const enemyRaw = ['불', '물', '풀'].map((type) =>
-        getRandomByType(type, myRaw)
-      );
+      const enemyRaw = redMode ? [mockPokemon[0], mockPokemon[1], mockPokemon[2]] :
+        // 레드모드 일때는 1세대만 고정적으로
+        ['불', '물', '풀'].map((type) =>
+          getRandomByType(type, myRaw)
+        );
       const shuffledEnemyRaw = [...enemyRaw].sort(() => Math.random() - 0.5);
       let myBattleTeam: BattlePokemon[] = [];
 
@@ -85,7 +94,7 @@ function App() {
         </div>
       ) : (
         <div>
-          <Battle watchMode={watchMode} watchCount={watchCount} watchDelay={watchDelay} />
+          <Battle watchMode={watchMode} redMode={redMode} watchCount={watchCount} watchDelay={watchDelay} />
           <BottomBar></BottomBar>
         </div>
       )}
