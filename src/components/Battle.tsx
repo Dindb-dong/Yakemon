@@ -335,7 +335,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   }
 };
 
-function Battle({ watchMode, watchCount, watchDelay }) {
+function Battle({ watchMode, redMode, watchCount, watchDelay }) {
   const {
     myTeam,
     enemyTeam,
@@ -477,7 +477,7 @@ function Battle({ watchMode, watchCount, watchDelay }) {
     if (!watchMode) {
       setIsTurnProcessing(true);
       // const aiAction = aiChooseAction('enemy');
-      const aiAction = await RLChooseAction('enemy');
+      const aiAction = redMode ? await RLChooseAction('enemy') : aiChooseAction('enemy');
       console.log('ai행동:' + aiAction)
       await battleSequence(playerAction, aiAction);
 

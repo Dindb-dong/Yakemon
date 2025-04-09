@@ -7,7 +7,7 @@ import AudioManager from "../utils/AudioManager";
 import { loadRLModel } from "../utils/RL/RLChooseAction";
 
 type Props = {
-  onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => void;
+  onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => void;
 };
 
 function PokemonDetailModal({
@@ -208,17 +208,17 @@ function PokemonSelect({ onSelect }: Props) {
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "center", // 세로축 중앙 정렬
+            flexDirection: "row",
+            justifyContent: "space-around", // 세로축 중앙 정렬
           }}
         >
           <button
             disabled={selected.length !== 3}
-            onClick={() => onSelect(selected, false)}
+            onClick={() => onSelect(selected, false, false)}
             style={{
               marginTop: "1rem",
               padding: "1rem 2rem",
-              backgroundColor: selected.length !== 3 ? "#FF0000FF" : "#2E6DFFFF",
+              backgroundColor: selected.length !== 3 ? "#676767" : "#7ea1ff",
               borderRadius: "6px",
               color: "#fff",
               fontSize: "1rem",
@@ -227,6 +227,22 @@ function PokemonSelect({ onSelect }: Props) {
             }}
           >
             배틀 시작
+          </button>
+          <button
+            disabled={selected.length !== 3}
+            onClick={() => onSelect(selected, false, true)}
+            style={{
+              marginTop: "1rem",
+              padding: "1rem 2rem",
+              backgroundColor: selected.length !== 3 ? "#676767" : "#FF0000FF",
+              borderRadius: "6px",
+              color: "#fff",
+              fontSize: "1rem",
+              border: "none",
+              cursor: selected.length === 3 ? "pointer" : "not-allowed"
+            }}
+          >
+            레드와 배틀 시작
           </button>
         </div>
 
@@ -254,7 +270,7 @@ function PokemonSelect({ onSelect }: Props) {
             </div>
 
             <button
-              onClick={() => onSelect(selected.length === 3 ? selected : [], true, watchCount, watchDelay)}
+              onClick={() => onSelect(selected.length === 3 ? selected : [], true, true, watchCount, watchDelay)}
               style={{ padding: "0.5rem 1rem", flex: 0.55 }}
             >
               관전 시작
