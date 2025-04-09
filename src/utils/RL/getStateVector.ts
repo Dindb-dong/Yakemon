@@ -1,10 +1,11 @@
-import { BattlePokemon } from "../models/BattlePokemon";
-import { FieldType } from "../models/Field";
-import { useBattleStore } from "../Context/useBattleStore";
-import { StatusState } from "../models/Status";
-import { useDurationStore } from "../Context/useDurationContext";
+import { BattlePokemon } from "../../models/BattlePokemon";
+import { FieldType } from "../../models/Field";
+import { useBattleStore } from "../../Context/useBattleStore";
+import { StatusState } from "../../models/Status";
+import { useDurationStore } from "../../Context/useDurationContext";
 
 export function getState(forOpponent = false): number[] {
+  // forOpponent는 상대가 ai인지. 유저가 사용할 때에는 true 고정임 
   const state: number[] = [];
   const {
     myTeam,
@@ -64,24 +65,30 @@ export function getState(forOpponent = false): number[] {
       state.push(0);
     }
   }
+  // 지금까지 42 
 
   // 7. 상대 포켓몬의 정보 (HP, 타입, 종족값, 상태이상, 랭크)
   state.push(opponent.currentHp / opponent.base.hp);
+
   allTypes.forEach((type) => {
     state.push(opponent.base.types.includes(type) ? 1 : 0);
   });
+
   state.push(opponent.base.attack / 255);
   state.push(opponent.base.defense / 255);
   state.push(opponent.base.spAttack / 255);
   state.push(opponent.base.spDefense / 255);
   state.push(opponent.base.speed / 255);
+
   statusList.forEach((s) => {
     state.push(opponent.status.includes(s as StatusState) ? 1 : 0);
   });
+
   ranks.forEach((stat) => {
     const rank = opponent.rank?.[stat] ?? 0;
     state.push((rank + 6) / 12);
   });
+  // 지금까지 80
 
   // 8. 팀 구성 정보 (HP 비율 + 상태이상 여부, 3마리 기준)
   [playerTeam, opponentTeam].forEach((team) => {
@@ -96,22 +103,20 @@ export function getState(forOpponent = false): number[] {
       }
     }
   });
+  // 지금까지 92
 
   // 9. 턴 수 (최대 30으로 정규화)
   state.push(Math.min(1, turn / 30));
+  // 지금까지 93
 
   // 10. 지형 효과 (4개) + 남은 턴 (최대 5)
   const terrains: FieldType[] = ['그래스필드', '사이코필드', '미스트필드', '일렉트릭필드'];
   terrains.forEach((terrain) => {
     state.push(publicEnv.field === terrain ? 1 : 0);
   });
-  publicEffects.forEach((p) => {
-    if (p.name === publicEnv.field) {
-      state.push(p.remainingTurn / 5)
-    } else {
-      state.push(0)
-    }
-  })
-
+  const activeEffect = publicEffects.find((p) => p.name === publicEnv.field);
+  state.push(activeEffect ? activeEffect.remainingTurn / 5 : 0);
+  // 지금까지 98개 
+  console.log("✅ 상태 벡터 길이:", state.length);
   return state;
 }

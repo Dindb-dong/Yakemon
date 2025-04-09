@@ -15,6 +15,7 @@ import { getBestSwitchIndex } from "../utils/battleLogics/getBestSwitchIndex";
 import { switchPokemon } from "../utils/battleLogics/switchPokemon";
 import { applyAppearance } from "../utils/battleLogics/applyAppearance";
 import AudioManager from "../utils/AudioManager";
+import { RLChooseAction } from "../utils/RL/RLChooseAction";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
@@ -475,7 +476,8 @@ function Battle({ watchMode, watchCount, watchDelay }) {
   const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
     if (!watchMode) {
       setIsTurnProcessing(true);
-      const aiAction = aiChooseAction('enemy');
+      // const aiAction = aiChooseAction('enemy');
+      const aiAction = await RLChooseAction('enemy');
       console.log('ai행동:' + aiAction)
       await battleSequence(playerAction, aiAction);
 
@@ -591,6 +593,11 @@ function Battle({ watchMode, watchCount, watchDelay }) {
                           <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
                             <p>타입: {poke.base.types.join(", ")}</p>
                             <p>체력: {poke.currentHp} / {poke.base.hp}</p>
+                            <p>공격력: {poke.base.attack}</p>
+                            <p>방어력: {poke.base.defense}</p>
+                            <p>특수공격력: {poke.base.spAttack}</p>
+                            <p>특수방어력: {poke.base.spDefense}</p>
+                            <p>스피드: {poke.base.speed}</p>
                             <p>상태이상: {poke.status.join(", ") || "없음"}</p>
                             <p>위치: {poke.position || "없음"}</p>
                             <div>
