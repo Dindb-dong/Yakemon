@@ -148,6 +148,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  justify-self: center;
+  align-items: center;
+  align-content: center;
   font-size: 0.8rem;
   transition: background-color 0.2s ease-in-out;
   align-self: center;

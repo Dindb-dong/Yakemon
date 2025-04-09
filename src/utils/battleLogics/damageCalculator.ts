@@ -125,6 +125,7 @@ export async function calculateMoveDamage({
           addLog(`🤕 ${attacker.base.name}은 반동으로 데미지를 입었다...`);
         }
       })
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
@@ -159,7 +160,7 @@ export async function calculateMoveDamage({
     }
     addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
     console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
-
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
     return { success: true }; // 변화기술은 성공으로 처리
   }
 
@@ -339,6 +340,7 @@ export async function calculateMoveDamage({
       addLog(`🤕 ${attacker.base.name}은 반동으로 데미지를 입었다...`);
       console.log(`${attacker.base.name}은 반동으로 데미지를 입었다...`);
     }
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, deffender.base.ability?.name === '프레셔')); // pp 깎기 
     return;
   }
 
@@ -395,6 +397,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
       }
     }
   }
+  updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, deffender?.ability?.name === '프레셔')); // pp 깎기 
 }
 
 function getMoveInfo(myPokemon: PokemonInfo, moveName: string): MoveInfo {

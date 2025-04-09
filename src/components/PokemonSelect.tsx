@@ -4,6 +4,7 @@ import { PokemonInfo } from "../models/Pokemon";
 import TutorialModal from "./TutorialModal";
 import { getHpImagePath } from "./PokemonArea";
 import AudioManager from "../utils/AudioManager";
+import { loadRLModel } from "../utils/RL/RLChooseAction";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, watchCount?: number, watchDelay?: number) => void;
@@ -73,6 +74,7 @@ function PokemonSelect({ onSelect }: Props) {
     if (hideTutorial !== "true") {
       setShowTutorial(true);
     }
+    loadRLModel()
   }, []);
 
   useEffect(() => {
@@ -101,7 +103,7 @@ function PokemonSelect({ onSelect }: Props) {
 
   const tutorialPages = [
     <div><h3>안녕하세요!</h3><p>본 웹페이지는 연세대학교 인공지능학회 YAI소속</p><p> 기초심화RL팀의 토이프로젝트에서 탄생했습니다.</p></div>,
-    <div><p>여러분께서는 DQN과 PPO 방식으로 학습된</p><p>강화학습 AI과 대전하실 수 있습니다!</p></div>,
+    <div><p>여러분께서는 Dueling-DDQN과 DDQN 방식으로 학습된</p><p>강화학습 AI과 대전하실 수 있습니다!</p></div>,
     <div><p>모델 학습에 시간이 걸리는 관계로</p><p>아직은 스타팅 포켓몬만 선택하실 수 있습니다...</p></div>,
     <div><h3>그래도 재밌게 즐겨주세요!</h3></div>,
     <div><h3>튜토리얼 1</h3><p>포켓몬을 3마리 선택하세요.</p></div>,

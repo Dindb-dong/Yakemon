@@ -1,2 +1,22 @@
 /node_modules
 *.DS_Store
+
+# 중간 변환 결과 폴더 무시
+public/model/converted/flat_model/
+public/model/converted/online_model/
+public/model/converted/saved_model/
+
+dist/model/converted/flat_model/
+dist/model/converted/online_model/
+dist/model/converted/saved_model/
+
+# 모델 원본 파일 무시
+public/model/*.keras
+public/model/*.h5
+public/model/*.pb
+
+dist/model/*.keras
+dist/model/*.h5
+dist/model/*.pb
+
+dist/sound/*.mp3

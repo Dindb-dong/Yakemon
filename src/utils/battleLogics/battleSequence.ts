@@ -91,7 +91,7 @@ export async function battleSequence(
   if (isSwitchAction(myAction)) {
     await switchPokemon("my", myAction.index);
     if (isMoveAction(enemyAction)) {
-      await delay(1500);
+      //await delay(1500);
       await handleMove("enemy", enemyAction, watchMode);
     }
     applyEndTurnEffects();
@@ -121,7 +121,7 @@ export async function battleSequence(
       applyEndTurnEffects();
       return;
     }
-    await delay(1500);
+    //await delay(1500);
     await handleMove("enemy", enemyAction as MoveInfo, watchMode);
   } else { // 상대가 선공일 경우 
     await handleMove("enemy", enemyAction as MoveInfo, watchMode);
