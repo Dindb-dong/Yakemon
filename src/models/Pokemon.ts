@@ -9,9 +9,11 @@ export type PokemonInfo = {
   id: number; // 도감번호 
   name: string; // 이름
   types: string[]; // ['불','물']
+  originalTypes?: string[];
   moves: MoveInfo[]; // 기술
   sex: 'male' | 'female' | null;
   ability: AbilityInfo | null; // 특성
+  originalAbility?: AbilityInfo | null;
   // 종족값 
   hp: number;
   attack: number;

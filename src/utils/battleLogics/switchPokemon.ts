@@ -83,6 +83,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
       if (trapCondition === '독압정 제거') {
         console.log('독압정 제거됨')
         removeTrap(side, '독압정')
+        removeTrap(side, '맹독압정')
       } else {
         updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState))
       }

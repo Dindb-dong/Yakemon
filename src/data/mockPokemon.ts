@@ -182,7 +182,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 497,
       name: '샤로다',
       types: ['풀'],
-      moves: moveData(['리프스톰', '기가드레인', '뱀눈초리', '용의파동', '드래곤테일', '개척하기', '에너지볼', '아쿠아테일'],
+      moves: moveData(['리프스톰', '기가드레인', '뱀눈초리', '용의파동', '드래곤테일', '에너지볼', '아쿠아테일'],
         ['풀']
       ),
       sex: 'female',
