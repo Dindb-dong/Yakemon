@@ -31,16 +31,17 @@ export type MoveInfo = {
   power: number; // 위력 
   pp: number;
   isTouch: boolean; // 접촉 기술 여부 
-  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | null; // 계열 
+  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | '파동' | null; // 계열 
   accuracy: number; // 명중율. 
   criticalRate: number; // 급소율. 랭크로 나타냄. 0이 기본, 1이 깜짝베기같은거, 3은 확정임 
   demeritEffects?: MoveEffect[]; // 엄청난힘, 인파이트, 플레어드라이브 같은 디메리트 효과. 
   effects?: MoveEffect[];
   priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
-  trap?: '독압정' | '스텔스락' | '압정뿌리기';
+  trap?: '독압정' | '스텔스록' | '압정뿌리기';
   field?: FieldType;
   weather?: string;
   uTurn?: boolean; // 유턴이나 퀵턴, 볼트체인치같이 교체하는 기술.
+  exile?: boolean; // 드래곤테일이나 울부짖기, 날려버리기 등 강제교체 기술. 
   protect?: boolean; // 방어나 니들가드 같은 기술.
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )
 };

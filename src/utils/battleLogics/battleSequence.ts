@@ -170,12 +170,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       }
       const result = await calculateMoveDamage({ moveName: move.name, side });
       if (result?.success) {
-        const recovered = decrementConfusionTurn(side, activeIndex);
-        if (recovered) {
-          addLog(`🏋️‍♂️ ${attacker}는 혼란에서 회복했다!`);
-          console.log(`${attacker}는 혼란에서 회복했다!`);
 
-        }
         // 트리플 기술은 데미지 누적 증가 (예시)
         move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
         await applyAfterDamage(side, attacker, deffender, move, result.damage, watchMode);
@@ -201,11 +196,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
     const result = await calculateMoveDamage({ moveName: move.name, side });
     console.log('1번째 타격!')
     if (result?.success) {
-      const recovered = decrementConfusionTurn(side, activeIndex);
-      if (recovered) {
-        addLog(`🏋️‍♂️ ${attacker}는 혼란에서 회복했다!`);
-        console.log(`${attacker}는 혼란에서 회복했다!`);
-      }
+
       const hitCount = getHitCount(move);
       console.log(hitCount)
       for (let i = 0; i < hitCount - 1; i++) {
@@ -236,11 +227,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
     }
     const result = await calculateMoveDamage({ moveName: move.name, side });
     if (result?.success) {
-      const recovered = decrementConfusionTurn(side, activeIndex);
-      if (recovered) {
-        addLog(`🏋️‍♂️ ${attacker}는 혼란에서 회복했다!`);
-        console.log(`${attacker}는 혼란에서 회복했다!`);
-      }
+
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
       // await new Promise<void>((resolve) => {
       //   setTimeout(() => {

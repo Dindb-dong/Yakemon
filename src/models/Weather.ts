@@ -1,0 +1,1 @@
+export type WeatherType = '쾌청' | '비' | '모래바람' | '싸라기눈' | null;

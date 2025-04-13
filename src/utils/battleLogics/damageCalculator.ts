@@ -11,7 +11,8 @@ import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
 import { addStatus, changeHp, changeRank, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
-import { addTrap, setField } from "./updateEnvironment";
+import { addTrap, setField, setWeather } from "./updateEnvironment";
+import { WeatherType } from "../../models/Weather";
 
 type ItemInfo = {
   id: number;
@@ -385,7 +386,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
         }
       })
     } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 
-      if (moveInfo.trap) {
+      if (moveInfo.trap) { // 독압정, 스텔스록 등 
         addTrap(opponentSide, moveInfo.trap);
         addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
         console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
@@ -394,6 +395,10 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
         setField(moveInfo.field);
         addLog(`⛰️ ${side}는 필드를 ${moveInfo.name}로 바꿨다!`);
         console.log(`${side}는 필드를 ${moveInfo.name}로 바꿨다!`);
+      }
+      if (moveInfo.weather) {
+        setWeather(moveInfo.weather as WeatherType);
+        console.log(`${side}는 날씨를 ${moveInfo.weather}로 바꿨다!`);
       }
     }
   }

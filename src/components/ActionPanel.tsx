@@ -71,6 +71,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
                       disabled={isTurnProcessing || isFainted || watchMode}
                     >
                       <span className="move-name">{move.name}</span>
+                      <span className="move-power">{move.category}</span>
                       <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
                         myPokemon.base.moves.find((m) => m.name === move.name)?.pp ?? "?"}</span>
                       <span className="move-power">위력: {move.power}</span>

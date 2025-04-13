@@ -242,7 +242,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
     return (
       <div>
         <Result winner={winner} setBattleKey={setBattleKey} />
-        <LogPanel logs={logs} />
+        <LogPanel logs={logs.slice(-20)} />
       </div>
     )
   }
@@ -306,6 +306,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
                         {isViewing && (
                           <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
                             <p>타입: {poke.base.types.join(", ")}</p>
+                            <p>특성: {typeof poke.base.ability === 'string' ? poke.base.ability : poke.base.ability?.name ?? '없음'}</p>
                             <p>체력: {poke.currentHp} / {poke.base.hp}</p>
                             <p>공격력: {poke.base.attack}</p>
                             <p>방어력: {poke.base.defense}</p>
@@ -351,7 +352,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
       <TurnBanner turn={turn} />
       <div className="main-area">
         <div className="pokemon_log">
-          <LogPanel logs={logs} />
+          <LogPanel logs={logs.slice(-20)} />
           <PokemonArea my={leftPokemon} enemy={rightPokemon} />
         </div>
 

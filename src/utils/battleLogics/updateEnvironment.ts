@@ -1,9 +1,10 @@
 import { useBattleStore } from "../../Context/useBattleStore";
 import { useDurationStore } from "../../Context/useDurationContext";
 import { FieldType } from "../../models/Field";
+import { WeatherType } from "../../models/Weather";
 
 // 📍 날씨 설정 (공유)
-export function setWeather(weather: string | null) {
+export function setWeather(weather: WeatherType) {
   const { addEffect } = useDurationStore.getState()
   if (weather !== null) {
     addEffect("public", { name: weather, remainingTurn: 5 });
@@ -124,7 +125,7 @@ export function resetEnvironment() {
 // setWeather("모래바람");             // 날씨 설정
 // setField("그래스필드");            // 필드 설정
 // setField();                      // 필드 초기화 
-// addTrap("enemy", "스텔스락");       // 상대 진영에 트랩 설치
+// addTrap("enemy", "스텔스록");       // 상대 진영에 트랩 설치
 // addDisaster("재앙의구슬");         // 재앙 효과 등록
 // removeDisaster("재앙의구슬");      // 재앙 해제
 // resetTrap("my");                   // 내 필드에서 트랩 전부 제거

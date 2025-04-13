@@ -123,6 +123,11 @@ export function applyEndTurnEffects() {
       updatePokemon(side, activeIndex, (prev) => changeRank(prev, 'speed', 1));
       addLog(`🦅 ${pokemon.base.name}의 가속 특성 발동!`);
     }
+    if (pokemon.base.ability?.name === '선파워' && publicEnv.weather === '쾌청') {
+      const damage = Math.floor(pokemon.base.hp / 16);
+      updatePokemon(side, activeIndex, (prev) => changeHp(prev, -damage));
+      addLog(`🦅 ${pokemon.base.name}의 가속 특성 발동!`);
+    }
   })
   return;
 }

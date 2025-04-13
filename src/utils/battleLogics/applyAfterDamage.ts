@@ -144,9 +144,23 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
           addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
         }
-
       }
     })
+  }
+  if (usedMove.exile) {
+    console.log('💨 강제 교체 발동!');
+    const available = opponentTeam
+      .map((p, i) => ({ ...p, index: i }))
+      .filter((p, i) => p.currentHp > 0 && i !== activeOpponent);
+
+    if (available.length === 0) {
+      console.log('📛 교체 가능한 포켓몬이 없습니다.');
+      return;
+    }
+
+    const random = available[Math.floor(Math.random() * available.length)];
+    await switchPokemon(opponentSide, random.index);
+    addLog(`💨 ${opponentTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
   }
   if (usedMove.uTurn) {
     const { setSwitchRequest, clearSwitchRequest } = useBattleStore.getState();

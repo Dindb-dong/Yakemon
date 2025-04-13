@@ -5,13 +5,14 @@ import "./index.css";
 import { createBattlePokemon } from "./utils/battleLogics/createBattlePokemon";
 import { useBattleStore } from "./Context/useBattleStore";
 import { PokemonInfo } from "./models/Pokemon";
-import { mockPokemon } from "./data/mockPokemon";
+import { createMockPokemon } from "./data/mockPokemon";
 import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 import { BattlePokemon } from "./models/BattlePokemon";
 import BottomBar from "./components/BottomBar";
 import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
 
 function MainApp() {
+  const mockPokemon = createMockPokemon();
   const [isSelected, setIsSelected] = useState(false);
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
