@@ -257,7 +257,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       addLog(`🦅 ${side}는 상대 포켓몬의 빈틈을 포착!`);
       return bestMove;
     }
-    if (uturnMove) {
+    if (uturnMove && hasSwitchOption) {
       addLog(`🛼 ${side}는 빠르지만 불리하므로 유턴으로 교체!`);
       return uturnMove;
     }

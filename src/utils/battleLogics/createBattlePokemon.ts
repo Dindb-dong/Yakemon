@@ -37,7 +37,13 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
         defense: base.defense + 20,
         spDefense: base.spDefense + 20,
         speed: base.speed + 20,
-      } : { ...base },
+        originalAbility: base.ability,
+        originalTypes: base.types
+      } : {
+        ...base,
+        originalAbility: base.ability,
+        originalTypes: base.types
+      },
     currentHp: !exchange ? base.hp + 75 : base.hp,
     pp,
     rank: defaultRank,

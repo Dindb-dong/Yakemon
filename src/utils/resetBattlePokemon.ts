@@ -5,7 +5,7 @@ export function resetBattlePokemon(pokemon: BattlePokemon): BattlePokemon {
   const base = pokemon.base;
   return {
     ...pokemon,
-    base: { ...base, types: [...base.types], ability: base.ability, },
+    base: { ...base, types: [...(base.originalTypes || [])], ability: base.originalAbility ?? null },
     currentHp: base.hp,
     status: [],
     rank: {
