@@ -5,12 +5,14 @@ import "./index.css";
 import { createBattlePokemon } from "./utils/battleLogics/createBattlePokemon";
 import { useBattleStore } from "./Context/useBattleStore";
 import { PokemonInfo } from "./models/Pokemon";
-import { mockPokemon } from "./data/mockPokemon";
+import { createMockPokemon } from "./data/mockPokemon";
 import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 import { BattlePokemon } from "./models/BattlePokemon";
 import BottomBar from "./components/BottomBar";
+import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
 
-function App() {
+function MainApp() {
+  const mockPokemon = createMockPokemon();
   const [isSelected, setIsSelected] = useState(false);
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
@@ -18,6 +20,8 @@ function App() {
   const [watchCount, setWatchCount] = useState(1);
   const [watchDelay, setWatchDelay] = useState(1.5);
   const { addLog } = useBattleStore.getState();
+  const [battleKey, setBattleKey] = useState(0);
+  const navigate = useNavigate();
 
   const handleSelect = useCallback(
     (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => {
@@ -71,7 +75,7 @@ function App() {
         }
         return createBattlePokemon(p);
       });
-
+      navigate("/battle");
       setMyTeam(myBattleTeam);
       setEnemyTeam(aiBattleTeam);
       setIsSelected(true); // 화면 전환 트리거
@@ -86,19 +90,30 @@ function App() {
   );
 
   return (
-    <div className="app">
-      {!isSelected ? (
-        <div>
-          <PokemonSelect onSelect={handleSelect} />
-          <BottomBar></BottomBar>
-        </div>
-      ) : (
-        <div>
-          <Battle watchMode={watchMode} redMode={redMode} watchCount={watchCount} watchDelay={watchDelay} />
-          <BottomBar></BottomBar>
-        </div>
-      )}
-    </div>
+    <>
+      <Routes>
+        <Route path="/" element={<PokemonSelect onSelect={handleSelect} />} />
+        <Route path="/battle" element={
+          <Battle
+            key={battleKey}
+            watchMode={watchMode}
+            redMode={redMode}
+            watchCount={watchCount}
+            watchDelay={watchDelay}
+            setBattleKey={setBattleKey}
+          />
+        } />
+      </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <MainApp />
+      <BottomBar />
+    </>
   );
 }
 

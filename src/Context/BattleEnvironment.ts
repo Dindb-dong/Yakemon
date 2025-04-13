@@ -1,7 +1,8 @@
 import { FieldType } from "../models/Field";
+import { WeatherType } from "../models/Weather";
 
 export type PublicBattleEnvironment = {
-  weather: string | null;        // 날씨 (비, 눈, 쾌청 등)
+  weather: WeatherType;        // 날씨 (비, 눈, 쾌청 등)
   field: FieldType;          // 필드 (일렉트릭, 그래스 등)
   aura: string[];           // 오라 (다크오라 등)
   disaster: string[] | null;       // 재앙 효과 (예: 재앙의구슬 등)
@@ -11,7 +12,7 @@ export type PublicBattleEnvironment = {
 };
 
 export type IndividualBattleEnvironment = {
-  trap: string[];                // 스텔스락, 독압정 등
+  trap: string[];                // 스텔스록, 독압정 등
   reflect?: boolean;        // 리플렉터 (물리 반감)
   lightScreen?: boolean;      // 빛의장막 (특수 반감)
   substitute?: boolean;    // 대타출동

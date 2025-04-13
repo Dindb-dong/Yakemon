@@ -1,8 +1,8 @@
 import { useBattleStore } from "../../Context/useBattleStore";
-import { useDurationStore } from "../../Context/useDurationContext";
+import { decrementConfusionTurn, useDurationStore } from "../../Context/useDurationContext";
 import { MoveInfo } from "../../models/Move";
 import { StatusState } from "../../models/Status";
-import { removeStatus } from "./updateBattlePokemon";
+import { changeHp, removeStatus } from "./updateBattlePokemon";
 
 export function applyStatusEffectBefore(
   status: StatusState[],
@@ -72,6 +72,24 @@ export function applyStatusEffectBefore(
       addLog(`😍 ${activeTeam[activeIndex].base.name}은/는 헤롱헤롱해있다!`);
       console.log(`${activeTeam[activeIndex].base.name}은/는 헤롱헤롱해있다!`);
       return { rate: currentRate, isHit: false };
+    }
+  } else if (status.includes('혼란')) {
+    const recovered = decrementConfusionTurn(side, activeIndex);
+    if (recovered) {
+      addLog(`🏋️‍♂️ ${activeTeam[activeIndex].base.name}는 혼란에서 회복했다!`);
+      console.log(`${activeTeam[activeIndex].base.name}는 혼란에서 회복했다!`);
+      return { rate: currentRate, isHit: true };
+    } else {
+      addLog(`😵‍💫 ${activeTeam[activeIndex].base.name}은/는 혼란에 빠져있다!`);
+      console.log(`${activeTeam[activeIndex].base.name}은/는 혼란에 빠져있다!`);
+      if (Math.random() < 0.33) {
+        const selfDamage = 40 * activeTeam[activeIndex].base.attack;
+        const durability = (activeTeam[activeIndex].base.defense * activeTeam[activeIndex].base.hp) / 0.411
+        const finalDamage = Math.min(activeTeam[activeIndex].currentHp, Math.round((selfDamage * durability) * activeTeam[activeIndex].base.hp));
+        updatePokemon(side, activeIndex, (prev) => changeHp(prev, -finalDamage));
+        addLog(`😵‍💫 ${activeTeam[activeIndex].base.name}은/는 스스로를 공격했다!`);
+        console.log(`${activeTeam[activeIndex].base.name}은/는 스스로를 공격했다!`);
+      }
     }
   }
   return { rate: currentRate, isHit: true };

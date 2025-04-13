@@ -3,7 +3,7 @@ import { useBattleStore } from "../Context/useBattleStore";
 import { useDurationStore } from "../Context/useDurationContext";
 
 function TurnBanner({ turn }: { turn: number }) {
-  const { publicEnv, myEnv, enemyEnv } = useBattleStore();
+  const { publicEnv, myEnv, enemyEnv, winCount } = useBattleStore();
   const { publicEffects } = useDurationStore();
 
   const {
@@ -49,6 +49,8 @@ function TurnBanner({ turn }: { turn: number }) {
   return (
     <div className="turn-banner">
       <div>턴 {turn}</div>
+      <div>{winCount}연승중!</div>
+
       {activeEffects.length > 0 && (
         <div className="public-env">
           {activeEffects.map((effect, idx) => (
@@ -56,12 +58,21 @@ function TurnBanner({ turn }: { turn: number }) {
           ))}
         </div>
       )}
-      <div style={{ flexDirection: 'row' }}>
-        <div>
 
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem", fontSize: "0.85rem" }}>
+        <div>
+          {myEnv.trap.length > 0 && (
+            <div>
+              🟩 내 필드 트랩: {myEnv.trap.join(", ")}
+            </div>
+          )}
         </div>
         <div>
-
+          {enemyEnv.trap.length > 0 && (
+            <div>
+              🟥 상대 필드 트랩: {enemyEnv.trap.join(", ")}
+            </div>
+          )}
         </div>
       </div>
     </div>

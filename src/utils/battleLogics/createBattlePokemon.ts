@@ -16,7 +16,7 @@ const defaultRank: RankState = {
 };
 
 // BattlePokemon 생성 함수
-export function createBattlePokemon(base: PokemonInfo): BattlePokemon {
+export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): BattlePokemon {
   if (!base || !base.moves) {
     throw new Error(`createBattlePokemon: 유효하지 않은 포켓몬 데이터: ${JSON.stringify(base)}`);
   }
@@ -28,16 +28,17 @@ export function createBattlePokemon(base: PokemonInfo): BattlePokemon {
   });
 
   return {
-    base: {
-      ...base,
-      hp: base.hp + 75,
-      attack: base.attack + 20,
-      spAttack: base.spAttack + 20,
-      defense: base.defense + 20,
-      spDefense: base.spDefense + 20,
-      speed: base.speed + 20,
-    },
-    currentHp: base.hp + 75,
+    base: !exchange ?
+      {
+        ...base,
+        hp: base.hp + 75,
+        attack: base.attack + 20,
+        spAttack: base.spAttack + 20,
+        defense: base.defense + 20,
+        spDefense: base.spDefense + 20,
+        speed: base.speed + 20,
+      } : { ...base },
+    currentHp: !exchange ? base.hp + 75 : base.hp,
     pp,
     rank: defaultRank,
     status: [],

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { mockPokemon } from "../data/mockPokemon";
+import { createMockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
 import TutorialModal from "./TutorialModal";
 import { getHpImagePath } from "./PokemonArea";
@@ -9,6 +9,7 @@ import { loadRLModel } from "../utils/RL/RLChooseAction";
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => void;
 };
+
 
 function PokemonDetailModal({
   pokemon,
@@ -29,18 +30,13 @@ function PokemonDetailModal({
       <div style={{ background: "#fff", padding: "2rem", borderRadius: "10px", width: "400px", fontSize: "0.8rem" }}>
         <h2>{pokemon.name}</h2>
         <p>타입: {pokemon.types.join(", ")}</p>
+        <p>특성: {typeof pokemon.ability === 'string' ? pokemon.ability : pokemon.ability?.name ?? '없음'}</p>
         <p>체력: {pokemon.hp + 75}</p>
         <p>공격력: {pokemon.attack + 20}</p>
         <p>방어력: {pokemon.defense + 20}</p>
         <p>특수공격력: {pokemon.spAttack + 20}</p>
         <p>특수방어력: {pokemon.spDefense + 20}</p>
         <p>스피드: {pokemon.speed + 20}</p>
-        <p>기술:</p>
-        <ul>
-          {pokemon.moves.map((m) => (
-            <li key={m.name}>{m.name} (위력: {m.power}, PP: {m.pp}, 타입: {m.type}, 명중율: {m.accuracy})</li>
-          ))}
-        </ul>
 
         <div style={{ marginTop: "1rem" }}>
           {!isAlreadySelected && (
@@ -61,8 +57,8 @@ function PokemonDetailModal({
 }
 
 function PokemonSelect({ onSelect }: Props) {
+  const [mockPokemon] = useState(() => createMockPokemon());
   const [musicOn, setMusicOn] = useState(true);
-
   useEffect(() => {
     if (musicOn) AudioManager.getInstance().play("main");
     else AudioManager.getInstance().mute(true);
@@ -103,7 +99,8 @@ function PokemonSelect({ onSelect }: Props) {
 
   const tutorialPages = [
     <div><h3>안녕하세요!</h3><p>본 웹페이지는 연세대학교 인공지능학회 YAI소속</p><p> 기초심화RL팀의 토이프로젝트에서 탄생했습니다.</p></div>,
-    <div><p>여러분께서는 Dueling-DDQN과 DDQN 방식으로 학습된</p><p>강화학습 AI과 대전하실 수 있습니다!</p></div>,
+    <div><p>여러분께서는 Dueling-DDQN 방식으로 학습된 강화학습 AI, '레드'와 대전하실 수 있습니다!</p>
+      <p>또는 제가 손코딩한 모델과도 대전하실 수 있습니다 :D</p></div>,
     <div><p>모델 학습에 시간이 걸리는 관계로</p><p>아직은 스타팅 포켓몬만 선택하실 수 있습니다...</p></div>,
     <div><h3>그래도 재밌게 즐겨주세요!</h3></div>,
     <div><h3>튜토리얼 1</h3><p>포켓몬을 3마리 선택하세요.</p></div>,

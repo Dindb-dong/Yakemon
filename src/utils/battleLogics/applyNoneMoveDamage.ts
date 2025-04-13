@@ -3,7 +3,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectiveness } from "../typeRalation";
 import { removeTrap } from "./updateEnvironment";
 
-// 스텔스락 = 바위타입 기술과 동일하게 상성 적용
+// 스텔스록 = 바위타입 기술과 동일하게 상성 적용
 export async function applyTrapDamage(
   pokemon: BattlePokemon,
   trap: string[]
@@ -16,7 +16,7 @@ export async function applyTrapDamage(
   const types = pokemon.base.types;
   if (pokemon.base.ability?.name !== '매직가드') {
     for (const item of trap) {
-      if (item === "스텔스락") {
+      if (item === "스텔스록") {
         const multiplier = calculateTypeEffectiveness("바위", types);
         damage += Math.floor(pokemon.base.hp * 0.125 * multiplier);
         if (damage) {

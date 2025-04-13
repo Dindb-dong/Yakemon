@@ -76,7 +76,7 @@ export function applyDefensiveAbilityEffectBeforeDamage(
 export function applyOffensiveAbilityEffectBeforeDamage(
   usedMove: MoveInfo, side: 'my' | 'enemy'
 ): number {
-  const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon } = useBattleStore.getState();
+  const { enemyTeam, activeEnemy, myTeam, activeMy, publicEnv, updatePokemon } = useBattleStore.getState();
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const deffender: BattlePokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const ability = attacker.base.ability; // 내 포켓몬의 특성
@@ -117,6 +117,10 @@ export function applyOffensiveAbilityEffectBeforeDamage(
           }
           if (ability.name === '심록' && usedMove.type === '풀' && attacker.currentHp <= attacker.base.hp / 3) {
             rate *= 1.5; // 심록은 1.5배
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '선파워' && publicEnv.weather === '쾌청' && usedMove.category === '특수') {
+            rate *= 1.5; // 선파워는 1.5배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
           break;
