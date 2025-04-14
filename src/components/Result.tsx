@@ -139,7 +139,7 @@ function Result({ winner, setBattleKey }) {
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
           <button onClick={() => {
-            window.location.reload()
+            navigate("/", { replace: true });
           }}>새로운 전투 시작</button>
         </div>
       )}
