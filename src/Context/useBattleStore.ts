@@ -43,6 +43,7 @@ type BattleStore = {
   clearSwitchRequest: () => void;
   setWinCount: (count: number) => void;
   setEnemyRoster: (roster: BattlePokemon[]) => void;
+  resetAll: () => void;
 };
 
 export const useBattleStore = create<BattleStore>((set, get) => ({
@@ -97,4 +98,29 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   clearSwitchRequest: () => set({ isSwitchWaiting: false, switchRequest: null }),
   setWinCount: (count) => set({ winCount: count }),
   setEnemyRoster: (roster) => set({ enemyRoster: roster }),
+  resetAll: () => set(() => ({
+    myTeam: [],
+    enemyTeam: [],
+    activeMy: 0,
+    activeEnemy: 0,
+    publicEnv: {
+      weather: null,
+      field: null,
+      room: null,
+      aura: [],
+      disaster: [],
+    },
+    myEnv: {
+      trap: [],
+    },
+    enemyEnv: {
+      trap: [],
+    },
+    turn: 1,
+    logs: [],
+    isSwitchWaiting: false,
+    switchRequest: null,
+    winCount: 0,
+    enemyRoster: [],
+  })),
 }));

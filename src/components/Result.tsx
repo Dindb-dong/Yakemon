@@ -24,9 +24,7 @@ function Result({ winner, setBattleKey }) {
     setTurn,
     addLog,
     setWinCount,
-    setPublicEnv,
-    setEnemyEnv,
-    setMyEnv,
+    resetAll
   } = useBattleStore();
   const mockPokemon = createMockPokemon();
   const win10Pokemon = mockPokemon.concat(createWin10Pokemon());
@@ -150,6 +148,7 @@ function Result({ winner, setBattleKey }) {
           <h1>{winCount} 연승에서 실패...</h1>
           <button onClick={() => {
             navigate('/', { replace: true })
+            resetAll()
           }}>
             새로운 전투 시작
           </button>
