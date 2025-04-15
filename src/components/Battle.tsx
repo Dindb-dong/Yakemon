@@ -80,29 +80,45 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   if (redirected || myTeam.length === 0 || enemyTeam.length === 0) {
     return <div style={{ padding: "2rem", textAlign: "center" }}>잘못된 접근입니다. 메인 화면으로 이동 중...</div>;
   }
+  useEffect(() => {
+    if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
+      applyAppearance(myTeam[activeMy], "my");
+      addLog(`🐶 my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
+      console.log(`my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
+      applyAppearance(enemyTeam[activeEnemy], "enemy");
+      addLog(`🐱 enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
+      console.log(`enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
+    }
+
+  }, []);
 
   useEffect(() => {
-    if (!watchMode && !isTurnProcessing && !isGameOver) {
-      const current = myTeam[activeMy];
-      if (current.isCharging && current.chargingMove) {
-        // 강제 행동 실행
-        const chargingMove = current.chargingMove;
-        console.log(`💥 ${current.base.name}이(가) ${chargingMove.name}을 발사합니다!`);
+    const handleChargingMove = async () => {
+      if (!watchMode && !isGameOver) {
+        const current = myTeam[activeMy];
+        if (current.isCharging && current.chargingMove) {
+          console.log('차징 기술 대기중...');
+          // 강제 행동 실행
+          await delay(2000);
+          const chargingMove = current.chargingMove;
+          console.log(`💥 ${current.base.name}이(가) ${chargingMove.name}을 발사합니다!`);
 
-        // 다음 턴 강제 실행
-        executeTurn(chargingMove);
+          // 다음 턴 강제 실행
+          await executeTurn(chargingMove);
 
-        // 상태 초기화
-        if (current.currentHp > 0) {
-          useBattleStore.getState().updatePokemon('my', activeMy, (prev) => ({
-            ...prev,
-            isCharging: false,
-            chargingMove: undefined
-          }));
+          // 상태 초기화
+          if (current.currentHp > 0) {
+            useBattleStore.getState().updatePokemon('my', activeMy, (prev) => ({
+              ...prev,
+              isCharging: false,
+              chargingMove: undefined
+            }));
+          }
         }
-
       }
-    }
+    };
+
+    handleChargingMove();
   }, [turn]); // 턴 시작할 때마다 실행
 
   const [currentWatch, setCurrentWatch] = useState(0);
@@ -164,6 +180,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
           removeFaintedPokemon('my');
           removeFaintedPokemon('enemy');
           applyAppearance(myTeam[newActiveMy], 'my');
+          applyAppearance(enemyTeam[activeEnemy], 'enemy');
         }
         await new Promise<void>((resolve) => {
           setTimeout(() => {
@@ -345,7 +362,9 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
                               <ul>
                                 {poke.base.moves.map((m) => (
                                   <li key={m.name}>
-                                    {m.name}: {poke.pp[m.name]}, ({m.power}, {m.accuracy}), {m.type}
+                                    {m.name}: {poke.pp[m.name]}, (
+                                    {m.getPower ? m.getPower(myTeam) : m.power}
+                                    , {m.accuracy}), {m.type}
                                   </li>
                                 ))}
                               </ul>

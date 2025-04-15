@@ -104,8 +104,8 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, nullifica
 
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);
-  console.log(`${pokemon}은 ${status} 상태에 빠졌다!`);
-  addLog(`🍄 ${pokemon}은 ${status} 상태에 빠졌다!`)
+  console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
+  addLog(`🍄 ${pokemon.base.name}은 ${status} 상태에 빠졌다!`)
   return { ...pokemon, status: manager.getStatus() };
 }
 
@@ -154,7 +154,7 @@ export function lockMove(pokemon: BattlePokemon, moveName: string): BattlePokemo
 // 위치 변경 (구멍파기, 공중날기 등)
 export function changePosition(
   pokemon: BattlePokemon,
-  position: '땅' | '하늘' | '바다' | null
+  position: '땅' | '하늘' | '바다' | '공허' | null
 ): BattlePokemon {
   return { ...pokemon, position };
 }
@@ -221,13 +221,24 @@ export function setTypes(pokemon: BattlePokemon, types: string[]): BattlePokemon
 }
 
 // 전투 관련 일시적 상태값 리셋
-export function resetState(pokemon: BattlePokemon): BattlePokemon {
-  return {
+export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePokemon {
+  const baseReset = {
     ...pokemon,
     isProtecting: false,
-    usedMove: undefined,
     hadRankUp: false,
-    isCharging: false,
     receivedDamage: 0
   };
+
+  if (isSwitch) {
+    return {
+      ...baseReset,
+      usedMove: undefined,
+      isCharging: false,
+      chargingMove: undefined,
+      lockedMove: undefined,
+      hadMissed: false
+    };
+  }
+
+  return baseReset;
 }

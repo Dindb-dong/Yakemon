@@ -39,17 +39,17 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
 
   // 1. 랭크업 초기화, 상태이상 제거 
   console.log('1. 랭크업 초기화 ')
-  updatePokemon(side, currentIndex, (switchingPokemon) => resetState(switchingPokemon))
+  updatePokemon(side, currentIndex, (switchingPokemon) => resetState(switchingPokemon, true))
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
 
   // 비메이저 상태이상 제거
-  for (const status in unMainStatusCondition) {
+  for (const status of unMainStatusCondition) {
     if (team[currentIndex].status.includes(status as StatusState)) {
       updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
   }
   if (switchingPokemon.base.ability?.name === '자연회복') {
-    for (const status in unMainStatusCondition) {
+    for (const status of unMainStatusCondition) {
       if (team[currentIndex].status.includes(status as StatusState)) {
         updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
       }

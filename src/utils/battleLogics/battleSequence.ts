@@ -91,7 +91,11 @@ export async function battleSequence(
   if (isSwitchAction(myAction)) {
     await switchPokemon("my", myAction.index);
     if (isMoveAction(enemyAction)) {
-      //await delay(1500);
+      if (enemyAction.name === '기습') {
+        addLog(`enemy의 기습은 실패했다...`)
+        console.log(`enemy의 기습은 실패했다...`)
+        return;
+      }
       await handleMove("enemy", enemyAction, watchMode);
     }
     applyEndTurnEffects();
@@ -101,6 +105,11 @@ export async function battleSequence(
   if (isSwitchAction(enemyAction)) {
     await switchPokemon("enemy", enemyAction.index);
     if (isMoveAction(myAction)) {
+      if (myAction.name === '기습') {
+        addLog(`my의 기습은 실패했다...`)
+        console.log(`my의 기습은 실패했다...`)
+        return;
+      }
       await delay(1500);
       await handleMove("my", myAction, watchMode);
     }
@@ -109,34 +118,55 @@ export async function battleSequence(
   }
 
   // === 3. 둘 다 기술 ===
-  if (whoIsFirst === "my") {
-    await handleMove("my", myAction as MoveInfo, watchMode);
+  if (isMoveAction(myAction) && isMoveAction(enemyAction)) {
+    if (whoIsFirst === "my") {
+      if (myAction.name === '기습' && enemyAction.category === '변화') {
+        addLog(`my의 기습은 실패했다...`)
+        console.log(`my의 기습은 실패했다...`)
+        return;
+      } else if (enemyAction.name === '기습') {
+        // 상대 기습보다 내 선공기가 먼저였으면 실패
+        addLog(`enemy의 기습은 실패했다...`)
+        console.log(`enemy의 기습은 실패했다...`)
+        return;
+      }
+      await handleMove("my", myAction as MoveInfo, watchMode);
 
-    // 상대가 쓰러졌는지 확인
-    const updatedEnemy = useBattleStore.getState().enemyTeam[
-      useBattleStore.getState().activeEnemy
-    ];
-    if (updatedEnemy.currentHp <= 0) {
-      //removeFaintedPokemon("enemy");
-      applyEndTurnEffects();
-      return;
-    }
-    //await delay(1500);
-    await handleMove("enemy", enemyAction as MoveInfo, watchMode);
-  } else { // 상대가 선공일 경우 
-    await handleMove("enemy", enemyAction as MoveInfo, watchMode);
+      // 상대가 쓰러졌는지 확인
+      const updatedEnemy = useBattleStore.getState().enemyTeam[
+        useBattleStore.getState().activeEnemy
+      ];
+      if (updatedEnemy.currentHp <= 0) {
+        //removeFaintedPokemon("enemy");
+        applyEndTurnEffects();
+        return;
+      }
+      //await delay(1500);
+      await handleMove("enemy", enemyAction as MoveInfo, watchMode);
+    } else { // 상대가 선공일 경우 
+      if (enemyAction.name === '기습' && myAction.category === '변화') {
+        addLog(`enemy의 기습은 실패했다...`)
+        console.log(`enemy의 기습은 실패했다...`)
+        return;
+      } else if (myAction.name === '기습') {
+        addLog(`my의 기습은 실패했다...`)
+        console.log(`my의 기습은 실패했다...`)
+        return;
+      }
+      await handleMove("enemy", enemyAction as MoveInfo, watchMode);
 
-    // 내가 쓰러졌는지 확인
-    const updatedMe = useBattleStore.getState().myTeam[
-      useBattleStore.getState().activeMy
-    ];
-    if (updatedMe.currentHp <= 0) {
-      //removeFaintedPokemon("my");
-      applyEndTurnEffects();
-      return;
+      // 내가 쓰러졌는지 확인
+      const updatedMe = useBattleStore.getState().myTeam[
+        useBattleStore.getState().activeMy
+      ];
+      if (updatedMe.currentHp <= 0) {
+        //removeFaintedPokemon("my");
+        applyEndTurnEffects();
+        return;
+      }
+      await delay(1500);
+      await handleMove("my", myAction as MoveInfo, watchMode);
     }
-    await delay(1500);
-    await handleMove("my", myAction as MoveInfo, watchMode);
   }
 
   applyEndTurnEffects();

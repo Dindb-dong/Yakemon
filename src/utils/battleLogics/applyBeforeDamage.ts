@@ -134,10 +134,6 @@ export function applyOffensiveAbilityEffectBeforeDamage(
             rate *= 1.5; // 벌레의알림은 1.5배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
-          if (ability.name === '선파워' && publicEnv.weather === '쾌청' && usedMove.category === '특수') {
-            rate *= 1.5; // 선파워는 1.5배
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
-          }
           if (ability.name === '의욕' && usedMove.category === '물리') {
             rate *= 1.5;
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
@@ -162,6 +158,10 @@ export function applyOffensiveAbilityEffectBeforeDamage(
         case "type_change":
           break;
         case "rank_buff":
+          if (ability.name === '선파워' && publicEnv.weather === '쾌청' && usedMove.category === '특수') {
+            rate *= 1.5; // 선파워는 1.5배
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
           break;
         case "crack":
           break;

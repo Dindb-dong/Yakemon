@@ -79,12 +79,6 @@ function MainApp() {
       setMyTeam(myBattleTeam);
       setEnemyTeam(aiBattleTeam);
       setIsSelected(true); // 화면 전환 트리거
-      applyAppearance(myBattleTeam[0], "my");
-      addLog(`🐶 my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
-      console.log(`my ${myBattleTeam[0].base.name}이/가 전투에 나왔다!`);
-      applyAppearance(aiBattleTeam[0], "enemy");
-      addLog(`🐱 enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
-      console.log(`enemy ${aiBattleTeam[0].base.name}이/가 전투에 나왔다!`);
     },
     [setMyTeam, setEnemyTeam]
   );

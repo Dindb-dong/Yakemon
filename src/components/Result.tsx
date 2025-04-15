@@ -54,7 +54,7 @@ function Result({ winner, setBattleKey }) {
     // 다음 enemyTeam 생성
     const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
       let pokemonList = mockPokemon;
-      if (winCount >= 2) {
+      if (winCount >= 1) {
         pokemonList = win10Pokemon;
       }
       const pool = pokemonList.filter(
@@ -148,16 +148,7 @@ function Result({ winner, setBattleKey }) {
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
           <button onClick={() => {
-            setWinCount(0); // 💥 연승기록 초기화
-            setMyTeam([]);
-            setEnemyTeam([]);
-            setTurn(1);
-            setActiveMy(0);
-            setActiveEnemy(0);
-            setPublicEnv({});
-            setEnemyEnv({});
-            setMyEnv({});
-            navigate("/", { replace: true }); // 홈으로 이동
+            window.location.reload();
           }}>
             새로운 전투 시작
           </button>

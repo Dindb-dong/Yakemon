@@ -5,6 +5,8 @@ import TutorialModal from "./TutorialModal";
 import { getHpImagePath } from "./PokemonArea";
 import AudioManager from "../utils/AudioManager";
 import { loadRLModel } from "../utils/RL/RLChooseAction";
+import { shuffleArray } from "../utils/shuffle";
+import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => void;
@@ -57,6 +59,24 @@ function PokemonDetailModal({
 }
 
 function PokemonSelect({ onSelect }: Props) {
+  const generateRandomTeam = () => {
+    const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
+      const pool = mockPokemon.filter(
+        (p) => p.types.includes(type) && !exclude.includes(p)
+      );
+      return pool[Math.floor(Math.random() * pool.length)];
+    };
+
+    const typeOrder = shuffleArray(['불', '물', '풀']);
+    const myRaw: PokemonInfo[] = [];
+
+    typeOrder.forEach((type) => {
+      const chosen = getRandomByType(type, myRaw);
+      if (chosen) myRaw.push(chosen);
+    });
+
+    setSelected(myRaw); // ✅ 타입 일치: PokemonInfo[]
+  };
   const [mockPokemon] = useState(() => createMockPokemon());
   const [musicOn, setMusicOn] = useState(true);
   useEffect(() => {
@@ -224,6 +244,15 @@ function PokemonSelect({ onSelect }: Props) {
             }}
           >
             배틀 시작
+          </button>
+          <button
+            onClick={() => {
+              generateRandomTeam();
+              onSelect(selected, false, false)
+            }}
+            className="random-button"
+          >
+            랜덤배틀 시작
           </button>
           <button
             disabled={selected.length !== 3}

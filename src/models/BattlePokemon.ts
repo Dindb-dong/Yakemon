@@ -13,7 +13,7 @@ export type BattlePokemon = {
   isActive: boolean;               // 현재 전투에 나와있는가?
   lockedMove?: string | null;      // 고정된 기술 (구애스카프 등)
   isProtecting?: boolean;          // 방어, 니들가드 등을 쓰고 있는가?
-  usedMove?: MoveInfo;             // 이번 턴 사용한 기술
+  usedMove?: MoveInfo;             // 가장 마지막에 사용한 기술
   hadMissed?: boolean;             // 전 턴에 기술 빗나갔는지 
   hadRankUp?: boolean;             // 이번 턴에 랭크업했는지
   isCharging?: boolean;            // 솔라빔처럼 1턴 기다리는 기술인지

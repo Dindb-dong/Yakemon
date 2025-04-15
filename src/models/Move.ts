@@ -3,6 +3,7 @@ import * as path from "path";
 import { RankState } from "./RankState";
 import { FieldType } from "./Field";
 import { StatusState } from "./Status";
+import { BattlePokemon } from "./BattlePokemon";
 
 type StatChange = {
   target: 'opponent' | 'self';
@@ -49,6 +50,7 @@ export type MoveInfo = {
   boostOnMissedPrev?: boolean; // 분함의발구르기, 열불내기 등 전 턴 빗나가면 위력 상승. rate 8/5. hadMissed 상태로 비교하면됨
   chargeTurn?: boolean; // 솔라빔같이 차징하는 기술 
   position?: '땅' | '하늘' | '바다' | '공허' | null; // 공허(고스트, 섀도우다이브), 하늘, 바다, 땅 등 
+  getPower?: (team: BattlePokemon[]) => number;
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )
 };
 

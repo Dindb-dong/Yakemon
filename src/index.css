@@ -15,6 +15,23 @@
   z-index: 9999;
 }
 
+.random-button {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  background-color: #66D16D;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.random-button:hover {
+  background-color: #6ce274;
+  color:#e2e2e2
+}
+
 .turn-banner {
   text-align: center;
   font-size: 1.5rem;

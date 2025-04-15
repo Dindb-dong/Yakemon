@@ -1068,6 +1068,20 @@ const moveDatas: MoveInfo[] = [
       multiHit: true
     }],
     target: 'opponent',
+  },
+  {
+    name: '니들가드',
+    type: '풀',
+    category: '변화',
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    protect: true,
+    priority: 4,
+    target: 'self'
   },// 브리가론 
   {
     name: '물수리검',
@@ -1708,7 +1722,13 @@ const moveDatas: MoveInfo[] = [
     effects: [
       {
         chance: 1.0,
-        heal: 1.0 // 상대 공격력만큼 회복. base.attack * rankEffect
+        heal: 1.0, // 상대 공격력만큼 회복. base.attack * rankEffect
+        statChange: [
+          {
+            target: 'opponent', stat: 'attack',
+            change: -1
+          }
+        ]
       }
     ],
     target: "opponent"
@@ -1786,8 +1806,13 @@ const moveDatas: MoveInfo[] = [
     affiliation: "소리",
     accuracy: 100,
     criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '혼란',
+      }
+    ],
     target: "opponent"
-    // 💡 데미지 계산 시 hadRankUp 상태에 따라 별도로 처리해야 함
   },
   {
     name: "얼어붙은바람",
@@ -2049,13 +2074,16 @@ const moveDatas: MoveInfo[] = [
     name: "성묘",
     type: "고스트",
     category: "물리",
-    power: 50, // 남은 팀원 수에 따라 위력 조절 가정 (예:(4-남은수) * 50)
-    pp: 5,
+    power: 100,
+    pp: 10,
     isTouch: false,
     affiliation: null,
     accuracy: 100,
     criticalRate: 0,
-    // 위력은 team 구성에 따라 별도 처리 필요
+    getPower: (team) => {
+      const aliveCount = team.filter(p => p.currentHp > 0).length;
+      return Math.max(0, (4 - aliveCount) * 50);
+    },
     target: "opponent"
   },
   {
@@ -2122,7 +2150,7 @@ const moveDatas: MoveInfo[] = [
     affiliation: null,
     accuracy: 100,
     criticalRate: 0,
-    protect: true, // ✅ 방어 효과 있음
+    protect: true,
     priority: 4,
     target: 'self'
   },
@@ -2169,7 +2197,7 @@ export function moveData(moveNames: string[], types: string[]): MoveInfo[] {
     const isStatus = move.category === "변화";
     const statusCount = chosen.filter(m => m.category === "변화").length;
 
-    if (isStatus && statusCount >= 2) continue;
+    if (isStatus && statusCount >= 3) continue; // 변화기술은 최대 3개까지 제한
     if (chosen.length >= 4) break;
 
     chosen.push(move);

@@ -7,8 +7,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 3,
       name: '이상해꽃',
       types: ['풀', '독'],
-      moves: moveData(['기가드레인', '오물폭탄', '수면가루', '맹독', '대지의힘', '씨뿌리기', '광합성', '쾌청',
-        '에너지볼', '리프스톰'
+      moves: moveData(['대지의힘', '씨뿌리기', '광합성', '쾌청',
       ], ['풀', '독']),
       sex: 'male',
       ability:
@@ -84,7 +83,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 154,
       name: '메가니움',
       types: ['풀'],
-      moves: moveData(['씨뿌리기', '기가드레인', '광합성', '맹독', '리프스톰', '에너지볼', '원시의힘', '지진', '바디프레스', '드래곤테일'],
+      moves: moveData(['씨뿌리기', '기가드레인', '광합성', '맹독', '방어', '에너지볼', '원시의힘', '지진', '바디프레스', '드래곤테일'],
         ['풀']
       ),
       sex: 'female',
@@ -106,7 +105,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 257,
       name: '번치코',
       types: ['불', '격투'],
-      moves: moveData(['칼춤', '플레어드라이브', '스톤에지', '인파이트', '블레이즈킥', '번개펀치', '유턴', '화염방사', '파동탄', '지진',
+      moves: moveData(['칼춤', '플레어드라이브', '스톤에지', '인파이트', '블레이즈킥', '번개펀치', '유턴', '파동탄', '지진',
         '브레이브버드', '진공파', '깜짝베기'
       ], ['불', '격투']),
       sex: 'male',
@@ -128,7 +127,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 260,
       name: '대짱이',
       types: ['물', '땅'],
-      moves: moveData(['퀵턴', '아쿠아브레이크', '지진', '눈사태', '스톤샤워', '암석봉인', '독찌르기', '벌크업', '냉동펀치', '스텔스록'],
+      moves: moveData(['퀵턴', '아쿠아브레이크', '지진', '눈사태', '스톤샤워', '암석봉인', '독찌르기', '카운터', '냉동펀치', '스텔스록'],
         ['물', '땅']
       ),
       sex: 'male',
@@ -215,7 +214,9 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 652,
       name: '브리가론',
       types: ['풀', '격투'],
-      moves: moveData(['씨기관총', '바디프레스', '광합성', '철벽', '맹독', '씨뿌리기', '바늘미사일', '암석봉인', '드레인펀치', '스톤샤워'],
+      moves: moveData(['씨기관총', '바디프레스', '광합성', '철벽', '맹독', '씨뿌리기', '바늘미사일', '암석봉인', '드레인펀치', '스톤샤워',
+        '니들가드'
+      ],
         ['풀', '격투']
       ),
       sex: 'male',
@@ -237,7 +238,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 727,
       name: '어흥염',
       types: ['불', '악'],
-      moves: moveData(['플레어드라이브', '도깨비불', '막말내뱉기', 'DD래리어트', '지진', '인파이트', '개척하기', '번개펀치', '불꽃번치',
+      moves: moveData(['플레어드라이브', '도깨비불', '막말내뱉기', 'DD래리어트', '지진', '인파이트', '개척하기', '번개펀치', '불꽃펀치',
         '크로스촙'], ['불', '악']),
       sex: 'male',
       ability: { id: 116, name: '위협', appear: ['rank_change'] },
@@ -302,7 +303,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 911,
       name: '라우드본',
       types: ['불', '고스트'],
-      moves: moveData(['플레어송', '게으름피우기', '섀도볼', '도깨비불', '오버히트', '대지의힘', '씨폭탄'], ['불', '고스트']),
+      moves: moveData(['플레어송', '게으름피우기', '섀도볼', '도깨비불', '오버히트', '대지의힘', '씨폭탄', '매혹의보이스'], ['불', '고스트']),
       sex: 'male',
       ability: { id: 122, name: '천진', util: ['rank_nullification'] },
       hp: 104, attack: 75, defense: 100, spAttack: 110, spDefense: 75, speed: 66, level: 50,
@@ -322,7 +323,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 914,
       name: '웨이니발',
       types: ['물', '격투'],
-      moves: moveData(['아쿠아스텝', '웨이브태클', '인파이트', '브레이브버드', '아쿠아브레이크', '트리플악셀', '로킥', '유턴', '칼춤'],
+      moves: moveData(['아쿠아스텝', '웨이브태클', '인파이트', '브레이브버드', '아쿠아브레이크', '트리플악셀', '로킥', '유턴'],
         ['물', '격투']
       ),
       sex: 'male',
