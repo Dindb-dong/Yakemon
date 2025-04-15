@@ -11,7 +11,7 @@ import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
 import { addStatus, changeHp, changeRank, setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
-import { addTrap, setField, setWeather } from "./updateEnvironment";
+import { addTrap, setField, setRoom, setWeather } from "./updateEnvironment";
 import { WeatherType } from "../../models/Weather";
 
 type ItemInfo = {
@@ -95,6 +95,19 @@ export async function calculateMoveDamage({
     return { success: true }; // 바로 함수 종료
   }
 
+  // 0-3. 차징 기술 차지상태 설정 
+  if (moveInfo.chargeTurn) {
+    updatePokemon(side, activeMine, (prev) => {
+      return {
+        ...prev,
+        isCharging: true,
+        chargingMove: moveInfo,
+      };
+    });
+    addLog(`${attacker.base.name}은(는) 힘을 모으기 시작했다!`);
+    return { success: true }; // 공격 안 하고 대기
+  }
+
   // 1. 상대 포켓몬 타입 설정
   let opponentType = [...opponentPokemon.types];
 
@@ -112,6 +125,9 @@ export async function calculateMoveDamage({
   if (isAlwaysHit) { // 연속기 사용 시 
     isHit = true;
   } else {
+    if (attacker.base.ability?.name === '의욕' && moveInfo.category === '물리') {
+      moveInfo.accuracy *= 0.8;
+    }
     const hitSuccess = calculateAccuracy(accRate, moveInfo.accuracy, myPokeRank?.accuracy ?? 0, opPokeRank?.dodge ?? 0);
     if (!hitSuccess) {
       isHit = false;
@@ -199,6 +215,12 @@ export async function calculateMoveDamage({
 
   // 5-1. 날씨 효과 적용
   if (weatherEffect) { // 날씨 있을 때만 
+    if (weatherEffect === '쾌청' && moveInfo.type === '물') {
+      rate *= 0.5;
+    }
+    if (weatherEffect === '비' && moveInfo.type === '불') {
+      rate *= 0.5;
+    }
     if (weatherEffect === '모래바람') {
       if (opponentPokemon.types.includes('바위') && moveInfo.category === '특수') { // 날씨가 모래바람이고 상대가 바위타입일 경우
         rate *= 2 / 3;
@@ -399,6 +421,10 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', attacker?: 
       if (moveInfo.weather) {
         setWeather(moveInfo.weather as WeatherType);
         console.log(`${side}는 날씨를 ${moveInfo.weather}로 바꿨다!`);
+      }
+      if (moveInfo.room) {
+        setRoom(moveInfo.room);
+        console.log(`${side}는 룸 상태를 ${moveInfo.room}으로 바꿨다!`);
       }
     }
   }

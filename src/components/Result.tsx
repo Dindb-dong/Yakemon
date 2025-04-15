@@ -10,6 +10,7 @@ import { resetEnvironment } from "../utils/battleLogics/updateEnvironment";
 import { useNavigate } from "react-router-dom";
 import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
+import { createWin10Pokemon } from "../data/createWincountPokemon";
 
 function Result({ winner, setBattleKey }) {
   const {
@@ -28,6 +29,7 @@ function Result({ winner, setBattleKey }) {
     setMyEnv,
   } = useBattleStore();
   const mockPokemon = createMockPokemon();
+  const win10Pokemon = mockPokemon.concat(createWin10Pokemon());
   const [musicOn, setMusicOn] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
@@ -51,7 +53,11 @@ function Result({ winner, setBattleKey }) {
   const startNextBattle = () => {
     // 다음 enemyTeam 생성
     const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
-      const pool = mockPokemon.filter(
+      let pokemonList = mockPokemon;
+      if (winCount >= 2) {
+        pokemonList = win10Pokemon;
+      }
+      const pool = pokemonList.filter(
         (p) => p.types.includes(type) && !exclude.includes(p)
       );
       return pool[Math.floor(Math.random() * pool.length)];

@@ -168,21 +168,17 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
         console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
       }
-      const result = await calculateMoveDamage({ moveName: move.name, side });
-      if (result?.success) {
+      if (deffender.currentHp > 0) {
+        const result = await calculateMoveDamage({ moveName: move.name, side });
+        if (result?.success) {
 
-        // 트리플 기술은 데미지 누적 증가 (예시)
-        move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
-        await applyAfterDamage(side, attacker, deffender, move, result.damage, watchMode);
-        // await new Promise<void>((resolve) => {
-        //   setTimeout(() => {
-        //     console.log('gsdfv');
-        //     resolve()
-        //   }, 1000)
-        // })
-      } else {
-        break; // 빗나가면 반복 중단
-      }
+          // 트리플 기술은 데미지 누적 증가 (예시)
+          move.power += (move.name === "트리플킥" ? 10 : 20); // 누적 증가
+          await applyAfterDamage(side, attacker, deffender, move, result.damage, watchMode);
+        } else {
+          break; // 빗나가면 반복 중단
+        }
+      } else break;
     }
     return;
   } else if (isDoubleHit || isMultiHit) { // 첫타 맞으면 다 맞춤 
@@ -200,17 +196,14 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       const hitCount = getHitCount(move);
       console.log(hitCount)
       for (let i = 0; i < hitCount - 1; i++) {
-        console.log(`${i + 2}번째 타격!`)
-        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
-        if (result?.success) {
-          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
-          // await new Promise<void>((resolve) => {
-          //   setTimeout(() => {
-          //     console.log('gsdfv');
-          //     resolve()
-          //   }, 1000)
-          // })
-        }
+        if (deffender.currentHp > 0) {
+          console.log(`${i + 2}번째 타격!`)
+          const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
+          if (result?.success) {
+            await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+          }
+        } else break;
+
       }
       addLog("📊 총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");

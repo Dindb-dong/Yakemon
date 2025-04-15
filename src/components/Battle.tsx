@@ -19,6 +19,7 @@ import { RLChooseAction } from "../utils/RL/RLChooseAction";
 import { delay } from "../utils/delay";
 import { useNavigate } from "react-router-dom";
 import { aiChooseAction } from "../utils/RL/\baiChooseAction";
+import { BattlePokemon } from "../models/BattlePokemon";
 
 
 
@@ -79,6 +80,30 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   if (redirected || myTeam.length === 0 || enemyTeam.length === 0) {
     return <div style={{ padding: "2rem", textAlign: "center" }}>잘못된 접근입니다. 메인 화면으로 이동 중...</div>;
   }
+
+  useEffect(() => {
+    if (!watchMode && !isTurnProcessing && !isGameOver) {
+      const current = myTeam[activeMy];
+      if (current.isCharging && current.chargingMove) {
+        // 강제 행동 실행
+        const chargingMove = current.chargingMove;
+        console.log(`💥 ${current.base.name}이(가) ${chargingMove.name}을 발사합니다!`);
+
+        // 다음 턴 강제 실행
+        executeTurn(chargingMove);
+
+        // 상태 초기화
+        if (current.currentHp > 0) {
+          useBattleStore.getState().updatePokemon('my', activeMy, (prev) => ({
+            ...prev,
+            isCharging: false,
+            chargingMove: undefined
+          }));
+        }
+
+      }
+    }
+  }, [turn]); // 턴 시작할 때마다 실행
 
   const [currentWatch, setCurrentWatch] = useState(0);
   const leftPokemon = myTeam[activeMy];
@@ -270,7 +295,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
           <div style={{
             position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
-            justifyContent: "center", alignItems: "center", zIndex: 9999
+            justifyContent: "center", alignItems: "center", zIndex: 9999, flex: 1,
           }}>
             <div className="switch-modal">
               {isFainted && <h3>포켓몬이 쓰러졌습니다... 어느 포켓몬으로 교체하시겠습니까?</h3>}

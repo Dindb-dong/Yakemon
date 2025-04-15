@@ -6,7 +6,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
-import { changeHp, setTypes } from "./updateBattlePokemon";
+import { changeHp, changeRank, setTypes } from "./updateBattlePokemon";
 
 // 내 포켓몬, 상대 포켓몬, 기술, 받은 데미지, 날씨, 필드
 export function applyDefensiveAbilityEffectBeforeDamage(
@@ -46,6 +46,10 @@ export function applyDefensiveAbilityEffectBeforeDamage(
               console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
               rate *= 1.25;
             }
+          } else if (ability.name === '타오르는불꽃' && usedMove.type === '불') {
+            rate = 0;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'spAttack', 1));
           }
           // TODO: 마중물, 노릇노릇바디, 피뢰침, 전기엔진 등은 rate 0으로 만들고 각각 특수공격 1랭크, 방어 2랭크, 특수공격 1랭크, 스피드 2랭크 올리기. 
           // updatePokemon("my", 0, changeRank(active, "spAttack", 1)); 같은거 이용해서.
@@ -56,6 +60,9 @@ export function applyDefensiveAbilityEffectBeforeDamage(
             addLog(`🤪 ${deffender.base.name}의 ${ability?.name} 발동!`);
             rate = 0;
           } else if (ability.name === '방탄' && usedMove.affiliation === '폭탄') {
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            rate = 0;
+          } else if (ability.name === '여왕의위엄' && (usedMove.priority ?? 0) > 0) {
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             rate = 0;
           }
@@ -103,6 +110,10 @@ export function applyOffensiveAbilityEffectBeforeDamage(
             rate *= 1.2; // 철주먹은 1.2배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
+          if (ability.name === '테크니션' && usedMove.power <= 60) {
+            rate *= 1.5; // 테크니션은 1.5배
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
           if (ability.name === '단단한발톱' && usedMove.isTouch) {
             rate *= 1.3; // 단단한발톱은 1.3배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
@@ -119,8 +130,28 @@ export function applyOffensiveAbilityEffectBeforeDamage(
             rate *= 1.5; // 심록은 1.5배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
+          if (ability.name === '벌레의알림' && usedMove.type === '벌레' && attacker.currentHp <= attacker.base.hp / 3) {
+            rate *= 1.5; // 벌레의알림은 1.5배
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
           if (ability.name === '선파워' && publicEnv.weather === '쾌청' && usedMove.category === '특수') {
             rate *= 1.5; // 선파워는 1.5배
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '의욕' && usedMove.category === '물리') {
+            rate *= 1.5;
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '적응력' && attacker.base.types.includes(usedMove.type)) {
+            rate *= 4 / 3; // 적응력은 자속 보정 1.5배 아니라 2배
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '메가런처' && usedMove.affiliation === '파동') {
+            rate *= 1.5;
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '수포' && usedMove.type === '물') {
+            rate *= 2; // 수포는 2배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
           break;

@@ -1569,6 +1569,576 @@ const moveDatas: MoveInfo[] = [
     demeritEffects: [{ chance: 1, recoil: 0.33 }],
     target: 'opponent',
   }, // 웨이니발 
+  {
+    name: "폭포오르기",
+    type: "물",
+    category: "물리",
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      { chance: 0.2, status: "풀죽음" }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "열불내기",
+    type: "불",
+    category: "물리",
+    power: 75,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    boostOnMissedPrev: true,
+    target: "opponent"
+  },
+  {
+    name: "분함의발구르기",
+    type: "땅",
+    category: "물리",
+    power: 75,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    boostOnMissedPrev: true,
+    target: "opponent"
+  },
+  {
+    name: "기습",
+    type: "악",
+    category: "물리",
+    power: 70,
+    pp: 5,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 1,
+    // 특수 구현: 상대의 공격 기술에만 발동. 상대방이 반동으로 움직일 수 없게 되어도 성공한다.
+
+    // 상대방이 기술을 사용하기 위해 힘을 모으는 중이어도 성공한다.
+
+    // 상대방이 잠듦, 얼음으로 움직일 수 없게 되어도 공격기술을 선택했다면 성공한다.
+    target: "opponent"
+  },
+  {
+    name: "트릭룸",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    room: "트릭룸",
+    target: "none"
+  },
+  {
+    name: "열탕",
+    type: "물",
+    category: "특수",
+    power: 80,
+    pp: 15,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.3,
+        status: "화상"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "미러코트",
+    type: "에스퍼",
+    category: "특수",
+    power: 0, // 실질적 위력은 계산에서 2배로 따로 처리됨
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: -4,
+    counter: true,
+    target: "opponent"
+  },
+  {
+    name: "나비춤",
+    type: "벌레",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1.0,
+        statChange: [
+          { target: "self", stat: "spAttack", change: 1 },
+          { target: "self", stat: "spDefense", change: 1 },
+          { target: "self", stat: "speed", change: 1 }
+        ]
+      }
+    ],
+    target: "self"
+  },
+  {
+    name: "힘흡수",
+    type: "풀",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1.0,
+        heal: 1.0 // 상대 공격력만큼 회복. base.attack * rankEffect
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "분연",
+    type: "불",
+    category: "특수",
+    power: 80,
+    pp: 15,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.3,
+        status: "화상"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "솔라빔",
+    type: "풀",
+    category: "특수",
+    power: 120,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    chargeTurn: true,
+    target: "opponent"
+  },
+  {
+    name: "땅가르기",
+    type: "땅",
+    category: "물리",
+    power: 100000,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 30, // 명중률 보정 없음, 상대 회피 랭크 무시 
+    criticalRate: 0,
+    target: "opponent"
+    // 옹골참 특성인 포켓몬은 이 기술에 맞지 않는다. 하지만 특성 틀깨기로 옹골참의 포켓몬에게도 이 기술을 사용할 수 있다. 
+    // 구멍파기로 땅에 들어간 상태인 포켓몬에게도 맞출수 있다.
+  },
+  {
+    name: "HP회복",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        heal: 0.5
+      }
+    ],
+    target: "self"
+  },
+  {
+    name: "매혹의보이스",
+    type: "페어리",
+    category: "특수",
+    power: 80,
+    pp: 15,
+    isTouch: false,
+    affiliation: "소리",
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+    // 💡 데미지 계산 시 hadRankUp 상태에 따라 별도로 처리해야 함
+  },
+  {
+    name: "얼어붙은바람",
+    type: "얼음",
+    category: "특수",
+    power: 55,
+    pp: 15,
+    isTouch: false,
+    affiliation: "바람",
+    accuracy: 95,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "speed",
+            change: -1
+          }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "발경",
+    type: "격투",
+    category: "물리",
+    power: 60,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.3,
+        status: "마비"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "기합구슬",
+    type: "격투",
+    category: "특수",
+    power: 120,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 70,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "애시드봄",
+    type: "독",
+    category: "특수",
+    power: 40,
+    pp: 20,
+    isTouch: false,
+    affiliation: "폭탄",
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "spDefense",
+            change: -2
+          }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "불꽃춤",
+    type: "불",
+    category: "특수",
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.5,
+        statChange: [
+          {
+            target: "self",
+            stat: "spAttack",
+            change: 1
+          }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "파워휩",
+    type: "풀",
+    category: "물리",
+    power: 120,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 85,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "덤벼들기",
+    type: "벌레",
+    category: "물리",
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "attack",
+            change: -1
+          }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "전광석화",
+    type: "노말",
+    category: "물리",
+    power: 40,
+    pp: 30,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 1,
+    target: "opponent"
+  },
+  {
+    name: "신속",
+    type: "노말",
+    category: "물리",
+    power: 80,
+    pp: 5,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 2,
+    target: "opponent"
+  },
+  {
+    name: "물의파동",
+    type: "물",
+    category: "특수",
+    power: 60,
+    pp: 20,
+    isTouch: false,
+    affiliation: "파동",
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.2,
+        status: "혼란"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "고스트다이브",
+    type: "고스트",
+    category: "물리",
+    power: 90,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    chargeTurn: true,
+    position: '공허',
+    target: "opponent"
+  },
+  {
+    name: "전기자석파",
+    type: "전기",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: "마비"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "트로피컬킥",
+    type: "풀",
+    category: "물리",
+    power: 70,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "attack",
+            change: -1
+          }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "대폭발",
+    type: "노말",
+    category: "물리",
+    power: 250,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    demeritEffects: [
+      {
+        chance: 1,
+        fail: 1 // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "성묘",
+    type: "고스트",
+    category: "물리",
+    power: 50, // 남은 팀원 수에 따라 위력 조절 가정 (예:(4-남은수) * 50)
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    // 위력은 team 구성에 따라 별도 처리 필요
+    target: "opponent"
+  },
+  {
+    name: "드래곤클로",
+    type: "드래곤",
+    category: "물리",
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: 'G의힘',
+    type: '풀',
+    category: '물리',
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: 'opponent',
+            stat: 'defense',
+            change: -1
+          }
+        ]
+      }
+    ],
+    target: 'opponent'
+  },
+  {
+    name: '원념의칼',
+    type: '불',
+    category: '물리',
+    power: 90,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        heal: 0.5
+      }
+    ],
+    target: 'opponent'
+  },
+  {
+    name: '방어',
+    type: '노말',
+    category: '변화',
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    protect: true, // ✅ 방어 효과 있음
+    priority: 4,
+    target: 'self'
+  },
+  {
+    name: '마지막일침',
+    type: '벌레',
+    category: '물리',
+    power: 50,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1 }],
+    target: 'opponent'
+  }
 ]
 
 export function moveData(moveNames: string[], types: string[]): MoveInfo[] {

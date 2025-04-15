@@ -54,8 +54,8 @@ export function createWin10Pokemon(): PokemonInfo[] {
       sex: 'male',
       ability: {
         id: 202,
-        name: '타오르는불꽃',
-        offensive: ['damage_buff']
+        name: '타오르는불꽃', // TODO: 불꽃 기술만 강화하도록 바꿔야되긴 함 
+        defensive: ['type_nullification']
       },
       hp: 75, attack: 90, defense: 50, spAttack: 110, spDefense: 80, speed: 95,
       level: 50
@@ -176,7 +176,7 @@ export function createWin10Pokemon(): PokemonInfo[] {
       id: 637,
       name: '불카모스',
       types: ['벌레', '불'],
-      moves: moveData(['불대문자', '폭풍', '불꽃춤', '벌레의야단법석', '기가드레인', '개척하기', '사이코키네시스', '에어슬래시'], ['벌레', '불']),
+      moves: moveData(['불대문자', '폭풍', '불꽃춤', '벌레의야단법석', '기가드레인', '개척하기', '사이코키네시스', '에어슬래시', '나비춤', '아침햇살'], ['벌레', '불']),
       sex: 'female',
       ability: {
         id: 210,
@@ -260,8 +260,8 @@ export function createWin10Pokemon(): PokemonInfo[] {
       sex: 'female',
       ability: {
         id: 223,
-        name: '수확',
-        util: ['etc']
+        name: '불면',
+        util: ['status_nullification']
       },
       hp: 65, attack: 90, defense: 122, spAttack: 58, spDefense: 75, speed: 84,
       level: 50
@@ -304,7 +304,7 @@ export function createWin10Pokemon(): PokemonInfo[] {
       ability: {
         id: 226,
         name: '여왕의위엄',
-        util: ['etc']
+        defensive: ['damage_nullification']
       },
       hp: 72, attack: 120, defense: 98, spAttack: 50, spDefense: 98, speed: 72,
       level: 50
@@ -392,7 +392,7 @@ export function createWin10Pokemon(): PokemonInfo[] {
       level: 50
     },
     {
-      id: 951,
+      id: 952,
       name: '스코빌런',
       types: ['풀', '불'],
       moves: moveData(['기가드레인', '불대문자', '개척하기', '오버히트', '깨물어부수기', '분함의발구르기', '방어'], ['풀', '불']),

@@ -28,6 +28,12 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
   if (opponentPokemon.base.ability?.name === '엽록소' && publicEnv.weather === '쾌청') {
     opponentSpeed *= 2;
   }
+  if (myPokemon.base.ability?.name === '쓱쓱' && publicEnv.weather === '비') {
+    mySpeed *= 2;
+  }
+  if (opponentPokemon.base.ability?.name === '쓱쓱' && publicEnv.weather === '비') {
+    opponentSpeed *= 2;
+  }
   if (publicEnv.room === '트릭룸') {
     mySpeed *= -1;
     opponentSpeed *= -1;

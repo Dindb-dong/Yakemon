@@ -3,6 +3,7 @@ import { AbilityInfo } from "../../models/Ability";
 import { RankManager, RankState } from "../../models/RankState";
 import { StatusManager, StatusState } from "../../models/Status";
 import { useBattleStore } from "../../Context/useBattleStore";
+import { MoveInfo } from "../../models/Move";
 
 // 체력 변화
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
@@ -37,6 +38,14 @@ export function changeRank(
     if (amount > 0) {
       manager.increaseState(stat as keyof RankState, amount);
     } else {
+      manager.increaseState('attack', 2);
+      manager.decreaseState(stat as keyof RankState, Math.abs(amount));
+    }
+  }
+  else if (pokemon.base.ability?.name === '승기') {
+    if (amount > 0) {
+      manager.increaseState(stat as keyof RankState, amount);
+    } else {
       manager.increaseState('spAttack', 2);
       manager.decreaseState(stat as keyof RankState, Math.abs(amount));
     }
@@ -57,12 +66,13 @@ export function resetRank(pokemon: BattlePokemon): BattlePokemon {
 }
 
 // 상태이상 추가
-export function addStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
+export function addStatus(pokemon: BattlePokemon, status: StatusState, nullification?: boolean): BattlePokemon {
+  // 부식때문에 nullification 추가
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜']
   const { publicEnv, addLog } = useBattleStore.getState();
   if (status === '독' || status === '맹독') {
-    if (pokemon.base.ability?.name === '면역' || pokemon.base.types.includes('독') || pokemon.base.types.includes('강철')) {
+    if (!nullification && pokemon.base.ability?.name === '면역' || pokemon.base.types.includes('독') || pokemon.base.types.includes('강철')) {
       return { ...pokemon };
     }
   }
@@ -149,6 +159,40 @@ export function changePosition(
   return { ...pokemon, position };
 }
 
+// 보호 상태 설정
+export function setProtecting(pokemon: BattlePokemon, isProtecting: boolean): BattlePokemon {
+  return { ...pokemon, isProtecting };
+}
+
+// 사용한 기술 기록
+export function setUsedMove(pokemon: BattlePokemon, move: MoveInfo | null): BattlePokemon {
+  return { ...pokemon, usedMove: move ?? undefined };
+}
+
+// 빗나감 여부 설정
+export function setHadMissed(pokemon: BattlePokemon, hadMissed: boolean): BattlePokemon {
+  return { ...pokemon, hadMissed };
+}
+
+// 랭크업 여부 설정
+export function setHadRankUp(pokemon: BattlePokemon, hadRankUp: boolean): BattlePokemon {
+  return { ...pokemon, hadRankUp };
+}
+
+// 차징 여부 설정
+export function setCharging(pokemon: BattlePokemon, isCharging: boolean, move?: MoveInfo): BattlePokemon {
+  return {
+    ...pokemon,
+    isCharging,
+    chargingMove: isCharging ? move ?? undefined : undefined,
+  };
+}
+
+// 받은 데미지 기록
+export function setReceivedDamage(pokemon: BattlePokemon, damage: number): BattlePokemon {
+  return { ...pokemon, receivedDamage: damage };
+}
+
 // 전투 출전 여부 설정
 export function setActive(pokemon: BattlePokemon, isActive: boolean): BattlePokemon {
   return { ...pokemon, isActive };
@@ -173,5 +217,17 @@ export function setTypes(pokemon: BattlePokemon, types: string[]): BattlePokemon
       ...pokemon.base,
       types: types, // 빈 배열 넣으면 사실상 타입 사라지게 함.
     },
+  };
+}
+
+// 전투 관련 일시적 상태값 리셋
+export function resetState(pokemon: BattlePokemon): BattlePokemon {
+  return {
+    ...pokemon,
+    isProtecting: false,
+    usedMove: undefined,
+    hadRankUp: false,
+    isCharging: false,
+    receivedDamage: 0
   };
 }

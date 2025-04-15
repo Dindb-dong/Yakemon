@@ -1,7 +1,8 @@
 import { useBattleStore } from "../../Context/useBattleStore";
 import { useDurationStore } from "../../Context/useDurationContext";
+import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
-import { changeHp, changeRank, removeStatus } from "./updateBattlePokemon";
+import { changeHp, changeRank, removeStatus, resetState } from "./updateBattlePokemon";
 import { setField, setWeather } from "./updateEnvironment";
 
 // 매 턴 종료 시 적용할 모든 효과를 통합적으로 처리
@@ -123,11 +124,26 @@ export function applyEndTurnEffects() {
       updatePokemon(side, activeIndex, (prev) => changeRank(prev, 'speed', 1));
       addLog(`🦅 ${pokemon.base.name}의 가속 특성 발동!`);
     }
+    if (pokemon.base.ability?.name === '변덕쟁이') {
+      const getRandomStat = () => {
+        const statList = ['attack', 'spAttack', 'defense', 'spDefense', 'speed'];
+        return statList[Math.floor(Math.random() * 5)] as keyof RankState;
+      }
+      updatePokemon(side, activeIndex, (prev) => changeRank(prev, getRandomStat(), 2));
+      updatePokemon(side, activeIndex, (prev) => changeRank(prev, getRandomStat(), -1));
+      addLog(`🦅 ${pokemon.base.name}의 변덕쟁이 특성 발동!`);
+    }
     if (pokemon.base.ability?.name === '선파워' && publicEnv.weather === '쾌청') {
       const damage = Math.floor(pokemon.base.hp / 16);
       updatePokemon(side, activeIndex, (prev) => changeHp(prev, -damage));
       addLog(`🦅 ${pokemon.base.name}의 가속 특성 발동!`);
     }
   })
+
+  // == resetState == //
+  const actives = [activeMy, activeEnemy];
+  ["my", "enemy"].forEach((side, i) => {
+    updatePokemon(side as "my" | "enemy", actives[i], (prev) => resetState(prev));
+  });
   return;
 }
