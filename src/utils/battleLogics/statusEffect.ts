@@ -89,6 +89,7 @@ export function applyStatusEffectBefore(
         updatePokemon(side, activeIndex, (prev) => changeHp(prev, -finalDamage));
         addLog(`😵‍💫 ${activeTeam[activeIndex].base.name}은/는 스스로를 공격했다!`);
         console.log(`${activeTeam[activeIndex].base.name}은/는 스스로를 공격했다!`);
+        return { rate: currentRate, isHit: false };
       }
     }
   }

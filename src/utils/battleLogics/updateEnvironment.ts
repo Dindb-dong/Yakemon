@@ -21,6 +21,15 @@ export function setField(field: FieldType) {
   useBattleStore.getState().setPublicEnv({ field });
 }
 
+// 📍 룸 설정 (공유)
+export function setRoom(room: string) {
+  const { addEffect } = useDurationStore.getState()
+  if (room !== null) {
+    addEffect("public", { name: room, remainingTurn: 5 });
+  }
+  useBattleStore.getState().setPublicEnv({ room });
+}
+
 // 📍 오라 설정 (공유)
 export function setAura(aura: string) {
   const env = useBattleStore.getState().publicEnv;
@@ -34,12 +43,6 @@ export function removeAura(aura: string) {
   const env = useBattleStore.getState().publicEnv;
   const setter = useBattleStore.getState().setPublicEnv;
   setter({ aura: env.aura.filter((v) => v !== aura) })
-}
-
-// 📍 룸 설정 (공유)
-export function setRoom(room: string) {
-  const env = useBattleStore.getState().publicEnv;
-  // TODO: 룸 바꾸는 기능 추가 필요 
 }
 
 // 📍 트랩 추가 (진영별)

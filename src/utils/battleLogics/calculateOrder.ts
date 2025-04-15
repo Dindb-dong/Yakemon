@@ -23,9 +23,19 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
     opponentSpeed *= 0.5;
   }
   if (myPokemon.base.ability?.name === '엽록소' && publicEnv.weather === '쾌청') {
+    console.log('엽록소 발동!');
     mySpeed *= 2;
   }
   if (opponentPokemon.base.ability?.name === '엽록소' && publicEnv.weather === '쾌청') {
+    console.log('엽록소 발동!');
+    opponentSpeed *= 2;
+  }
+  if (myPokemon.base.ability?.name === '쓱쓱' && publicEnv.weather === '비') {
+    console.log('쓱쓱 발동!');
+    mySpeed *= 2;
+  }
+  if (opponentPokemon.base.ability?.name === '쓱쓱' && publicEnv.weather === '비') {
+    console.log('쓱쓱 발동!');
     opponentSpeed *= 2;
   }
   if (publicEnv.room === '트릭룸') {

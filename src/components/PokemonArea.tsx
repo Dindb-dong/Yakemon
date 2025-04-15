@@ -112,11 +112,13 @@ function PokemonArea({ my, enemy }: Props) {
       {my &&
         <div className={`pokemon-card ${myDamage ? 'damage-effect' : ''} ${myHeal ? 'heal-effect' : ''}`}>
           <h5>{my.base.name} (내 포켓몬)</h5>
-          <img
-            src={myImg}
-            alt={my.base.name}
-            className="pokemon-image"
-          />
+          {my.position === null &&
+            <img
+              src={myImg}
+              alt={my.base.name}
+              className="pokemon-image"
+            />
+          }
           <p>HP: {my.currentHp} / {my.base.hp}</p>
           <div className="hp-bar-container">
             <div
@@ -131,11 +133,13 @@ function PokemonArea({ my, enemy }: Props) {
       {enemy &&
         <div className={`pokemon-card ${enemyDamage ? 'damage-effect' : ''} ${enemyHeal ? 'heal-effect' : ''}`}>
           <h5>{enemy.base.name} (상대 포켓몬)</h5>
-          <img
-            src={enemyImg}
-            alt={enemy.base.name}
-            className="pokemon-image"
-          />
+          {enemy.position === null &&
+            <img
+              src={enemyImg}
+              alt={enemy.base.name}
+              className="pokemon-image"
+            />
+          }
           <p>HP:</p>
           <div className="hp-bar-container">
             <div

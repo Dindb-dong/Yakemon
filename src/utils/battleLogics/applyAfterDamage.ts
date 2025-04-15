@@ -13,14 +13,62 @@ import { applyConfusionStatus } from "./applyConfusionStatus";
 import { switchPokemon } from "./switchPokemon";
 import { calculateTypeEffectiveness } from "../typeRalation";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
+import { calculateRankEffect } from "./rankEffect";
 
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
 export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean) {
+
+  await applyDefensiveAbilityEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage, watchMode);
   await applyMoveEffectAfterDamage(side, attacker, deffender, usedMove, appliedDameage, watchMode);
 }
 
-function applyDefensiveAbilityEffectAfterDamage() {
+async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, deffender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean) {
+  const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
+  const effect = usedMove.effects;
+  const demeritEffect = usedMove.demeritEffects;
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const activeMine = side === 'my' ? activeMy : activeEnemy;
+  const mineTeam = side === 'my' ? myTeam : enemyTeam;
+  const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+  const ability = deffender.base.ability;
+  ability?.defensive?.forEach((category: string) => {
+    switch (category) {
+      case "rank_change":
+        if (ability.name === '증기기관' && (usedMove.type === '물' || usedMove.type === '불')) {
+          if (deffender.currentHp > 0) {
+            console.log(`${deffender.base.name}의 특성 ${ability.name} 발동!`);
+            addLog(`${deffender.base.name}의 특성 ${ability.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'speed', 6));
+          }
+        } else if (ability.name === '깨어진갑옷' && usedMove.category === '물리') {
+          if (deffender.currentHp > 0) {
+            console.log(`${deffender.base.name}의 특성 ${ability.name} 발동!`);
+            addLog(`${deffender.base.name}의 특성 ${ability.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'speed', 2));
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'defense', -1));
+          }
+        }
+      case "status_change":
+        if (ability.name === '불꽃몸' && usedMove.isTouch) {
+          if (Math.random() < 0.3) {
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '화상'));
+            addLog(`🥵 ${mineTeam[activeMine].base.name}은/는 화상상태가 되었다!`);
+            console.log(`${mineTeam[activeMine].base.name}은/는 화상상태가 되었다!`);
+          }
+        }
+        if (ability.name === '독가시' && usedMove.isTouch) {
+          if (Math.random() < 0.3) {
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '독'));
+            addLog(`🤢 ${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
+            console.log(`${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
+          }
+        }
+      default:
+        return;
+    }
+  })
 
 }
 
@@ -41,6 +89,58 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
 
   let shouldWaitForSwitch = false;
   let switchPromise: Promise<void> | null = null;
+  if (usedMove.uTurn) {
+    console.log('유턴 기술 사용!')
+    const { setSwitchRequest, clearSwitchRequest } = useBattleStore.getState();
+    const availableIndexes = mineTeam
+      .map((p, i) => ({ ...p, index: i }))
+      .filter((p, i) => p.currentHp > 0 && i !== activeMine); // 현재 포켓몬은 제외
+
+    console.log(availableIndexes);
+    // 1마리만 남은 경우는 실행안함
+    if (availableIndexes.length != 0) {
+      if (watchMode) {
+        console.log('관전 모드에서 유턴 사용');
+        const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
+        // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
+        switchPromise = new Promise<void>(async (resolve) => {
+          await switchPokemon(side, switchIndex);
+          resolve();
+        });
+
+      } else if (side === 'my') {
+        console.log('내가 유턴 사용');
+        switchPromise = new Promise<void>((resolve) => {
+          setSwitchRequest({
+            side,
+            reason: "uTurn",
+            onSwitch: async (index: number) => {
+              await switchPokemon(side, index);
+              setSwitchRequest(null);
+              clearSwitchRequest();
+              resolve();
+            },
+          });
+        });
+        shouldWaitForSwitch = true;
+      }
+      else {
+        // ✅ AI가 유턴 사용한 경우 자동 교체!
+        console.log('ai가 유턴 사용');
+        const switchIndex = getBestSwitchIndex(side);
+        switchPromise = new Promise<void>(async (resolve) => {
+          await switchPokemon(side, switchIndex);
+          resolve();
+        });
+      }
+    }
+  }
+
+  if (shouldWaitForSwitch && switchPromise) {
+    console.log('유턴 로직 실행중...2');
+    await switchPromise;
+    console.log('유턴 로직 실행중...5 (완료)');
+  }
   demeritEffect?.forEach((demerit) => {
     if (demerit && Math.random() < demerit.chance) {
       console.log(`${usedMove.name}의 디메리트 효과 발동!`)
@@ -62,31 +162,27 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           addLog(`🔃 ${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
         });
       }
-      // if (demerit.status) {
-      //   // 상태이상 적용
-      //   // 아니 여기 원래 attacker가 아니라 deffender여야 하는데 이거 왜이러냐 이거?
-      //   const status = demerit.status;
-      //   if (status === '화상' && deffender.base.types.includes('불')) { };
-      //   if (status === '마비' && deffender.base.types.includes('전기')) { };
-      //   if (status === '얼음' && deffender.base.types.includes('얼음')) { };
-      //   if (status === '독' && deffender.base.types.includes('독')) { };
-      //   if (status === '맹독' && deffender.base.types.includes('독')) { };
-      //   if (status === '풀죽음' || status === '도발' || status === '앵콜' || status === '잠듦') {
-      //     applyStatusWithDuration(opponentSide, activeOpponent, status);
-      //   } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
-      //     applyConfusionStatus(opponentSide, activeOpponent);
-      //   } else {
-      //     updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
-      //   }
-      //   addLog(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
-      //   console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`)
-      // }
     }
   })
   if (attacker.base.ability?.name !== '우격다짐' && usedMove.target === 'opponent') { // 우격다짐일 때에는 부가효과 적용안함.
     effect?.forEach((effect) => {
       if (effect && Math.random() < effect.chance) {
         console.log(`${usedMove.name}의 부가효과 발동!`)
+        if (effect.heal && !appliedDameage) {
+          const healRate = effect.heal;
+          if (healRate < 1) {
+            // 반피 회복 로직 
+            updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
+            addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
+          } else {
+            // 힘흡수
+            let healAmount: number;
+            healAmount = calculateRankEffect(deffender.rank.attack) * deffender.base.attack;
+            updatePokemon(side, activeMine, (attacker) => changeHp(attacker, healAmount));
+            addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
+          }
+
+        }
         if (effect.statChange) {
           effect.statChange.forEach((statChange) => {
             let targetSide: 'my' | 'enemy' = 'enemy'; // 누구의 랭크를 변화시킬건지 정함. 
@@ -112,21 +208,30 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           // 상태이상 적용
           const status = effect.status;
           let noStatusCondition: boolean = false;
-          if (status === '화상' && deffender.base.types.includes('불')) { noStatusCondition = true };
-          if (status === '마비' && deffender.base.types.includes('전기')) { noStatusCondition = true };
-          if (status === '얼음' && deffender.base.types.includes('얼음')) { noStatusCondition = true };
-          if (status === '독' && (deffender.base.types.includes('독') || deffender.base.types.includes('강철'))) { noStatusCondition = true };
-          if (status === '맹독' && (deffender.base.types.includes('독') || deffender.base.types.includes('강철'))) { noStatusCondition = true };
-          if (status === '풀죽음' || status === '앵콜' || status === '잠듦') {
-            applyStatusWithDuration(opponentSide, activeOpponent, status);
-          } else if (status === '도발' || status === '헤롱헤롱' && !(deffender.base.ability?.name === '둔감')) {
-            applyConfusionStatus(opponentSide, activeOpponent);
-          } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
-            applyConfusionStatus(opponentSide, activeOpponent);
+          if (usedMove.name === '매혹의보이스') {
+            if (deffender.hadRankUp) {
+              if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
+                applyConfusionStatus(opponentSide, activeOpponent);
+              } else {
+                noStatusCondition = true;
+              }
+            }
           } else {
-            updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
+            if (status === '화상' && deffender.base.types.includes('불')) { noStatusCondition = true };
+            if (status === '마비' && deffender.base.types.includes('전기')) { noStatusCondition = true };
+            if (status === '얼음' && deffender.base.types.includes('얼음')) { noStatusCondition = true };
+            if (status === '독' && (deffender.base.types.includes('독') || deffender.base.types.includes('강철'))) { noStatusCondition = true };
+            if (status === '맹독' && (deffender.base.types.includes('독') || deffender.base.types.includes('강철'))) { noStatusCondition = true };
+            if (status === '풀죽음' || status === '앵콜' || status === '잠듦') {
+              applyStatusWithDuration(opponentSide, activeOpponent, status);
+            } else if (status === '도발' || status === '헤롱헤롱' && !(deffender.base.ability?.name === '둔감')) {
+              applyConfusionStatus(opponentSide, activeOpponent);
+            } else if (status === '혼란' && !(deffender.base.ability?.name === '마이페이스')) {
+              applyConfusionStatus(opponentSide, activeOpponent);
+            } else {
+              updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status));
+            }
           }
-
           if (!noStatusCondition) {
             addLog(`🍄 ${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
             console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
@@ -136,12 +241,6 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           const deal = appliedDameage;
           const healRate = effect.heal;
           updatePokemon(side, activeMine, (attacker) => changeHp(attacker, deal * healRate));
-          addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
-        }
-        if (effect.heal && !appliedDameage) {
-          // 반피 회복 로직 
-          const healRate = effect.heal;
-          updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
           addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
         }
       }
@@ -162,58 +261,6 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     await switchPokemon(opponentSide, random.index);
     addLog(`💨 ${opponentTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
   }
-  if (usedMove.uTurn) {
-    const { setSwitchRequest, clearSwitchRequest } = useBattleStore.getState();
-    const availableIndexes = mineTeam
-      .map((p, i) => ({ ...p, index: i }))
-      .filter((p, i) => p.currentHp > 0 && i !== activeMine); // 현재 포켓몬은 제외
 
-
-    // ✅ 1마리만 남은 경우
-    if (availableIndexes.length <= 1) {
-      return;
-    }
-    if (watchMode) {
-      console.log('관전 모드에서 유턴 사용');
-      const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
-      // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
-      switchPromise = new Promise<void>(async (resolve) => {
-        await switchPokemon(side, switchIndex);
-        resolve();
-      });
-
-    } else if (side === 'my') {
-      console.log('내가 유턴 사용');
-      switchPromise = new Promise<void>((resolve) => {
-        setSwitchRequest({
-          side,
-          reason: "uTurn",
-          onSwitch: async (index: number) => {
-            await switchPokemon(side, index);
-            setSwitchRequest(null);
-            clearSwitchRequest();
-            resolve();
-          },
-        });
-      });
-      shouldWaitForSwitch = true;
-    }
-    else {
-      // ✅ AI가 유턴 사용한 경우 자동 교체!
-      console.log('ai가 유턴 사용');
-      const switchIndex = getBestSwitchIndex(side);
-      switchPromise = new Promise<void>(async (resolve) => {
-        await switchPokemon(side, switchIndex);
-        resolve();
-      });
-    }
-
-  }
-
-  if (shouldWaitForSwitch && switchPromise) {
-    console.log('유턴 로직 실행중...2');
-    await switchPromise;
-    console.log('유턴 로직 실행중...5 (완료)');
-  }
   return;
 }

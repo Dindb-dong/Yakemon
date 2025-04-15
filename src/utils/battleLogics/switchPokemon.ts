@@ -2,7 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
-import { addStatus, removeStatus, resetRank, setActive } from "./updateBattlePokemon";
+import { addStatus, changeHp, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
 export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
@@ -32,18 +32,24 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     return;
   }
 
+  if (switchingPokemon.base.ability?.name === '재생력' && switchingPokemon.currentHp > 0) {
+    console.log('재생력 발동!');
+    updatePokemon(side, currentIndex, (switchingPokemon) => changeHp(switchingPokemon, switchingPokemon.base.hp / 3));
+  }
+
   // 1. 랭크업 초기화, 상태이상 제거 
   console.log('1. 랭크업 초기화 ')
+  updatePokemon(side, currentIndex, (switchingPokemon) => resetState(switchingPokemon, true))
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
 
   // 비메이저 상태이상 제거
-  for (const status in unMainStatusCondition) {
+  for (const status of unMainStatusCondition) {
     if (team[currentIndex].status.includes(status as StatusState)) {
       updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
   }
   if (switchingPokemon.base.ability?.name === '자연회복') {
-    for (const status in unMainStatusCondition) {
+    for (const status of unMainStatusCondition) {
       if (team[currentIndex].status.includes(status as StatusState)) {
         updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
       }

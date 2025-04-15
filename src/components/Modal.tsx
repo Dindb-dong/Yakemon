@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { getHpImagePath } from "./PokemonArea";
+import { useBattleStore } from "../Context/useBattleStore";
 
 type Props = {
   myTeam: BattlePokemon[];
@@ -30,6 +31,7 @@ function PokemonDetailModal({
       <div style={{ background: "#fff", padding: "2rem", borderRadius: 10, width: 400 }}>
         <h2>{pokemon.base.name}</h2>
         <p>타입: {pokemon.base.types.join(", ")}</p>
+        <p>특성: {typeof pokemon.base.originalAbility === 'object' && pokemon.base.originalAbility !== null && 'name' in pokemon.base.originalAbility ? pokemon.base.originalAbility.name : pokemon.base.ability?.name ?? '없음'}</p>
         <p>체력: {pokemon.base.hp}</p>
         <p>공격력: {pokemon.base.attack}</p>
         <p>방어력: {pokemon.base.defense}</p>
@@ -58,6 +60,7 @@ function PokemonDetailModal({
 }
 
 function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
+  const { winCount } = useBattleStore.getState();
   const [selectedMy, setSelectedMy] = useState<number | null>(null);
   const [selectedEnemy, setSelectedEnemy] = useState<number | null>(null);
   const [viewing, setViewing] = useState<{ side: 'my' | 'enemy', index: number } | null>(null);
@@ -121,7 +124,7 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
   return (
     <div className="modal" style={{ padding: "2rem", background: "#f9f9f9", borderRadius: 10, maxWidth: 800, margin: "2rem auto" }}>
       <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>🎉 승리! 상대 포켓몬과 교체할 수 있어요</h2>
-
+      <div style={{ textAlign: "center", fontWeight: 'bold', fontSize: '1.5rem' }}>{winCount + 1} 연승중!</div>
       <div style={{ display: "flex", gap: "2rem" }}>
         <div style={{ flex: 1 }}>
           <h3>내 포켓몬</h3>

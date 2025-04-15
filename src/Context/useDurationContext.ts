@@ -80,6 +80,8 @@ export const useDurationStore = create<DurationState>((set, get) => ({
         battleStore.setPublicEnv({ weather: null });
       } else if (["그래스필드", "미스트필드", "사이코필드", "일렉트릭필드"].includes(effect)) {
         battleStore.setPublicEnv({ field: null });
+      } else if (['트릭룸', '매직룸', '원더룸'].includes(effect)) {
+        battleStore.setPublicEnv({ room: null });
       }
     });
 

@@ -3,7 +3,7 @@ from PIL import Image
 
 # 변환 대상 폴더 리스트
 TARGET_FOLDERS = ['red_hp', 'yellow_hp', 'green_hp', 'red_hp_2', 'yellow_hp_2', 'green_hp_2']
-BASE_PATH = 'assets'
+BASE_PATH = 'public/assets'
 
 def convert_png_to_webp_and_remove():
     print("🟡 PNG → WEBP 변환 후 PNG 삭제")
