@@ -7,7 +7,7 @@ import { createMockPokemon } from "../data/mockPokemon";
 import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
 import { resetBattlePokemon } from "../utils/resetBattlePokemon";
 import { resetEnvironment } from "../utils/battleLogics/updateEnvironment";
-import { useNavigate } from "react-router-dom";
+import { replace, useNavigate } from "react-router-dom";
 import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
 import { createWin10Pokemon } from "../data/createWincountPokemon";
@@ -24,9 +24,7 @@ function Result({ winner, setBattleKey }) {
     setTurn,
     addLog,
     setWinCount,
-    setPublicEnv,
-    setEnemyEnv,
-    setMyEnv,
+    resetAll
   } = useBattleStore();
   const mockPokemon = createMockPokemon();
   const win10Pokemon = mockPokemon.concat(createWin10Pokemon());
@@ -147,8 +145,10 @@ function Result({ winner, setBattleKey }) {
       {!isVictory && (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
+          <h1>{winCount} 연승에서 실패...</h1>
           <button onClick={() => {
-            window.location.reload();
+            navigate('/', { replace: true })
+            resetAll()
           }}>
             새로운 전투 시작
           </button>
