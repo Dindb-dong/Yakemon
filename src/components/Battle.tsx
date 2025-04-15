@@ -18,7 +18,7 @@ import AudioManager from "../utils/AudioManager";
 import { RLChooseAction } from "../utils/RL/RLChooseAction";
 import { delay } from "../utils/delay";
 import { useNavigate } from "react-router-dom";
-import { aiChooseAction } from "../utils/RL/\baiChooseAction";
+import { aiChooseAction } from "../utils/RL/aiChooseAction";
 import { BattlePokemon } from "../models/BattlePokemon";
 
 
