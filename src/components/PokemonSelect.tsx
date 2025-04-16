@@ -32,7 +32,7 @@ function PokemonDetailModal({
       <div style={{ background: "#fff", padding: "2rem", borderRadius: "10px", width: "400px", fontSize: "0.8rem" }}>
         <h2>{pokemon.name}</h2>
         <p>타입: {pokemon.types.join(", ")}</p>
-        <p>특성: {typeof pokemon.ability === 'string' ? pokemon.ability : pokemon.ability?.name ?? '없음'}</p>
+        {/* <p>특성: {typeof pokemon.ability === 'string' ? pokemon.ability : pokemon.ability?.name ?? '없음'}</p> */}
         <p>체력: {pokemon.hp + 75}</p>
         <p>공격력: {pokemon.attack + 20}</p>
         <p>방어력: {pokemon.defense + 20}</p>
@@ -238,7 +238,7 @@ function PokemonSelect({ onSelect }: Props) {
               backgroundColor: selected.length !== 3 ? "#676767" : "#7ea1ff",
               borderRadius: "6px",
               color: "#fff",
-              fontSize: "1rem",
+              fontSize: "0.7rem",
               border: "none",
               cursor: selected.length === 3 ? "pointer" : "not-allowed"
             }}
@@ -263,7 +263,7 @@ function PokemonSelect({ onSelect }: Props) {
               backgroundColor: selected.length !== 3 ? "#676767" : "#FF0000FF",
               borderRadius: "6px",
               color: "#fff",
-              fontSize: "1rem",
+              fontSize: "0.7rem",
               border: "none",
               cursor: selected.length === 3 ? "pointer" : "not-allowed"
             }}

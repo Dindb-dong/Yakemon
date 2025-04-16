@@ -108,7 +108,7 @@ export function applyAppearance(
         break;
 
       case "rank_change":
-        if (ability.name === '위협') {
+        if (ability.name === '위협' && !enemyPokemon.base.ability?.util?.includes('intimidate_nullification')) {
           const updatedOpponent = (enemyPokemon) => changeRank(enemyPokemon, "attack", -1);
           updatePokemon(opponentSide, activeOpponent, updatedOpponent);
           addLog(`🔃 ${pokemon.base.name}의 등장으로 상대의 공격력이 떨어졌다!`);

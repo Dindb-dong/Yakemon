@@ -29,7 +29,7 @@ type defensive_BeforeAbility =
   // 데미지 계산 전 발동하는 특성
   'type_nullification' | // 타입 상성 무효화 (예: 부유, 저수, 흙먹기, 초식, 건조피부, 노릇노릇바디, 마중물, 타오르는불꽃, 피뢰침, 전기엔진)
   'damage_nullification' | // 데미지 무효화 (예: 방탄, 방진 등)
-  'damage_reduction' | // 데미지 감소 (예: 퍼코트, 복슬복슬, 필터, 하드록, 두꺼운지방, 내열, 수포, 멀티스케일, 스펙터가드 등 )
+  'damage_reduction' | // 데미지 감소 (예: 퍼코트, 복슬복슬, 필터, 하드록, 두꺼운지방, 내열, 수포, 멀티스케일, 스펙터가드, 이상한비늘 등 )
   'critical_nullification'; // 급소 무효화 (예: 조가비갑옷, 전투무장 등)
 
 type defensive_AfterAbility =

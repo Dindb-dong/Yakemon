@@ -12,7 +12,7 @@ export class StatusManager {
   addStatus(status: StatusState): void {
     if (!status || this.hasStatus(status)) return;
 
-    const exclusive = ['마비', '독', '맹독', '얼음', '잠듦'];
+    const exclusive = ['마비', '독', '맹독', '얼음', '잠듦', '화상'];
     // 중복 있으면 바로 함수 종료 
     if (exclusive.some(s => this.status.includes(s as StatusState)) && exclusive.includes(status)) return;
     this.status.push(status);

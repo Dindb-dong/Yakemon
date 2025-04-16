@@ -28,6 +28,9 @@ export function changeRank(
   amount: number
 ): BattlePokemon {
   const manager = new RankManager(JSON.parse(JSON.stringify(pokemon.rank))); // 💡 깊은 복사
+  if (pokemon.base.ability?.name === '하얀연기' || pokemon.base.ability?.name === '클리어바디' || pokemon.base.ability?.name === '메탈프로텍트') {
+    return { ...pokemon };
+  }
   if (pokemon.base.ability?.name === '심술꾸러기') {
     if (amount > 0) {
       manager.decreaseState(stat as keyof RankState, amount);
