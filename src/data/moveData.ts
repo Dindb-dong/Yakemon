@@ -2065,7 +2065,8 @@ const moveDatas: MoveInfo[] = [
     demeritEffects: [
       {
         chance: 1,
-        fail: 1 // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
+        fail: 1, // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
+        recoil: 1,
       }
     ],
     target: "opponent"

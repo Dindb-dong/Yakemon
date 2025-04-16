@@ -12,6 +12,12 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
   const { publicEnv, myTeam, activeMy, enemyTeam, activeEnemy, addLog } = useBattleStore.getState();
   const myPokemon = myTeam[activeMy];
   const opponentPokemon = enemyTeam[activeEnemy];
+  if (myPokemon.base.ability?.name === '질풍날개' && playerMove?.type === '비행' && myPokemon.currentHp === myPokemon.base.hp) {
+    playerMove.priority = 1;
+  }
+  if (opponentPokemon.base.ability?.name === '질풍날개' && aiMove?.type === '비행' && opponentPokemon.currentHp === opponentPokemon.base.hp) {
+    aiMove.priority = 1;
+  }
   let mySpeed = myPokemon.base.speed;
   mySpeed *= calculateRankEffect(myPokemon.rank.speed);
   if (myPokemon.status.includes('마비')) {
@@ -21,6 +27,14 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
   opponentSpeed *= calculateRankEffect(opponentPokemon.rank.speed);
   if (opponentPokemon.status.includes('마비')) {
     opponentSpeed *= 0.5;
+  }
+  if (myPokemon.base.ability?.name === '곡예') {
+    console.log('곡예 발동!');
+    mySpeed *= 2;
+  }
+  if (opponentPokemon.base.ability?.name === '곡예') {
+    console.log('곡예 발동!');
+    opponentSpeed *= 2;
   }
   if (myPokemon.base.ability?.name === '엽록소' && publicEnv.weather === '쾌청') {
     console.log('엽록소 발동!');

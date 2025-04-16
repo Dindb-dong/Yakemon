@@ -69,6 +69,9 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           // TODO: 방탄, 방진 등 추가하기.
           break;
         case 'damage_reduction':
+          if (ability.name === '이상한비늘' && deffender.status.length > 0 && usedMove.category === '물리') {
+            rate = 2 / 3;
+          }
           // TODO: 퍼코트, 복슬복슬, 필터, 하드록, 두꺼운지방, 내열, 수포, 멀티스케일, 스펙터가드 등 추가하기 
           break;
         default:

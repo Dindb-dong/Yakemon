@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBattleStore } from "../Context/useBattleStore";
 import Result from "./Result";
 import { MoveInfo } from "../models/Move";
@@ -8,6 +8,7 @@ import TurnBanner from "./TurnBanner";
 import PokemonArea from "./PokemonArea";
 import ActionPanel from "./ActionPanel";
 import LogPanel from "./LogPanel";
+import TimerBar from "./TimerBar";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
 import { applyOffensiveAbilityEffectBeforeDamage } from "../utils/battleLogics/applyBeforeDamage";
@@ -41,6 +42,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   const [musicOn, setMusicOn] = useState(true);
   const navigate = useNavigate();
   const [redirected, setRedirected] = useState(false);
+  const slicedLogs = useMemo(() => logs.slice(-20), [logs]);
   useEffect(() => {
     const checkLastOne = () => {
       const aliveMy = myTeam.filter(p => p.currentHp > 0).length;
@@ -91,6 +93,88 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
     }
 
   }, []);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const [timeLeft, setTimeLeft] = useState(20); // 20초 제한
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timeLeftRef = useRef(timeLeft);
+  // useEffect(() => {
+  //   timeLeftRef.current = timeLeft;
+  //   console.log("💡 useEffect 타이머 리셋 트리거 확인", timeLeft);
+  // }, [timeLeft]);
+  const startTimer = useCallback(() => {
+    setTimeout(() => {
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      timeLeftRef.current = 20;
+      setTimeLeft(20);
+      console.log("⌛ 타이머 시작 (20초)");
+
+      timerRef.current = setInterval(() => {
+
+        timeLeftRef.current -= 1;
+        setTimeLeft(timeLeftRef.current);
+
+        if (timeLeftRef.current <= 0) {
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
+        }
+      }, 1000);
+    }, 0); // 🔥 이벤트 루프 뒤로 밀어서 타이밍 맞춤
+  }, []);
+
+  useEffect(() => {
+    if (!watchMode) {
+      startTimer(); // 초기 진입 시에도 사용
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [turn]); // 턴마다 타이머 리셋
+
+  useEffect(() => {
+    if (!watchMode && !isGameOver) {
+      console.log("🎯 내 포켓몬 교체 감지됨, 타이머 재시작");
+      startTimer();
+    }
+  }, [activeMy]);
+
+  useEffect(() => {
+    const handleTimeout = async () => {
+      if (timeLeft <= 0 && !isTurnProcessing && !watchMode) {
+        const current = myTeam[activeMy];
+
+        if (current.currentHp <= 0) {
+          // 체력이 0이므로 교체할 수 있는 포켓몬 탐색
+          const switchIndex = myTeam.findIndex((p, i) => i !== activeMy && p.currentHp > 0);
+          if (switchIndex !== -1) {
+            console.log("시간 초과! 기절 상태이므로 자동으로 교체합니다:", myTeam[switchIndex].base.name);
+            addLog(`시간 초과! 기절 상태이므로 자동으로 교체합니다: ${myTeam[switchIndex].base.name}`);
+            await switchPokemon('my', switchIndex);
+            clearSwitchRequest();
+            setIsSwitchModalOpen(false);
+          } else {
+            console.log("시간 초과! 교체 가능한 포켓몬이 없습니다.");
+            // 아무 것도 하지 않거나 게임오버 처리
+          }
+        } else {
+          // 체력이 남아 있으므로 0번째 기술 사용
+          const defaultMove = current.base.moves[0];
+          console.log("시간 초과! 자동으로 0번 기술 사용:", defaultMove.name);
+          addLog(`시간 초과! 자동으로 0번 기술 사용: ${defaultMove.name}`);
+          executeTurn(defaultMove);
+        }
+
+        if (timerRef.current) clearInterval(timerRef.current);
+      }
+    };
+
+    handleTimeout();
+  }, [timeLeft]);
 
   useEffect(() => {
     const handleChargingMove = async () => {
@@ -139,6 +223,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   useEffect(() => {
     if (isSwitchWaiting && switchRequest?.side === "my") {
       console.log('유턴 효과 실행중...3')
+      startTimer();
       setIsSwitchModalOpen(true);
       setPendingSwitch(() => (index) => {
         if (switchRequest?.onSwitch) {
@@ -216,6 +301,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   let isFainted: boolean = false;
   isFainted = myTeam[activeMy].currentHp <= 0 ? true : false;
 
+  // 내 포켓몬 기절했을 때 호출 
   useEffect(() => {
     if (isFainted) {
       setIsSwitchModalOpen(true);
@@ -396,7 +482,8 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
       <TurnBanner turn={turn} />
       <div className="main-area">
         <div className="pokemon_log">
-          <LogPanel logs={logs.slice(-20)} />
+          <LogPanel logs={slicedLogs} />
+          <TimerBar timeLeft={timeLeft} />
           <PokemonArea my={leftPokemon} enemy={rightPokemon} />
         </div>
 

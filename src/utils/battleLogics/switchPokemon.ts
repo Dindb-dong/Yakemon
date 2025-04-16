@@ -54,6 +54,11 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
         updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
       }
     }
+    for (const status of mainStatusCondition) {
+      if (team[currentIndex].status.includes(status as StatusState)) {
+        updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
+      }
+    }
   }
 
   // 2. 현재 포켓몬 비활성화

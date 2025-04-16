@@ -109,7 +109,6 @@ export function decrementConfusionTurn(side: "my" | "enemy", index: number): boo
     return true;
   } else {
     // 아직 혼란 상태 유지 (지속 턴 -1)
-    removeEffect(side, "혼란");
     useDurationStore.getState().addEffect(side, {
       name: "혼란",
       remainingTurn: nextTurn,

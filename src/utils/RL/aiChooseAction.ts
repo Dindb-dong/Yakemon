@@ -192,7 +192,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         return supportMove;
       }
 
-      if (roll < 0.75 && hasSwitchOption) {
+      if (roll < 0.7 && hasSwitchOption) {
         if (switchIndex !== -1) {
           addLog(`🛼 ${side}는 상대의 교체를 예상하고 맞교체한다!`);
           return { type: "switch" as const, index: switchIndex };
