@@ -37,12 +37,12 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
         defense: base.defense + 20,
         spDefense: base.spDefense + 20,
         speed: base.speed + 20,
-        originalAbility: base.ability,
-        originalTypes: base.types
+        originalAbility: base.ability ?? null, // 원본 특성 복사
+        originalTypes: base.types // 원본 타입 복사, 기본값 빈 배열
       } : {
         ...base,
-        originalAbility: base.ability,
-        originalTypes: base.types
+        ability: base.originalAbility ?? null,
+        types: base.originalTypes ?? [] // 원본 타입 복사, 기본값 빈 배열
       },
     currentHp: !exchange ? base.hp + 75 : base.hp,
     pp,

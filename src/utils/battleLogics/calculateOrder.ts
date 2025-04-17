@@ -13,9 +13,11 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
   const myPokemon = myTeam[activeMy];
   const opponentPokemon = enemyTeam[activeEnemy];
   if (myPokemon.base.ability?.name === '질풍날개' && playerMove?.type === '비행' && myPokemon.currentHp === myPokemon.base.hp) {
+    console.log('질풍날개 발동!');
     playerMove.priority = 1;
   }
   if (opponentPokemon.base.ability?.name === '질풍날개' && aiMove?.type === '비행' && opponentPokemon.currentHp === opponentPokemon.base.hp) {
+    console.log('질풍날개 발동!');
     aiMove.priority = 1;
   }
   let mySpeed = myPokemon.base.speed;

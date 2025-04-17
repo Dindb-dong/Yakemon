@@ -12,7 +12,7 @@ import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
 import { createWin10Pokemon } from "../data/createWincountPokemon";
 
-function Result({ winner, setBattleKey }) {
+function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
   const {
     myTeam,
     enemyTeam,
@@ -113,7 +113,7 @@ function Result({ winner, setBattleKey }) {
 
   return (
     <>
-      {showModal && isVictory && (
+      {showModal && isVictory && randomMode && (
         <Modal
           myTeam={myTeam}
           enemyTeam={enemyTeam}
@@ -136,7 +136,7 @@ function Result({ winner, setBattleKey }) {
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
-      {!showModal && isVictory && (
+      {!showModal && isVictory && randomMode && (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
           <button onClick={handleSkip}>다음 전투 시작</button>
@@ -145,7 +145,18 @@ function Result({ winner, setBattleKey }) {
       {!isVictory && (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
-          <h1>{winCount} 연승에서 실패...</h1>
+          {randomMode && (<h1>{winCount} 연승에서 실패...</h1>)}
+          <button onClick={() => {
+            navigate('/', { replace: true })
+            resetAll()
+          }}>
+            새로운 전투 시작
+          </button>
+        </div>
+      )}
+      {isVictory && !randomMode && (
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <h1>{winner}</h1>
           <button onClick={() => {
             navigate('/', { replace: true })
             resetAll()
