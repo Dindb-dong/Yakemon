@@ -136,12 +136,19 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   let switchPromise: Promise<void> | null = null;
   if (usedMove.uTurn) {
     console.log('유턴 기술 사용!')
-    const available = opponentTeam
+    const availableMine = mineTeam
+      .map((p, i) => ({ ...p, index: i }))
+      .filter((p, i) => p.currentHp > 0 && i !== activeMine);
+
+    const availableOpponent = opponentTeam
       .map((p, i) => ({ ...p, index: i }))
       .filter((p, i) => p.currentHp > 0 && i !== activeOpponent);
-
-    if (available.length === 0) {
-      console.log('유턴으로 게임을 끝냄!');
+    if (side === 'my' && availableOpponent.length === 0) {
+      console.log('내가 유턴으로 게임을 끝냄!');
+      return;
+    }
+    if (side === 'enemy' && availableMine.length === 0) {
+      console.log('상대가 유턴으로 게임을 끝냄!');
       return;
     }
     const { setSwitchRequest, clearSwitchRequest } = useBattleStore.getState();

@@ -9,7 +9,7 @@ import { shuffleArray } from "../utils/shuffle";
 import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
 
 type Props = {
-  onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => void;
+  onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => void;
 };
 
 
@@ -59,24 +59,7 @@ function PokemonDetailModal({
 }
 
 function PokemonSelect({ onSelect }: Props) {
-  const generateRandomTeam = () => {
-    const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
-      const pool = mockPokemon.filter(
-        (p) => p.types.includes(type) && !exclude.includes(p)
-      );
-      return pool[Math.floor(Math.random() * pool.length)];
-    };
 
-    const typeOrder = shuffleArray(['불', '물', '풀']);
-    const myRaw: PokemonInfo[] = [];
-
-    typeOrder.forEach((type) => {
-      const chosen = getRandomByType(type, myRaw);
-      if (chosen) myRaw.push(chosen);
-    });
-
-    setSelected(myRaw); // ✅ 타입 일치: PokemonInfo[]
-  };
   const [mockPokemon] = useState(() => createMockPokemon());
   const [musicOn, setMusicOn] = useState(true);
   useEffect(() => {
@@ -106,6 +89,7 @@ function PokemonSelect({ onSelect }: Props) {
   }, []);
 
   const [selected, setSelected] = useState<PokemonInfo[]>([]);
+  const myRaw: PokemonInfo[] = [];
   const [watchCount, setWatchCount] = useState(1); // 관전 반복 횟수
   const [watchDelay, setWatchDelay] = useState(1.5);
   const [showTutorial, setShowTutorial] = useState(true); // 모달 보일지 여부
@@ -116,6 +100,24 @@ function PokemonSelect({ onSelect }: Props) {
     setSelectedPokemonInfo(pokemon);
     setShowDetailModal(true);
   };
+  const generateRandomTeam = () => {
+    const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
+      const pool = mockPokemon.filter(
+        (p) => p.types.includes(type) && !exclude.includes(p)
+      );
+      return pool[Math.floor(Math.random() * pool.length)];
+    };
+
+    const typeOrder = shuffleArray(['불', '물', '풀']);
+    console.log("🔥 셔플된 타입 순서:", typeOrder.map(t => t).join(" > "));
+
+
+    typeOrder.forEach((type) => {
+      const chosen = getRandomByType(type, myRaw);
+      if (chosen) myRaw.push(chosen);
+    });
+    setSelected(myRaw);
+  };
 
   const tutorialPages = [
     <div><h3>안녕하세요!</h3><p>본 웹페이지는 연세대학교 인공지능학회 YAI소속</p><p> 기초심화RL팀의 토이프로젝트에서 탄생했습니다.</p></div>,
@@ -123,9 +125,9 @@ function PokemonSelect({ onSelect }: Props) {
       <p>또는 제가 손코딩한 모델과도 대전하실 수 있습니다 :D</p></div>,
     <div><p>모델 학습에 시간이 걸리는 관계로</p><p>아직은 스타팅 포켓몬만 선택하실 수 있습니다...</p></div>,
     <div><h3>그래도 재밌게 즐겨주세요!</h3></div>,
-    <div><h3>튜토리얼 1</h3><p>포켓몬을 3마리 선택하세요.</p></div>,
-    <div><h3>튜토리얼 2</h3><p>관전 모드를 사용하면 AI끼리의 대전을 볼 수 있어요.</p>
-      <p>사용할 포켓몬을 3마리 고르고 관전할 수도 있답니다!</p></div>,
+    <div><h3>튜토리얼 1</h3><p>랜덤배틀을 시작하시면 배틀 프론티어를 즐길 수 있어요.</p>
+      <p>기술, 특성도 랜덤, 포켓몬도 랜덤! 재밌게 즐겨주세요.</p></div>,
+    <div><h3>튜토리얼 2</h3><p>포켓몬을 3마리 선택하고 1회만 배틀할 수도 있어요.</p></div>,
     <div><h3>튜토리얼 3</h3><p>포켓몬 선택이 끝나면 ‘배틀 시작’을 누르세요!</p></div>,
   ];
 
@@ -231,7 +233,7 @@ function PokemonSelect({ onSelect }: Props) {
         >
           <button
             disabled={selected.length !== 3}
-            onClick={() => onSelect(selected, false, false)}
+            onClick={() => onSelect(selected, false, false, false)}
             style={{
               marginTop: "1rem",
               padding: "1rem 2rem",
@@ -248,7 +250,7 @@ function PokemonSelect({ onSelect }: Props) {
           <button
             onClick={() => {
               generateRandomTeam();
-              onSelect(selected, false, false)
+              onSelect(myRaw, false, false, true)
             }}
             className="random-button"
           >
@@ -256,7 +258,7 @@ function PokemonSelect({ onSelect }: Props) {
           </button>
           <button
             disabled={selected.length !== 3}
-            onClick={() => onSelect(selected, false, true)}
+            onClick={() => onSelect(selected, false, true, false)}
             style={{
               marginTop: "1rem",
               padding: "1rem 2rem",
@@ -296,7 +298,7 @@ function PokemonSelect({ onSelect }: Props) {
             </div>
 
             <button
-              onClick={() => onSelect(selected.length === 3 ? selected : [], true, true, watchCount, watchDelay)}
+              onClick={() => onSelect(selected.length === 3 ? selected : [], true, true, false, watchCount, watchDelay)}
               style={{ padding: "0.5rem 1rem", flex: 0.55 }}
             >
               관전 시작

@@ -17,6 +17,7 @@ function MainApp() {
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
   const [redMode, setRedMode] = useState(false);
+  const [randomeMode, setRandomMode] = useState(false);
   const [watchCount, setWatchCount] = useState(1);
   const [watchDelay, setWatchDelay] = useState(1.5);
   const { addLog } = useBattleStore.getState();
@@ -24,9 +25,10 @@ function MainApp() {
   const navigate = useNavigate();
 
   const handleSelect = useCallback(
-    (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, watchCount?: number, watchDelay?: number) => {
+    (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => {
       setWatchMode(watchMode);
       setRedMode(redMode);
+      setRandomMode(randomMode);
       setWatchCount(watchCount || 1);
       setWatchDelay(watchDelay || 1.5);
       if (watchMode) {
@@ -52,6 +54,7 @@ function MainApp() {
       let myBattleTeam: BattlePokemon[] = [];
 
       if (playerPokemons.length !== 3) {
+        console.error("포켓몬 선택이 잘못되었습니다.");
         console.log("선택된 포켓몬:", myRaw);
         myBattleTeam = myRaw.map((p, i) => {
           if (!p || !p.moves) {
@@ -92,6 +95,7 @@ function MainApp() {
             key={battleKey}
             watchMode={watchMode}
             redMode={redMode}
+            randomMode={randomeMode}
             watchCount={watchCount}
             watchDelay={watchDelay}
             setBattleKey={setBattleKey}

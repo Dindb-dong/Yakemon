@@ -85,7 +85,7 @@ export function applyStatusEffectBefore(
       if (Math.random() < 0.33) {
         const selfDamage = 40 * activeTeam[activeIndex].base.attack;
         const durability = (activeTeam[activeIndex].base.defense * activeTeam[activeIndex].base.hp) / 0.411
-        const finalDamage = Math.min(activeTeam[activeIndex].currentHp, Math.round((selfDamage * durability) * activeTeam[activeIndex].base.hp));
+        const finalDamage = Math.min(activeTeam[activeIndex].currentHp, Math.round((selfDamage / durability) * activeTeam[activeIndex].base.hp));
         updatePokemon(side, activeIndex, (prev) => changeHp(prev, -finalDamage));
         addLog(`😵‍💫 ${activeTeam[activeIndex].base.name}은/는 스스로를 공격했다!`);
         console.log(`${activeTeam[activeIndex].base.name}은/는 스스로를 공격했다!`);

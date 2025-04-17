@@ -24,7 +24,7 @@ import { BattlePokemon } from "../models/BattlePokemon";
 
 
 
-function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
+function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBattleKey }) {
   const myTeam = useBattleStore((state) => state.myTeam);
   const enemyTeam = useBattleStore((state) => state.enemyTeam);
   const {
@@ -69,6 +69,15 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
       AudioManager.getInstance().stop(); // 다음 진입 대비
     };
   }, []);
+  useEffect(() => {
+    if (!watchMode && musicOn) {
+      console.log("🎵 초기 배틀 브금 강제 재생");
+      AudioManager.getInstance().play("battle");
+    }
+    return () => {
+      AudioManager.getInstance().stop(); // 다음 진입 대비
+    };
+  }, []); // ✅ 최초 1회 명시적 실행
 
   useEffect(() => {
     if (myTeam.length === 0 || enemyTeam.length === 0) {
@@ -83,6 +92,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
     return <div style={{ padding: "2rem", textAlign: "center" }}>잘못된 접근입니다. 메인 화면으로 이동 중...</div>;
   }
   useEffect(() => {
+    // TODO: 여기마저도 calculateOrder 써야 함 
     if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
       applyAppearance(myTeam[activeMy], "my");
       addLog(`🐶 my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
@@ -98,7 +108,20 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
-
+  const [currentWatch, setCurrentWatch] = useState(0);
+  const leftPokemon = myTeam[activeMy];
+  const rightPokemon = enemyTeam[activeEnemy];
+  const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
+  const [isTurnProcessing, setIsTurnProcessing] = useState(false);
+  const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+  const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [viewingIndex, setViewingIndex] = useState<number | null>(null);
+  const toggleView = (index: number) => {
+    setViewingIndex((prev) => (prev === index ? null : index));
+  };
+  const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
+  const isRunningRef = useRef(false);
   const [timeLeft, setTimeLeft] = useState(20); // 20초 제한
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const timeLeftRef = useRef(timeLeft);
@@ -128,20 +151,20 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   }, []);
 
   useEffect(() => {
-    if (!watchMode) {
-      startTimer(); // 초기 진입 시에도 사용
+    if (!watchMode && !isGameOver) {
+      startTimer(); // 초기 진입 or 턴 시작 시
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [turn]); // 턴마다 타이머 리셋
+  }, [turn, isGameOver]);
 
   useEffect(() => {
     if (!watchMode && !isGameOver) {
       console.log("🎯 내 포켓몬 교체 감지됨, 타이머 재시작");
       startTimer();
     }
-  }, [activeMy]);
+  }, [activeMy, isGameOver]);
 
   useEffect(() => {
     const handleTimeout = async () => {
@@ -205,13 +228,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
     handleChargingMove();
   }, [turn]); // 턴 시작할 때마다 실행
 
-  const [currentWatch, setCurrentWatch] = useState(0);
-  const leftPokemon = myTeam[activeMy];
-  const rightPokemon = enemyTeam[activeEnemy];
-  const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
-  const [isTurnProcessing, setIsTurnProcessing] = useState(false);
-  const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
-  const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
+
   const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
     setPendingSwitch(() => (index) => {
       onSwitchConfirmed(index);
@@ -238,8 +255,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
   }, [isSwitchWaiting, switchRequest]);
 
   // 어느 한 팀이 다 기절했을 때에 게임 끝 
-  const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
-  const isRunningRef = useRef(false);
+
   useEffect(() => {
     if (watchMode && !isTurnProcessing && !isGameOver && !isRunningRef.current) {
       isRunningRef.current = true; // 실행 중 플래그 설정
@@ -347,11 +363,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
     }
   };
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [viewingIndex, setViewingIndex] = useState<number | null>(null);
-  const toggleView = (index: number) => {
-    setViewingIndex((prev) => (prev === index ? null : index));
-  };
+
 
   if (isGameOver) {
     let winner: string = '승리';
@@ -369,7 +381,7 @@ function Battle({ watchMode, redMode, watchCount, watchDelay, setBattleKey }) {
     }
     return (
       <div>
-        <Result winner={winner} setBattleKey={setBattleKey} />
+        <Result winner={winner} setBattleKey={setBattleKey} randomMode={randomMode} />
         <LogPanel logs={logs.slice(-20)} />
       </div>
     )
