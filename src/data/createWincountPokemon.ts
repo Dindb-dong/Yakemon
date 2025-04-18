@@ -219,7 +219,7 @@ export function createWin10Pokemon(): PokemonInfo[] {
       id: 763,
       name: '달코퀸',
       types: ['풀'],
-      moves: moveData(['트로피컬킥', '유턴', '씨폭탄', '무릎차기', '기가드레인', '개척하기', '애크러뱃', '로킥', '트리플악셀'], ['풀']),
+      moves: moveData(['트로피컬킥', '유턴', '씨폭탄', '무릎차기', '개척하기', '애크러뱃', '로킥', '트리플악셀'], ['풀']),
       sex: 'female',
       ability: abilityData(['여왕의위엄', '리프가드']),
       hp: 72, attack: 120, defense: 98, spAttack: 50, spDefense: 98, speed: 72,

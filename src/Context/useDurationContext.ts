@@ -100,7 +100,7 @@ export function decrementConfusionTurn(side: "my" | "enemy", index: number): boo
   if (!confusion) return false;
 
   const nextTurn = confusion.remainingTurn - 1;
-  const shouldRecover = nextTurn <= 0 || Math.random() < 1 / 3;
+  const shouldRecover = nextTurn <= 0;
 
   if (shouldRecover) {
     // 상태 제거
