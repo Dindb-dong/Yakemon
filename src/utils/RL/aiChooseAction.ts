@@ -15,7 +15,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   // 이 아래에서부터는 rightPokemon -> myPokemon, leftPokemon -> enemyPokemon으로 변경 
   const userSpeed = enemyPokemon.base.speed * calculateRankEffect(enemyPokemon.rank.speed) * (enemyPokemon.status.includes('마비') ? 0.5 : 1);
   const aiSpeed = myPokemon.base.speed * calculateRankEffect(myPokemon.rank.speed) * (myPokemon.status.includes('마비') ? 0.5 : 1);
-  const isEnemyFaster = (publicEnv.room === '트릭룸') ? aiSpeed < userSpeed : aiSpeed > userSpeed;
+  const isAiFaster = (publicEnv.room === '트릭룸') ? aiSpeed < userSpeed : aiSpeed > userSpeed;
   const roll = Math.random();
   const aiHpRation = myPokemon.currentHp / myPokemon.base.hp; // ai 포켓몬의 체력 비율 
   const userHpRation = enemyPokemon.currentHp / enemyPokemon.base.hp; // 유저 포켓몬의 체력 비율 
@@ -119,6 +119,28 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     return rankUpMoves[0];
   };
 
+  // 새로운 유틸 함수 추가
+  const isAllSlower = mineTeam
+    .filter((p, i) => i !== activeIndex && p.currentHp > 0)
+    .every((p) => {
+      const speed = p.base.speed * calculateRankEffect(p.rank.speed) * (p.status.includes("마비") ? 0.5 : 1);
+      const enemySpeed = enemyPokemon.base.speed * calculateRankEffect(enemyPokemon.rank.speed);
+      return (publicEnv.room === "트릭룸") ? speed < enemySpeed : speed <= enemySpeed;
+    });
+
+  const hasGoodMatchup = mineTeam
+    .filter((p, i) => i !== activeIndex && p.currentHp / p.base.hp > 0.3)
+    .some((p) => calculateTypeEffectiveness(p.base.types[0], enemyPokemon.base.types) > 1.5);
+
+  const getSpeedDownMove = (): MoveInfo | null => {
+    return usableMoves.find((m) =>
+      m.effects?.some((e) =>
+        e.statChange?.some((s) => s.target === "opponent" && s.stat === "speed" && s.change < 0)
+      )
+    ) || null;
+  };
+
+  const speedDownMove = getSpeedDownMove();
   const aiTouser = typeEffectiveness(myPokemon.base.types, enemyPokemon.base.types);
   const userToai = typeEffectiveness(enemyPokemon.base.types, myPokemon.base.types);
   const bestMove = getBestMove();
@@ -141,28 +163,53 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
   // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
   if (myPokemon.currentHp <= 0) {
-    return { type: "switch" as const, index: switchIndex };
+    const switchOptions = mineTeam
+      .map((p, i) => ({ ...p, index: i }))
+      .filter((p, i) => p.currentHp > 0 && i !== activeIndex);
+
+    // 우선순위 기준: (1) 상대보다 빠르고 (2) 상대 체력 적음
+    const prioritized = switchOptions.find((p) => {
+      const speed = p.base.speed * calculateRankEffect(p.rank.speed);
+      return (publicEnv.room === "트릭룸" ? speed < userSpeed : speed > userSpeed)
+        && userHpRation < 0.35;
+    });
+
+    if (prioritized) {
+      addLog(`⚡ ${side}는 막타를 노려 빠른 포켓몬을 꺼냈다`);
+      return { type: "switch" as const, index: prioritized.index };
+    } else {
+      addLog(`⚡ ${side}는 상성이 좋은 포켓몬을 내보냈다`);
+      return { type: "switch" as const, index: switchIndex };
+    }
   }
 
   // === 2. 플레이어가 더 빠를 경우 ===
-  if (!isEnemyFaster) {
+  if (!isAiFaster) {
     if (userToai > 1 && !(aiTouser > 1)) { // ai가 확실히 불리
       if (isUser_veryLowHp && priorityMove) {
         addLog(`🦅 ${side}는 상대 포켓몬의 빈틈을 포착하여 선공기 사용!`);
         return bestMove;
       }
-      if (roll < 0.2 && speedUpMove) {
+      if (roll < 0.4 && speedUpMove && aiHpRation > 0.5) {
         addLog(`🦅 ${side}는 상대의 맞교체 또는 랭크업을 예측하고 스피드 상승을 시도!`);
         return speedUpMove;
       }
-      if (roll < 0.4 && (hasSwitchOption)) {
-        if (switchIndex !== -1) {
+      if (roll < 0.5 && speedDownMove && aiHpRation > 0.5) {
+        addLog(`🦅 ${side}는 상대의 스피드 감소를 시도!`);
+        return speedDownMove;
+      }
+      if (roll < 0.6 && hasSwitchOption && switchIndex !== -1) {
+        if (isAllSlower && !hasGoodMatchup) {
+          addLog(`🤔 ${side}는 교체해도 의미 없다고 판단하고 체력 보존을 택했다`);
+          return bestMove;
+        } else {
           addLog(`🐢 ${side}는 느리고 불리하므로 교체 선택`);
           return { type: "switch" as const, index: switchIndex };
         }
       }
       addLog(`🥊 ${side}는 최고 위력기를 선택`);
       return bestMove;
+      ///////////////////////////////////////////////////////
     } else if (aiTouser > 1 && !(userToai > 1)) {
       // ai가 느리지만 상성 확실히 유리 
       if (roll < 0.4 && isAi_lowHp && hasSwitchOption) {

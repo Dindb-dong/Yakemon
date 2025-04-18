@@ -48,34 +48,47 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
     return () => AudioManager.getInstance().stop(); // cleanup
   }, [musicOn]);
 
-  const startNextBattle = () => {
-    // 다음 enemyTeam 생성
-    const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
-      let pokemonList = mockPokemon;
-      if (winCount >= 1) {
-        pokemonList = win10Pokemon;
-      }
-      const pool = pokemonList.filter(
-        (p) => p.types.includes(type) && !exclude.includes(p)
-      );
-      return pool[Math.floor(Math.random() * pool.length)];
-    };
+  function generateNewRandomPokemon() {
+    let pokemonList = mockPokemon;
+    if (winCount >= 1) {
+      pokemonList = win10Pokemon;
+    }
 
-    // 1. 각 타입별 포켓몬 하나씩 가져오기
-    const typeOrder = shuffleArray(['불', '물', '풀']);
     const enemyRaw: PokemonInfo[] = [];
 
-    typeOrder.forEach((type) => {
-      const chosen = getRandomByType(type, enemyRaw); // 중복 방지
-      if (chosen) enemyRaw.push(chosen);
+    // 1. 첫 번째 포켓몬 랜덤 선택
+    const first = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+    enemyRaw.push(first);
+
+    // 2. 두 번째 포켓몬 - 첫 번째와 타입 겹치지 않는 것 중 랜덤
+    const secondPool = pokemonList.filter(p =>
+      !p.types.some(type => first.types.includes(type)) &&
+      !enemyRaw.includes(p)
+    );
+    if (secondPool.length === 0) return; // 예외 처리
+    const second = secondPool[Math.floor(Math.random() * secondPool.length)];
+    enemyRaw.push(second);
+
+    // 3. 세 번째 포켓몬 - 두 마리와 타입 2개 이상 겹치지 않는 것 중 랜덤
+    const combinedTypes = [...first.types, ...second.types];
+    const thirdPool = pokemonList.filter(p => {
+      if (enemyRaw.includes(p)) return false;
+      const overlap = p.types.filter(type => combinedTypes.includes(type));
+      return overlap.length <= 1;
     });
+    if (thirdPool.length === 0) return; // 예외 처리
+    const third = thirdPool[Math.floor(Math.random() * thirdPool.length)];
+    enemyRaw.push(third);
 
-    // 2. 무작위로 섞기
+    // 무작위 셔플
     const shuffledEnemy = enemyRaw.sort(() => Math.random() - 0.5);
-
-    // 3. 전투용 포켓몬으로 변환
     const newEnemyTeam = shuffledEnemy.map((p) => createBattlePokemon(p));
     setEnemyTeam(newEnemyTeam);
+  }
+
+  const startNextBattle = () => {
+    // 다음 enemyTeam 생성
+    generateNewRandomPokemon();
 
     // 상태 초기화
     resetEnvironment();
@@ -88,6 +101,8 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
       // 💡 배틀 리셋하려면 navigate로 다시 진입
       setBattleKey(prev => prev + 1); // 👈 이걸 통해 완전히 새로운 Battle 시작
     }, 300);
+
+
   };
 
   const handleExchange = (myIndex: number, enemyIndex: number) => {

@@ -10,7 +10,8 @@ export function applyConfusionStatus(side: "my" | "enemy", index: number) {
   updatePokemon(side, index, (prev) => addStatus(prev, "혼란"));
 
   // 2. 2~4턴 랜덤 설정
-  const duration = Math.floor(Math.random() * 3) + 2;
+  const duration = Math.floor(Math.random() * 3 + 2);
+  console.log("혼란 지속 턴:", duration);
 
   // 3. 지속효과 추가 (혼란은 durationStore에만 등록, 상태이상은 위에서 등록됨)
   addEffect(side, {
