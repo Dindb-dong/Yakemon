@@ -491,7 +491,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
         )
       }
-      <TurnBanner turn={turn} />
+      <TurnBanner turn={turn} randomMode={randomMode} />
       <div className="main-area">
         <div className="pokemon_log">
           <LogPanel logs={slicedLogs} />

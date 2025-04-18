@@ -1,10 +1,19 @@
 {
   "main": [
+    "/sound/main8.mp3",
+    "/sound/main9.mp3",
     "/sound/main1.mp3",
-    "/sound/main2.mp3"
+    "/sound/main2.mp3",
+    "/sound/main3.mp3",
+    "/sound/main7.mp3",
+    "/sound/main6.mp3",
+    "/sound/main4.mp3",
+    "/sound/main5.mp3"
   ],
   "battle": [
     "/sound/battle2.mp3",
+    "/sound/battle10.mp3",
+    "/sound/battle11.mp3",
     "/sound/battle3.mp3",
     "/sound/battle1.mp3",
     "/sound/battle4.mp3",
@@ -15,6 +24,8 @@
     "/sound/battle9.mp3"
   ],
   "last_one": [
+    "/sound/last_one11.mp3",
+    "/sound/last_one10.mp3",
     "/sound/last_one2.mp3",
     "/sound/last_one3.mp3",
     "/sound/last_one1.mp3",
@@ -26,10 +37,19 @@
     "/sound/last_one9.mp3"
   ],
   "win": [
+    "/sound/win4.mp3",
+    "/sound/win5.mp3",
+    "/sound/win6.mp3",
     "/sound/win2.mp3",
+    "/sound/win3.mp3",
     "/sound/win1.mp3"
   ],
   "defeat": [
+    "/sound/defeat8.mp3",
+    "/sound/defeat4.mp3",
+    "/sound/defeat5.mp3",
+    "/sound/defeat7.mp3",
+    "/sound/defeat6.mp3",
     "/sound/defeat2.mp3",
     "/sound/defeat3.mp3",
     "/sound/defeat1.mp3"

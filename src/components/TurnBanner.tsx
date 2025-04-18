@@ -2,7 +2,7 @@ import React from "react";
 import { useBattleStore } from "../Context/useBattleStore";
 import { useDurationStore } from "../Context/useDurationContext";
 
-function TurnBanner({ turn }: { turn: number }) {
+function TurnBanner({ turn, randomMode }: { turn: number, randomMode: boolean }) {
   const { publicEnv, myEnv, enemyEnv, winCount } = useBattleStore();
   const { publicEffects } = useDurationStore();
 
@@ -49,7 +49,9 @@ function TurnBanner({ turn }: { turn: number }) {
   return (
     <div className="turn-banner">
       <div>턴 {turn}</div>
-      <div>{winCount}연승중!</div>
+      {randomMode && (
+        <div>{winCount}연승중!</div>
+      )}
 
       {activeEffects.length > 0 && (
         <div className="public-env">
