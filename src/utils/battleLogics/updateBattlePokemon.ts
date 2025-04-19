@@ -69,7 +69,7 @@ export function resetRank(pokemon: BattlePokemon): BattlePokemon {
 }
 
 // 상태이상 추가
-export function addStatus(pokemon: BattlePokemon, status: StatusState, nullification?: boolean): BattlePokemon {
+export function addStatus(pokemon: BattlePokemon, status: StatusState, side: 'my' | 'enemy', nullification?: boolean): BattlePokemon {
   // 부식때문에 nullification 추가
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜']
@@ -84,7 +84,9 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, nullifica
     pokemon.base.ability?.name === '둔감') {
     return { ...pokemon };
   }
-  if (status === '마비' && (pokemon.base.ability?.name === '유연' || pokemon.base.types.includes('전기'))) { return { ...pokemon }; }
+  if (status === '마비' && (pokemon.base.ability?.name === '유연' || pokemon.base.types.includes('전기'))) {
+    return { ...pokemon };
+  }
   if (status === '화상') {
     if (pokemon.base.ability?.name === '수의베일' || pokemon.base.ability?.name === '수포' || pokemon.base.types.includes('불')) {
       { return { ...pokemon }; }
@@ -108,7 +110,17 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, nullifica
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);
   console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
-  addLog(`🍄 ${pokemon.base.name}은 ${status} 상태에 빠졌다!`)
+  addLog(`🍄 ${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
+  // 싱크로 특성 처리
+  if (pokemon.base.ability?.name === '싱크로') {
+    const { myTeam, enemyTeam, activeMy, activeEnemy, updatePokemon } = useBattleStore.getState();
+    const opponentSide = side === 'my' ? 'enemy' : 'my';
+    const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+    const opponentPokemon = opponentSide === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+    if (opponentPokemon.base.ability?.name !== '싱크로') {
+      updatePokemon(opponentSide, activeOpponent, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
+    }
+  }
   return { ...pokemon, status: manager.getStatus() };
 }
 
@@ -150,8 +162,8 @@ export function useMovePP(pokemon: BattlePokemon, moveName: string, pressure?: b
 }
 
 // 기술 고정 (구애스카프 등)
-export function lockMove(pokemon: BattlePokemon, moveName: string): BattlePokemon {
-  return { ...pokemon, lockedMove: moveName };
+export function setLockedMove(pokemon: BattlePokemon, moveInfo: MoveInfo | null): BattlePokemon {
+  return { ...pokemon, lockedMove: moveInfo ?? undefined };
 }
 
 // 위치 변경 (구멍파기, 공중날기 등)
@@ -229,7 +241,8 @@ export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePo
     ...pokemon,
     isProtecting: false,
     hadRankUp: false,
-    receivedDamage: 0
+    receivedDamage: 0,
+    isFirstTurn: false,
   };
 
   if (isSwitch) {

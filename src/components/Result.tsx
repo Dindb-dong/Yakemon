@@ -10,7 +10,7 @@ import { resetEnvironment } from "../utils/battleLogics/updateEnvironment";
 import { replace, useNavigate } from "react-router-dom";
 import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
-import { createWin10Pokemon } from "../data/createWincountPokemon";
+import { createWin10Pokemon, createWin5Pokemon } from "../data/createWincountPokemon";
 
 function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
   const {
@@ -28,6 +28,7 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   } = useBattleStore();
   const mockPokemon = createMockPokemon();
   const win10Pokemon = mockPokemon.concat(createWin10Pokemon());
+  const win20Pokemon = win10Pokemon.concat(createWin5Pokemon());
   const [musicOn, setMusicOn] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   function generateNewRandomPokemon() {
     let pokemonList = mockPokemon;
     if (winCount >= 1) {
-      pokemonList = win10Pokemon;
+      pokemonList = win20Pokemon;
     }
 
     const enemyRaw: PokemonInfo[] = [];
@@ -74,7 +75,7 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
     const thirdPool = pokemonList.filter(p => {
       if (enemyRaw.includes(p)) return false;
       const overlap = p.types.filter(type => combinedTypes.includes(type));
-      return overlap.length <= 1;
+      return overlap.length < 1;
     });
     if (thirdPool.length === 0) return; // 예외 처리
     const third = thirdPool[Math.floor(Math.random() * thirdPool.length)];

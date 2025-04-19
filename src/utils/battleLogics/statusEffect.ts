@@ -53,7 +53,13 @@ export function applyStatusEffectBefore(
       return { rate: currentRate, isHit: false };
     }
   } else if (status.includes('풀죽음')) {
+    addLog(`${activeTeam[activeIndex].base.name}은/는 풀이 죽어서 기술 사용에 실패했다!`);
+    console.log(`${activeTeam[activeIndex].base.name}은/는 풀이 죽어서 기술 사용에 실패했다!`);
     return { rate: currentRate, isHit: false }
+  } else if (status.includes('소리기술사용불가') && move.affiliation === '소리') {
+    addLog(`${activeTeam[activeIndex].base.name}은/는 소리기술 사용에 실패했다!`);
+    console.log(`${activeTeam[activeIndex].base.name}은/는 소리기술 사용에 실패했다!`);
+    return { rate: currentRate, isHit: false };
   } else if (status.includes('얼음')) {
     if (Math.random() > 0.1 || move.type === '불') {
       update(side, activeIndex, (prev) => removeStatus(prev, '얼음'));

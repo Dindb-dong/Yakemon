@@ -2,6 +2,8 @@ import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectiveness } from "../typeRalation";
 import { removeTrap } from "./updateEnvironment";
+import { StatusState } from "../../models/Status";
+import { WeatherType } from "../../models/Weather";
 
 // 스텔스록 = 바위타입 기술과 동일하게 상성 적용
 export async function applyTrapDamage(
@@ -54,4 +56,73 @@ export async function applyTrapDamage(
   const updated = { ...pokemon, currentHp: Math.max(0, pokemon.currentHp - damage) };
 
   return { updated, log, status_condition };
+}
+
+export async function applyWeatherDamage(
+  pokemon: BattlePokemon,
+  weather: WeatherType
+): Promise<{ updated: BattlePokemon; }> {
+  const { addLog } = useBattleStore.getState();
+  let damage = 0;
+  if (pokemon.base.ability?.name !== '매직가드') {
+    if (weather === "모래바람" && !(pokemon.base.types.includes("바위") || pokemon.base.types.includes("강철") || pokemon.base.types.includes("땅"))
+      && !((pokemon.base.ability?.name === '모래헤치기') || (pokemon.base.ability?.name === '모래숨기') || (pokemon.base.ability?.name === '모래의힘'))) {
+      damage = Math.floor(pokemon.base.hp * 0.125);
+      addLog(`${pokemon.base.name}은 모래바람에 의해 피해를 입었다!`);
+    }
+  }
+  const updated = { ...pokemon, currentHp: Math.max(0, pokemon.currentHp - damage) };
+  return { updated };
+}
+
+export async function applyRecoilDamage(
+  pokemon: BattlePokemon,
+  recoil: number,
+  appliedDameage: number
+): Promise<{ updated: BattlePokemon; log?: string; }> {
+  let damage: number = 0;
+  const { addLog } = useBattleStore.getState();
+  if (pokemon.base.ability?.name !== '매직가드') {
+    damage = Math.floor(appliedDameage * recoil);
+    addLog(`${pokemon.base.name}은 반동으로 피해를 입었다!`);
+  }
+  const updated = { ...pokemon, currentHp: Math.max(0, pokemon.currentHp - damage) };
+  return { updated };
+}
+
+export async function applyThornDamage(
+  pokemon: BattlePokemon,
+): Promise<{ updated: BattlePokemon; log?: string; }> {
+  let damage = 0;
+  const { addLog } = useBattleStore.getState();
+  if (pokemon.base.ability?.name !== '매직가드') {
+    damage = Math.floor(pokemon.base.hp * 0.125);
+    addLog(`${pokemon.base.name}은 가시에 의해 피해를 입었다!`);
+  }
+  const updated = { ...pokemon, currentHp: Math.max(0, pokemon.currentHp - damage) };
+  return { updated };
+}
+
+export async function applyStatusConditionDamage(
+  pokemon: BattlePokemon,
+  status: string
+): Promise<{ updated: BattlePokemon; log?: string; }> {
+  let damage = 0;
+  const { addLog } = useBattleStore.getState();
+  if (pokemon.base.ability?.name !== '매직가드') {
+    if (status === "화상") {
+      damage = Math.floor(pokemon.base.hp * 0.0625);
+      addLog(`🔥 ${pokemon.base.name}은 화상으로 피해를 입었다!`);
+    }
+    if (status === "독") {
+      damage = Math.floor(pokemon.base.hp * 0.125);
+      addLog(`🍄 ${pokemon.base.name}은 독으로 피해를 입었다!`);
+    }
+    if (status === "맹독") {
+      damage = Math.floor(pokemon.base.hp * (1 / 6));
+      addLog(`🍄 ${pokemon.base.name}은 맹독으로 피해를 입었다!`);
+    }
+  }
+  const updated = { ...pokemon, currentHp: Math.max(0, pokemon.currentHp - damage) };
+  return { updated };
 }

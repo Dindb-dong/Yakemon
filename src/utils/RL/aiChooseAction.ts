@@ -46,7 +46,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
           basePower = 3 * move.power;
         }
       })
-      basePower = move.power ?? 0;
+      basePower = move.getPower ? move.getPower(enemyTeam, 'enemy') : (move.power ?? 0);
       const score = basePower * stab * rate * effectiveness;
 
       if (score > bestScore) {
@@ -160,7 +160,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const isUser_highHp = aiHpRation > 0.8;
   const isAttackReinforced = mineTeam[activeIndex].rank.attack > 1 || mineTeam[activeIndex].rank.spAttack > 1;
   const switchIndex = getBestSwitchIndex(side);
-
+  // 0. isCharging일 경우 
+  if (myPokemon.isCharging && myPokemon.chargingMove) {
+    return myPokemon.chargingMove;
+  }
   // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
   if (myPokemon.currentHp <= 0) {
     const switchOptions = mineTeam

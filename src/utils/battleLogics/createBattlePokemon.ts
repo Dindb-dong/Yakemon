@@ -49,7 +49,7 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
     rank: defaultRank,
     status: [],
     position: null,
-    lockedMove: null,
+    lockedMove: undefined,
     isActive: false,
   };
 }

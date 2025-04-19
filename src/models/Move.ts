@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import { RankState } from "./RankState";
 import { FieldType } from "./Field";
 import { StatusState } from "./Status";
@@ -32,7 +30,7 @@ export type MoveInfo = {
   power: number; // 위력 
   pp: number;
   isTouch: boolean; // 접촉 기술 여부 
-  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | '파동' | null; // 계열 
+  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | '파동' | '물기' | null; // 계열 
   accuracy: number; // 명중율. 
   criticalRate: number; // 급소율. 랭크로 나타냄. 0이 기본, 1이 깜짝베기같은거, 3은 확정임 
   demeritEffects?: MoveEffect[]; // 엄청난힘, 인파이트, 플레어드라이브 같은 디메리트 효과. 
@@ -50,7 +48,10 @@ export type MoveInfo = {
   boostOnMissedPrev?: boolean; // 분함의발구르기, 열불내기 등 전 턴 빗나가면 위력 상승. rate 8/5. hadMissed 상태로 비교하면됨
   chargeTurn?: boolean; // 솔라빔같이 차징하는 기술 
   position?: '땅' | '하늘' | '바다' | '공허' | null; // 공허(고스트, 섀도우다이브), 하늘, 바다, 땅 등 
-  getPower?: (team: BattlePokemon[]) => number;
+  oneHitKO?: boolean; // 일격필살기 여부. 절대영도, 땅가르기, 뿔드릴, 가위자르기 
+  firstTurnOnly?: boolean; // 등장한 턴에만 사용 가능한 기술.
+  getPower?: (team: BattlePokemon[], side?: 'my' | 'enemy') => number;
+  selfKill?: boolean; // 목숨걸기, 추억의선물, 자폭, 대폭발 등
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )
 };
 

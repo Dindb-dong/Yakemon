@@ -18,7 +18,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
-  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기'];
+  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기', '소리기술사용불가']; // 비주요 상태이상
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
@@ -41,6 +41,9 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   console.log('1. 랭크업 초기화 ')
   updatePokemon(side, currentIndex, (switchingPokemon) => resetState(switchingPokemon, true))
   updatePokemon(side, currentIndex, (switchingPokemon) => resetRank(switchingPokemon))
+  updatePokemon(side, currentIndex, (prev) => ({
+    ...prev, isFirstTurn: false
+  }));
 
   // 비메이저 상태이상 제거
   for (const status of unMainStatusCondition) {
@@ -96,7 +99,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
         removeTrap(side, '독압정')
         removeTrap(side, '맹독압정')
       } else {
-        updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState))
+        updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState, side))
       }
     }
     if (trapLog) addLog(trapLog); console.log(trapLog);

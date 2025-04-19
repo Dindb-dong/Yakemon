@@ -7,7 +7,7 @@ export function applyConfusionStatus(side: "my" | "enemy", index: number) {
   const { addEffect } = useDurationStore.getState();
 
   // 1. 상태이상 부여
-  updatePokemon(side, index, (prev) => addStatus(prev, "혼란"));
+  updatePokemon(side, index, (prev) => addStatus(prev, "혼란", side));
 
   // 2. 2~4턴 랜덤 설정
   const duration = Math.floor(Math.random() * 3 + 2);

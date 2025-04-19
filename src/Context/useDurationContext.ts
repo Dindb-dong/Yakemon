@@ -55,7 +55,7 @@ export const useDurationStore = create<DurationState>((set, get) => ({
       return list
         .map((e) => {
           // 💤 잠듦은 active 포켓몬일 때만 턴 감소
-          if (e.name === "잠듦" && e.ownerIndex !== activeIndex) {
+          if ((e.name === "잠듦" || e.name === "혼란") && e.ownerIndex !== activeIndex) {
             return e; // 턴 유지
           }
 

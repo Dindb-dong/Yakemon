@@ -50,8 +50,19 @@ export function applyDefensiveAbilityEffectBeforeDamage(
             rate = 0;
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'spAttack', 1));
+          } else if (ability.name === '피뢰침' && usedMove.type === '전기') {
+            rate = 0;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'spAttack', 1));
+          } else if (ability.name === '마중물' && usedMove.type === '물') {
+            rate = 0;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'spAttack', 1));
+          } else if (ability.name === '부유' && usedMove.type === '땅') {
+            rate = 0;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           }
-          // TODO: 마중물, 노릇노릇바디, 피뢰침, 전기엔진 등은 rate 0으로 만들고 각각 특수공격 1랭크, 방어 2랭크, 특수공격 1랭크, 스피드 2랭크 올리기. 
+          // TODO: 마중물, 노릇노릇바디, 전기엔진 등은 rate 0으로 만들고 각각 특수공격 1랭크, 방어 2랭크, 특수공격 1랭크, 스피드 2랭크 올리기. 
           // updatePokemon("my", 0, changeRank(active, "spAttack", 1)); 같은거 이용해서.
           break;
         case 'damage_nullification':
@@ -65,14 +76,21 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           } else if (ability.name === '여왕의위엄' && (usedMove.priority ?? 0) > 0) {
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             rate = 0;
+          } else if (ability.name === '방음' && usedMove.affiliation === '소리') {
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            rate = 0;
           }
           // TODO: 방탄, 방진 등 추가하기.
           break;
         case 'damage_reduction':
           if (ability.name === '이상한비늘' && deffender.status.length > 0 && usedMove.category === '물리') {
             rate = 2 / 3;
+          } else if (ability.name === '두꺼운지방' && (usedMove.type === '얼음' || usedMove.type === '불')) {
+            rate = 1 / 2;
+          } else if (ability.name === '내열' && usedMove.type === '불') {
+            rate = 1 / 2;
           }
-          // TODO: 퍼코트, 복슬복슬, 필터, 하드록, 두꺼운지방, 내열, 수포, 멀티스케일, 스펙터가드 등 추가하기 
+          // TODO: 퍼코트, 복슬복슬, 필터, 하드록, 내열, 수포, 멀티스케일, 스펙터가드 등 추가하기 
           break;
         default:
           rate = 1;

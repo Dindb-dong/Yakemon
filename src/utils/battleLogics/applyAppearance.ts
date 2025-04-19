@@ -156,10 +156,24 @@ export function applyAppearance(
         break;
 
       case "ability_change":
-        addLog(`➕ ${pokemon.base.name}의 특성이 변화했다!`);
+        // 트레이스
+        updatePokemon(side, activeMine, (prev) => ({
+          ...prev,
+          base: {
+            ...prev.base,
+            ability: {
+              ...enemyPokemon.base.ability,
+              name: enemyPokemon.base.ability?.name ?? "Unknown Ability", // Provide a default name
+              id: enemyPokemon.base.ability?.id ?? 0, // Ensure 'id' is always defined
+            }
+          }
+        }));
+        addLog(`➕ ${pokemon.base.name}의 특성이 ${enemyPokemon.base.ability?.name}으로 변화했다!`);
         break;
     }
   }
-
+  updatePokemon(side, activeMine, (prev) => ({
+    ...prev, isFirstTurn: true
+  }));
   return logs;
 }

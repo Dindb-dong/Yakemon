@@ -1,3 +1,4 @@
+import { useBattleStore } from "../Context/useBattleStore";
 import { MoveInfo } from "../models/Move";
 import { shuffleArray } from "../utils/shuffle";
 
@@ -1768,12 +1769,13 @@ const moveDatas: MoveInfo[] = [
     name: "땅가르기",
     type: "땅",
     category: "물리",
-    power: 100000,
+    power: 0,
     pp: 5,
     isTouch: false,
     affiliation: null,
     accuracy: 30, // 명중률 보정 없음, 상대 회피 랭크 무시 
     criticalRate: 0,
+    oneHitKO: true,
     target: "opponent"
     // 옹골참 특성인 포켓몬은 이 기술에 맞지 않는다. 하지만 특성 틀깨기로 옹골참의 포켓몬에게도 이 기술을 사용할 수 있다. 
     // 구멍파기로 땅에 들어간 상태인 포켓몬에게도 맞출수 있다.
@@ -2062,6 +2064,7 @@ const moveDatas: MoveInfo[] = [
     affiliation: null,
     accuracy: 100,
     criticalRate: 0,
+    selfKill: true,
     demeritEffects: [
       {
         chance: 1,
@@ -2167,7 +2170,616 @@ const moveDatas: MoveInfo[] = [
     criticalRate: 0,
     effects: [{ chance: 1 }],
     target: 'opponent'
-  }
+  },
+  {
+    name: "볼부비부비",
+    type: "전기",
+    category: "물리",
+    power: 20,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      { chance: 1, status: "마비" }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "나쁜음모",
+    type: "악",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "self", stat: "spAttack", change: 2 }
+        ]
+      }
+    ],
+    target: "self"
+  },
+  {
+    name: "10만볼트",
+    type: "전기",
+    category: "특수",
+    power: 90,
+    pp: 15,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      { chance: 0.1, status: "마비" }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "볼트체인지",
+    type: "전기",
+    category: "특수",
+    power: 70,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [],
+    uTurn: true,
+    target: "opponent"
+  },
+  {
+    name: "구멍파기",
+    type: "땅",
+    category: "물리",
+    power: 80,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    chargeTurn: true,
+    target: "opponent"
+  },
+  {
+    name: "메가혼",
+    type: "벌레",
+    category: "물리",
+    power: 120,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 85,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "파도타기",
+    type: "물",
+    category: "특수",
+    power: 90,
+    pp: 15,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "일렉트릭네트",
+    type: "전기",
+    category: "특수",
+    power: 55,
+    pp: 15,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 95,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [{ target: "opponent", stat: "speed", change: -1 }]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "차지빔",
+    type: "전기",
+    category: "특수",
+    power: 50,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.5,
+        statChange: [{ target: "self", stat: "spAttack", change: 1 }]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "얼음뭉치",
+    type: "얼음",
+    category: "물리",
+    power: 40,
+    pp: 30,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 1,
+    target: "opponent"
+  },
+  {
+    name: "절대영도",
+    type: "얼음",
+    category: "특수",
+    power: 0, // 명중 시 기절이므로 위력은 0으로 표기
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 30,
+    criticalRate: 0,
+    priority: 0,
+    oneHitKO: true,
+    target: "opponent"
+  },
+  {
+    name: "메테오빔",
+    type: "바위",
+    category: "특수",
+    power: 120,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    priority: 0,
+    chargeTurn: true,
+    effects: [{ chance: 1, statChange: [{ target: "self", stat: "spAttack", change: 1 }] }],
+    target: "opponent"
+  },
+  {
+    name: "흡혈",
+    type: "벌레",
+    category: "물리",
+    power: 80,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    effects: [{ chance: 1, heal: 0.5 }],
+    target: "opponent"
+  },
+  {
+    name: "크로스포이즌",
+    type: "독",
+    category: "물리",
+    power: 70,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 1,
+    priority: 0,
+    effects: [{ chance: 0.1, status: "독" }],
+    target: "opponent"
+  },
+  {
+    name: "공중날기",
+    type: "비행",
+    category: "물리",
+    power: 90,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 95,
+    criticalRate: 0,
+    priority: 0,
+    chargeTurn: true,
+    position: "하늘",
+    target: "opponent"
+  },
+  {
+    name: '얼음엄니',
+    type: '얼음',
+    category: '물리',
+    power: 65,
+    isTouch: true,
+    affiliation: '물기',
+    accuracy: 95,
+    pp: 15,
+    priority: 0,
+    effects: [{ chance: 0.1, status: '얼음' }, { chance: 0.1, status: '풀죽음' }],
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: '불꽃엄니',
+    type: '불꽃',
+    category: '물리',
+    power: 65,
+    accuracy: 95,
+    pp: 15,
+    priority: 0,
+    effects: [{ chance: 0.1, status: '화상' }, { chance: 0.1, status: '풀죽음' }],
+    isTouch: true,
+    affiliation: '물기',
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: '번개엄니',
+    type: '전기',
+    category: '물리',
+    power: 65,
+    accuracy: 95,
+    pp: 15,
+    priority: 0,
+    effects: [{ chance: 0.1, status: '마비' }, { chance: 0.1, status: '풀죽음' }],
+    isTouch: true,
+    affiliation: '물기',
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: '누르기',
+    type: '노말',
+    category: '물리',
+    power: 85,
+    accuracy: 100,
+    pp: 10,
+    priority: 0,
+    effects: [{ chance: 0.3, status: '마비' }],
+    isTouch: true,
+    affiliation: null,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: '헤비봄버',
+    type: '강철',
+    category: '물리',
+    power: 80, // 위력은 상대의 무게에 따라 변동하지만... 일단은 고정
+    accuracy: 100,
+    pp: 10,
+    priority: 0,
+    isTouch: true,
+    affiliation: null,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "파워젬",
+    type: "바위",
+    category: "특수",
+    power: 80,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent"
+  },
+  {
+    name: "시그널빔",
+    type: "벌레",
+    category: "특수",
+    power: 75,
+    pp: 15,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    effects: [{ chance: 0.1, status: "혼란" }],
+    target: "opponent"
+  },
+  {
+    name: "불릿펀치",
+    type: "강철",
+    category: "물리",
+    power: 40,
+    pp: 30,
+    isTouch: true,
+    affiliation: "펀치",
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 1,
+    target: "opponent"
+  },
+  {
+    name: "카운터",
+    type: "격투",
+    category: "물리",
+    power: 0,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: -4,
+    target: "opponent",
+    counter: true // 특수 속성
+  },
+  {
+    name: "지옥찌르기",
+    type: "악",
+    category: "물리",
+    power: 80,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [{ chance: 1, status: '소리기술사용불가' }],
+  },
+  {
+    name: "비바라기",
+    type: "물",
+    category: "변화",
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    weather: "비",
+    target: "none",
+  },
+  {
+    name: "스케일샷",
+    type: "드래곤",
+    category: "물리",
+    power: 25,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    priority: 0,
+    effects: [{ chance: 1, multiHit: true },
+    {
+      chance: 1, statChange: [
+        { target: "self", stat: "speed", change: 1 }, { target: "self", stat: "defense", change: -1 }
+      ]
+    }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "메탈버스트",
+    type: "강철",
+    category: "물리",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    counter: true,
+    target: "opponent"
+  },
+  {
+    name: "만나자마자",
+    type: "벌레",
+    category: "물리",
+    power: 90,
+    pp: 5,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 1,
+    priority: 2,
+    firstTurnOnly: true,
+    getPower(team, side) {
+      const { activeEnemy, activeMy } = useBattleStore.getState();
+      const activeIndex = side === 'my' ? activeMy : activeEnemy;
+      const activePokemon = team[activeIndex];
+      return activePokemon.isFirstTurn ? 90 : 0;
+    },
+    target: "opponent"
+  },
+  {
+    name: "록커트",
+    type: "바위",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    effects: [{ chance: 1, statChange: [{ target: "self", stat: "speed", change: 2 }] }],
+    target: "self"
+  },
+  {
+    name: "이판사판태클",
+    type: "노말",
+    category: "물리",
+    power: 120,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    demeritEffects: [
+      {
+        chance: 1,
+        recoil: 0.33, // 주는 피해의 1/4 반동
+      }
+    ]
+  },
+  {
+    name: "목숨걸기", // 쓰면 죽는 로직 만들기 
+    type: "격투",
+    category: "특수",
+    power: 0, // 포켓몬의 현재 체력만큼 데미지. 
+    pp: 5,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    selfKill: true,
+    demeritEffects: [
+      {
+        chance: 1,
+        fail: 1, // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
+        recoil: 1,
+      }
+    ],
+    getPower: (team, side?: 'my' | 'enemy') => {
+      const { activeEnemy, activeMy } = useBattleStore.getState();
+      const activeIndex = side === 'my' ? activeMy : activeEnemy;
+      const activePokemon = team[activeIndex];
+      return activePokemon.currentHp;
+    },
+  },
+  {
+    name: "썬더다이브",
+    type: "비행",
+    category: "물리",
+    power: 100,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 95,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    demeritEffects: [{ chance: 1, fail: 0.5 }], // 반동 50%
+  },
+  {
+    name: "겁나는얼굴",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "speed",
+            change: -2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    name: "신통력",
+    type: "에스퍼",
+    category: "특수",
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [
+      {
+        chance: 0.1,
+        status: "풀죽음"
+      }
+    ]
+  },
+  {
+    name: "아이스스피너",
+    type: "얼음",
+    category: "물리",
+    power: 80,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "추억의선물",
+    type: "악",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    selfKill: true,
+    demeritEffects: [
+      {
+        chance: 1,
+        fail: 1, // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
+        recoil: 1,
+      }
+    ],
+    effects: [{
+      chance: 1, statChange: [
+        { target: "opponent", stat: "attack", change: -2 },
+        { target: "opponent", stat: "spAttack", change: -2 },
+      ]
+    }],
+    target: "opponent"
+  },
+  {
+    name: "바크아웃",
+    type: "악",
+    category: "특수",
+    power: 55,
+    pp: 15,
+    isTouch: false,
+    affiliation: "소리",
+    accuracy: 95,
+    criticalRate: 0,
+    effects: [{ chance: 1, statChange: [{ target: "opponent", stat: "spAttack", change: -1 }] }],
+    target: "opponent"
+  },
+  {
+    name: "아픔나누기",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 1000,
+    criticalRate: 0,
+    // 이거 기술 효과는 따로 구현해야함
+    target: "opponent"
+  },
 ]
 
 export function moveData(moveNames: string[], types: string[]): MoveInfo[] {

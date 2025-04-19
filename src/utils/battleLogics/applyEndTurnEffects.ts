@@ -2,6 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { useDurationStore } from "../../Context/useDurationContext";
 import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
+import { applyStatusConditionDamage } from "./applyNoneMoveDamage";
 import { changeHp, changeRank, removeStatus, resetState } from "./updateBattlePokemon";
 import { setField, setWeather } from "./updateEnvironment";
 
@@ -47,36 +48,27 @@ export function applyEndTurnEffects() {
     const activeOpponent = i === 0 ? activeEnemy : activeMy;
     // 이렇게 효율적으로 처리할 수도 있구만! 
     if (pokemon.status.includes("화상")) {
-      const damage = Math.floor(pokemon.base.hp / 16);
-      const updated = (pokemon) => changeHp(pokemon, -damage);
-      updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
-      addLog(`🔥 ${pokemon.base.name}은 화상으로 ${damage}의 데미지를 입었다!`);
+      applyStatusConditionDamage(pokemon, "화상")
     }
     if (pokemon.status.includes("맹독")) {
-      const damage = Math.floor(pokemon.base.hp / 6);
-      const updated = (pokemon) => changeHp(pokemon, -damage);
-      updatePokemon(side, i === 0 ? activeMy : activeEnemy, updated);
-      addLog(`🍄 ${pokemon.base.name}은 맹독의 피해를 입었다!`);
-      console.log(`${pokemon.base.name}은 맹독의 피해를 입었다!`);
+      applyStatusConditionDamage(pokemon, "맹독")
     }
     if (pokemon.status.includes("독")) {
-      const damage = Math.floor(pokemon.base.hp / 8);
-      const updated = (pokemon) => changeHp(pokemon, -damage);
-      updatePokemon(side, activeIndex, updated);
-      addLog(`🍄 ${pokemon.base.name}은 독의 피해를 입었다!`);
-      console.log(`${pokemon.base.name}은 독의 피해를 입었다!`);
+      applyStatusConditionDamage(pokemon, "독")
     }
     if (pokemon.status.includes("씨뿌리기")) {
-      const damage = Math.floor(pokemon.base.hp / 8);
-      const damaged = (prev) => changeHp(prev, -damage);
-      const healed = (prev) => changeHp(prev, damage);
-      updatePokemon(side, activeIndex, damaged);
-      if (opponentTeam[activeOpponent].currentHp > 0) {
-        updatePokemon(opponentSide, activeOpponent, healed);
+      if (!(pokemon.base.ability?.name === '매직가드')) {
+        const damage = Math.floor(pokemon.base.hp / 8);
+        const damaged = (prev) => changeHp(prev, -damage);
+        const healed = (prev) => changeHp(prev, damage);
+        updatePokemon(side, activeIndex, damaged);
+        if (opponentTeam[activeOpponent].currentHp > 0) {
+          updatePokemon(opponentSide, activeOpponent, healed);
+        }
+        addLog(`🌱 ${opponentTeam[activeOpponent].base.name}은 씨뿌리기로 회복했다!`);
+        addLog(`🌱 ${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
+        console.log(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
       }
-      addLog(`🌱 ${opponentTeam[activeOpponent].base.name}은 씨뿌리기로 회복했다!`);
-      addLog(`🌱 ${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
-      console.log(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
     }
   });
 
