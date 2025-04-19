@@ -8,7 +8,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 3,
       name: '이상해꽃',
       types: ['풀', '독'],
-      moves: moveData(['대지의힘', '씨뿌리기', '광합성', '쾌청',
+      moves: moveData(['대지의힘', '씨뿌리기', '광합성', '쾌청', '기가드레인', '오물폭탄', '수면가루', '맹독', '에너지볼'
       ], ['풀', '독']),
       sex: 'male',
       ability: abilityData(['엽록소', '심록']),

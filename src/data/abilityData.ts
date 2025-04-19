@@ -141,7 +141,24 @@ const availableAbilities: AbilityInfo[] = [
   { id: 57, name: '테라볼티지', offensive: ['ability_nullification'] },
   { id: 58, name: '터보블레이즈', offensive: ['ability_nullification'] },
   { id: 59, name: '균사의힘', offensive: ['ability_nullification'] },
-
+  { id: 60, name: '곡예', util: ['rank_buff'] },
+  { id: 61, name: '정전기', defensive: ['status_change'] },
+  { id: 62, name: '피뢰침', defensive: ['type_nullification'] },
+  { id: 63, name: '매직가드', util: ['tickDamage_nullification'] },
+  { id: 64, name: '싱크로', defensive: ['status_change'] },
+  { id: 65, name: '전투무장', defensive: ['critical_nullification'] },
+  { id: 66, name: '프레셔', util: ['etc'] },
+  { id: 67, name: '면역', util: ['status_nullification'] },
+  { id: 68, name: '두꺼운지방', defensive: ['damage_reduction'] },
+  { id: 69, name: '정신력', util: ['intimidate_nullification', 'status_nullification'] },
+  { id: 70, name: '매직미러', util: ['statusMove_nullification'] },
+  { id: 71, name: '트레이스', appear: ['ability_change'] },
+  { id: 72, name: '옹골참', util: ['etc'] },
+  { id: 73, name: '부유', defensive: ['type_nullification'] },
+  { id: 74, name: '방음', defensive: ['damage_nullification'] },
+  { id: 75, name: '대운', util: ['rank_buff'] },
+  { id: 76, name: '내열', defensive: ['damage_reduction'] },
+  { id: 77, name: '마중물', defensive: ['type_nullification'] },
 ]
 
 export function abilityData(abilities: string[]) {

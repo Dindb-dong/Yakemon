@@ -14,6 +14,7 @@ import { switchPokemon } from "./switchPokemon";
 import { calculateTypeEffectiveness } from "../typeRalation";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { calculateRankEffect } from "./rankEffect";
+import { applyRecoilDamage } from "./applyNoneMoveDamage";
 
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
@@ -44,7 +45,7 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
             addLog(`${defender.base.name}의 특성 ${ability.name} 발동!`);
             updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'speed', 6));
           }
-        } else if (ability.name === '깨어진갑옷' && usedMove.category === '물리') {
+        } else if (ability.name === '깨어진갑옷' && usedMove.isTouch) {
           if (defender.currentHp > 0) {
             console.log(`${defender.base.name}의 특성 ${ability.name} 발동!`);
             addLog(`${defender.base.name}의 특성 ${ability.name} 발동!`);
@@ -61,29 +62,36 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
       case "status_change":
         if (ability.name === '불꽃몸' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
-            updatePokemon(side, activeMine, (prev) => addStatus(prev, '화상'));
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '화상', side));
             addLog(`🥵 ${mineTeam[activeMine].base.name}은/는 화상상태가 되었다!`);
             console.log(`${mineTeam[activeMine].base.name}은/는 화상상태가 되었다!`);
           }
         }
+        if (ability.name === '정전기' && usedMove.isTouch) {
+          if (Math.random() < 0.3) {
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '마비', side));
+            addLog(`⚡️ ${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
+            console.log(`${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
+          }
+        }
         if (ability.name === '독가시' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
-            updatePokemon(side, activeMine, (prev) => addStatus(prev, '독'));
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '독', side));
             addLog(`🤢 ${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
             console.log(`${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
           }
         }
         if (ability.name === '포자' && usedMove.isTouch) {
           if (Math.random() < 0.1) {
-            updatePokemon(side, activeMine, (prev) => addStatus(prev, '독'));
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '독', side));
             addLog(`🤢 ${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
             console.log(`${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
           } else if (Math.random() < 0.2) {
-            updatePokemon(side, activeMine, (prev) => addStatus(prev, '마비'));
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '마비', side));
             addLog(`😥 ${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
             console.log(`${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
           } else if (Math.random() < 0.3) {
-            updatePokemon(side, activeMine, (prev) => addStatus(prev, '잠듦'));
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '잠듦', side));
             addLog(`🥵 ${mineTeam[activeMine].base.name}은/는 잠듦상태가 되었다!`);
             console.log(`${mineTeam[activeMine].base.name}은/는 잠듦상태가 되었다!`);
           }
@@ -110,7 +118,7 @@ async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", atta
       case "status_change":
         if (ability.name === '독수' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
-            updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, '독'));
+            updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, '독', opponentSide));
             addLog(`🤢 ${opponentTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
             console.log(`${opponentTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
           }
@@ -201,15 +209,13 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   demeritEffect?.forEach((demerit) => {
     if (demerit && Math.random() < demerit.chance) {
       console.log(`${usedMove.name}의 디메리트 효과 발동!`)
-      if (demerit?.recoil == 1) {
+      if (demerit?.recoil == 1) { // 대폭발, 자폭, 추억의선물, 목숨걸기
         updatePokemon(side, activeMine, (attacker) => changeHp(attacker, -attacker.base.hp));
-        addLog(`🤕 ${attacker.base.name}은/는 폭발의 반동으로 기절했다...!`);
+        addLog(`🤕 ${attacker.base.name}은/는 반동으로 기절했다...!`);
       }
       if (demerit?.recoil && appliedDameage) {
         // 반동 데미지 적용
-        const recoilDamage = appliedDameage * demerit.recoil;
-        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, - recoilDamage));
-        addLog(`🤕 ${attacker.base.name}은/는 반동 데미지를 입었다!`);
+        applyRecoilDamage(attacker, activeMine, appliedDameage);
       }
       if (demerit.statChange) {
         demerit.statChange.forEach((statChange) => {
@@ -227,7 +233,33 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   })
   if (attacker.base.ability?.name !== '우격다짐' && usedMove.target === 'opponent') { // 우격다짐일 때에는 부가효과 적용안함.
     effect?.forEach((effect) => {
-      if (effect && Math.random() < effect.chance) {
+      if (defender.base.ability?.name === '매직미러' && usedMove.category === '변화') {
+        console.log(`${defender.base.name}의 매직미러 발동!`);
+        addLog(`🔁 ${defender.base.name}의 매직미러 발동!`);
+
+        // 공격자 쪽 정보 설정
+        const mirrorTargetSide = side; // 공격자 쪽
+        const mirrorTargetIndex = activeMine;
+        const mirrorTargetTeam = side === 'my' ? myTeam : enemyTeam;
+
+        // 각 효과를 반사해서 적용
+        if (effect.status) {
+          updatePokemon(mirrorTargetSide, mirrorTargetIndex, (target) =>
+            addStatus(target, effect.status!, mirrorTargetSide)
+          );
+          addLog(`🪞 ${mirrorTargetTeam[mirrorTargetIndex].base.name}은/는 ${effect.status} 상태가 되었다!`);
+        }
+
+        if (effect.statChange) {
+          effect.statChange.forEach((sc) => {
+            updatePokemon(mirrorTargetSide, mirrorTargetIndex, (target) =>
+              changeRank(target, sc.stat as keyof RankState, sc.change)
+            );
+            addLog(`🪞 ${mirrorTargetTeam[mirrorTargetIndex].base.name}의 ${sc.stat}이/가 ${sc.change}랭크 변했다!`);
+          });
+        }
+      }
+      else if (effect && Math.random() < effect.chance) {
         console.log(`${usedMove.name}의 부가효과 발동!`)
         if (effect.heal && !appliedDameage) {
           const healRate = effect.heal;
@@ -260,9 +292,13 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             const change = statChange.change;
             const activeTeam = targetSide === 'my' ? myTeam : enemyTeam;
             const activeIndex = targetSide === 'my' ? activeMy : activeEnemy;
-            updatePokemon(targetSide, activeIndex, (target) => changeRank(target, stat as keyof RankState, change))
-            console.log(`${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
-            addLog(`🔃 ${activeTeam[activeIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
+            // 미러아머 효과 적용 
+            const finalTarget = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? side : targetSide;
+            const finalActiveIndex = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? activeMine : activeIndex;
+            const finalActiveTeam = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? myTeam : enemyTeam;
+            updatePokemon(finalTarget, finalActiveIndex, (target) => changeRank(target, stat as keyof RankState, change))
+            console.log(`${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
+            addLog(`🔃 ${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
           });
         }
         if (effect.status) {
@@ -285,16 +321,30 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             if (status === '화상' && defender.base.types.includes('불')) { noStatusCondition = true };
             if (status === '마비' && defender.base.types.includes('전기')) { noStatusCondition = true };
             if (status === '얼음' && defender.base.types.includes('얼음')) { noStatusCondition = true };
-            if (status === '독' && (defender.base.types.includes('독') || defender.base.types.includes('강철'))) { noStatusCondition = true };
-            if (status === '맹독' && (defender.base.types.includes('독') || defender.base.types.includes('강철'))) { noStatusCondition = true };
-            if (status === '풀죽음' || status === '앵콜' || status === '잠듦') {
+            if (status === '독' && (defender.base.types.includes('독') || defender.base.types.includes('강철')) || defender.base.ability?.name === '면역') { noStatusCondition = true };
+            if (status === '맹독' && (defender.base.types.includes('독') || defender.base.types.includes('강철')) || defender.base.ability?.name === '면역') { noStatusCondition = true };
+            if (status === '풀죽음') {
+              if (defender.base.ability?.name === '정신력') {
+                noStatusCondition = true;
+              } else {
+                applyStatusWithDuration(opponentSide, activeOpponent, status);
+              }
+            }
+            if (status === '잠듦') {
+              if (defender.base.ability?.name === '불면' || defender.base.ability?.name === '의기양양' || defender.base.ability?.name === '스위트베일') {
+                noStatusCondition = true;
+              } else {
+                applyStatusWithDuration(opponentSide, activeOpponent, status);
+              }
+            }
+            if (status === '앵콜' || status === '잠듦' || status === '소리기술사용불가') {
               applyStatusWithDuration(opponentSide, activeOpponent, status);
             } else if (status === '도발' || status === '헤롱헤롱' && !(defender.base.ability?.name === '둔감')) {
               applyConfusionStatus(opponentSide, activeOpponent);
             } else if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
               applyConfusionStatus(opponentSide, activeOpponent);
             } else {
-              updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, nullification));
+              updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
             }
           }
           if (!noStatusCondition) {
