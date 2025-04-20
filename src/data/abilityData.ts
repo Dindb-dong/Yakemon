@@ -159,6 +159,9 @@ const availableAbilities: AbilityInfo[] = [
   { id: 75, name: '대운', util: ['rank_buff'] },
   { id: 76, name: '내열', defensive: ['damage_reduction'] },
   { id: 77, name: '마중물', defensive: ['type_nullification'] },
+  { id: 78, name: '모래날림', appear: ['weather_change'] },
+  { id: 79, name: '모래숨기', util: ['rank_buff'] },
+  { id: 80, name: '눈퍼뜨리기', appear: ['weather_change'] },
 ]
 
 export function abilityData(abilities: string[]) {

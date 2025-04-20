@@ -95,6 +95,7 @@ export async function battleSequence(
         console.log(`enemy의 기습은 실패했다...`)
         return;
       }
+      await delay(1500);
       await handleMove("enemy", enemyAction, watchMode);
     }
     applyEndTurnEffects();
@@ -140,7 +141,7 @@ export async function battleSequence(
         applyEndTurnEffects();
         return;
       }
-      //await delay(1500);
+      await delay(1500);
       await handleMove("enemy", enemyAction as MoveInfo, watchMode);
     } else { // 상대가 선공일 경우 
       if (enemyAction.name === '기습' && myAction.category === '변화') {

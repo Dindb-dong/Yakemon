@@ -1,5 +1,7 @@
 import { useBattleStore } from "../Context/useBattleStore";
 import { MoveInfo } from "../models/Move";
+import { WeatherType } from "../models/Weather";
+import { changeHp } from "../utils/battleLogics/updateBattlePokemon";
 import { shuffleArray } from "../utils/shuffle";
 
 const moveDatas: MoveInfo[] = [
@@ -188,6 +190,7 @@ const moveDatas: MoveInfo[] = [
     pp: 10,
     isTouch: false,
     affiliation: null,
+    position: '하늘',
     accuracy: 70,
     criticalRate: 0,
     effects: [{
@@ -195,6 +198,11 @@ const moveDatas: MoveInfo[] = [
       status: '혼란',
     }],
     target: 'opponent',
+    getAccuracy: (env: WeatherType, side, accuracy) => {
+      if (env === '쾌청') return 50;
+      if (env === '비') return 100;
+      else return 70;
+    },
   },
   {
     name: '원시의힘',
@@ -431,6 +439,19 @@ const moveDatas: MoveInfo[] = [
     target: "opponent"
   },
   {
+    name: "불꽃펀치",
+    type: "불",
+    category: "물리",
+    power: 75,
+    pp: 15,
+    isTouch: true,
+    affiliation: "펀치",
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 0.1, status: "화상" }],
+    target: "opponent"
+  },
+  {
     name: "엄청난힘",
     type: "격투",
     category: "물리",
@@ -610,12 +631,15 @@ const moveDatas: MoveInfo[] = [
     name: '애크러뱃',
     type: '비행',
     category: '물리',
-    power: 110,
+    power: 55,
     pp: 15,
     isTouch: true,
     affiliation: null,
     accuracy: 100,
     criticalRate: 0,
+    getPower: (team, side, basePower) => {
+      return (basePower ?? 55) * 2;
+    },
     target: 'opponent',
   },// 나무킹 
   {
@@ -939,6 +963,22 @@ const moveDatas: MoveInfo[] = [
     type: '에스퍼',
     category: '특수',
     power: 90,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 0.1,
+      statChange: [{ target: 'opponent', stat: 'spDefense', change: -1 }]
+    }],
+    target: 'opponent',
+  },
+  {
+    name: '섀도볼',
+    type: '고스트',
+    category: '특수',
+    power: 80,
     pp: 10,
     isTouch: false,
     affiliation: null,
@@ -2069,7 +2109,6 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         fail: 1, // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
-        recoil: 1,
       }
     ],
     target: "opponent"
@@ -2409,7 +2448,7 @@ const moveDatas: MoveInfo[] = [
   },
   {
     name: '불꽃엄니',
-    type: '불꽃',
+    type: '불',
     category: '물리',
     power: 65,
     accuracy: 95,
@@ -2648,7 +2687,6 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         fail: 1, // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
-        recoil: 1,
       }
     ],
     getPower: (team, side?: 'my' | 'enemy') => {
@@ -2660,7 +2698,7 @@ const moveDatas: MoveInfo[] = [
   },
   {
     name: "썬더다이브",
-    type: "비행",
+    type: "전기",
     category: "물리",
     power: 100,
     pp: 10,
@@ -2743,7 +2781,6 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         fail: 1, // 자기 자신 기절 처리 (battleSequence에서 따로 처리 필요)
-        recoil: 1,
       }
     ],
     effects: [{
@@ -2780,12 +2817,264 @@ const moveDatas: MoveInfo[] = [
     // 이거 기술 효과는 따로 구현해야함
     target: "opponent"
   },
+  {
+    name: "버섯포자",
+    type: "풀",
+    category: "변화",
+    power: 0,
+    pp: 15,
+    isTouch: false,
+    affiliation: '가루',
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [{ status: "잠듦", chance: 1.0 }]
+  },
+  {
+    name: "아이언테일",
+    type: "강철",
+    category: "물리",
+    power: 100,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 75,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [{ statChange: [{ stat: "defense", change: -1, target: "opponent" }], chance: 0.3 }]
+  },
+  {
+    name: "압정뿌리기",
+    type: "땅",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "none",
+    trap: "압정뿌리기"
+  },
+  {
+    name: "벌레의야단법석",
+    type: "벌레",
+    category: "물리",
+    power: 90,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 1,
+    priority: 0,
+    target: "opponent",
+    effects: []
+  },
+  {
+    name: "아침햇살",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "self",
+    effects: [{ heal: 0.5, chance: 1 }]
+  },
+  {
+    name: "고속이동",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 30,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "self",
+    effects: [{ statChange: [{ stat: "speed", change: 2, target: "self" }], chance: 1.0 }]
+  },
+  {
+    name: "제비반환",
+    type: "비행",
+    category: "물리",
+    power: 60,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 1000, // 반드시 명중
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: []
+  },
+  {
+    name: "사념의박치기",
+    type: "에스퍼",
+    category: "물리",
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [{ chance: 0.2, status: "풀죽음" }]
+  },
+  {
+    name: "열풍",
+    type: "불꽃",
+    category: "특수",
+    power: 95,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [{ chance: 0.1, status: "화상" }]
+  },
+  {
+    name: "시저크로스",
+    type: "벌레",
+    category: "물리",
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 1,
+    priority: 0,
+    target: "opponent",
+    effects: []
+  },
+  {
+    name: "깨트리다",
+    type: "격투",
+    category: "물리",
+    power: 75,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [
+      { chance: 1.0, breakScreen: true }
+    ]
+  },
+  {
+    name: "하품",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 1000,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [{ status: "하품", chance: 1.0 }]
+  },
+  {
+    name: "분노의앞니",
+    type: "노말",
+    category: "물리",
+    power: 0,
+    pp: 10,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 90,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    getPower: (team, side) => {
+      // 상대 현재 체력의 절반만큼의 데미지 
+      const { activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
+      const activeIndex = side === 'my' ? activeMy : activeEnemy;
+      const opponentSide = side === 'my' ? 'enemy' : 'my';
+      const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+      const opponentPokemon = opponentTeam[activeIndex];
+      const opponentCurrentHp = opponentPokemon.currentHp;
+      return opponentCurrentHp / 2;
+    }
+  },
+  {
+    name: "코멧펀치",
+    type: "강철",
+    category: "물리",
+    power: 90,
+    pp: 10,
+    isTouch: true,
+    affiliation: "펀치",
+    accuracy: 90,
+    criticalRate: 0,
+    effects: [{ chance: 0.2, statChange: [{ stat: 'attack', target: 'self', change: 1 }] }],
+    target: "opponent"
+  },
+  {
+    name: "오로라베일",
+    type: "얼음",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 0,
+    target: "none",
+    screen: '오로라베일'
+  },
+  {
+    name: "눈보라",
+    type: "얼음",
+    category: "특수",
+    power: 110,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 70,
+    criticalRate: 0,
+    priority: 0,
+    target: "opponent",
+    effects: [
+      {
+        status: "얼음",
+        chance: 0.1
+      }
+    ],
+    getAccuracy: (env: WeatherType, side, accuracy) => {
+      if (env === '싸라기눈') return 100;
+      else return 70;
+    },
+  }
 ]
 
 export function moveData(moveNames: string[], types: string[]): MoveInfo[] {
   const selected = moveNames
     .map(name => moveDatas.find(m => m.name === name))
     .filter((m): m is MoveInfo => !!m);
+
+  if (selected.length != moveNames.length) {
+    for (const mName of moveNames) {
+      const move = selected.find(m => m.name === mName);
+      if (!move) {
+        console.warn("moveData: moveNames에 없는 기술:", mName);
+      }
+    }
+  }
 
   // 1. 자속 기술만 골라냄 (power ≥ 10)
   const preferred = selected.filter(

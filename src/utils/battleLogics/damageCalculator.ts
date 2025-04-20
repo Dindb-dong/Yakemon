@@ -11,7 +11,7 @@ import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
 import { addStatus, changeHp, changePosition, changeRank, setAbility, setCharging, setHadMissed, setLockedMove, setProtecting, setReceivedDamage, setTypes, setUsedMove, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
-import { addTrap, setField, setRoom, setWeather } from "./updateEnvironment";
+import { addTrap, setField, setRoom, setScreen, setWeather } from "./updateEnvironment";
 import { WeatherType } from "../../models/Weather";
 import { op } from "@tensorflow/tfjs";
 import { applyThornDamage } from "./applyNoneMoveDamage";
@@ -40,6 +40,7 @@ export async function calculateMoveDamage({
     activeMy,
     activeEnemy,
     publicEnv,
+    enemyEnv,
     updatePokemon,
     addLog
   } = useBattleStore.getState();
@@ -59,9 +60,16 @@ export async function calculateMoveDamage({
 
   // 초기 변수 설정
   let types = 1; // 타입 상성 배율
+  let basePower = moveInfo.power; // 기본 위력
+  if (attacker.base.ability?.name === '테크니션' && basePower <= 60) {
+    basePower *= 1.5; // 테크니션 적용
+  }
   let power = moveInfo.getPower
-    ? moveInfo.getPower(team, side) + (additionalDamage ?? 0) // 성묘 등 실질적 위력 다른 기술. 
-    : moveInfo.power + (additionalDamage ?? 0); // 기술 위력. 추가위력 있는 기술은 숫자 넣기. 
+    ? moveInfo.getPower(team, side, basePower) + (additionalDamage ?? 0) // 성묘 등 실질적 위력 다른 기술. 
+    : basePower + (additionalDamage ?? 0); // 기술 위력. 추가위력 있는 기술은 숫자 넣기. 
+
+  let accuracy = moveInfo.getAccuracy
+    ? moveInfo.getAccuracy(publicEnv, side) : moveInfo.accuracy;
 
   let accRate = 1; // 기본 명중율 배율 (복안 1.3, 승리의별 1.1), 곱해서 적용
   let criRate = 0; // 급소율 배율 (대운 -> 1), 더해서 적용 
@@ -156,13 +164,13 @@ export async function calculateMoveDamage({
   }
 
   // 4. 명중률 계산
-  if (isAlwaysHit || moveInfo.accuracy > 100) { // 연속기 사용 시 또는 필중기 사용시
+  if (isAlwaysHit || accuracy > 100) { // 연속기 사용 시 또는 필중기 사용시
     isHit = true;
   } else if (isHit) {
     if (attacker.base.ability?.name === '의욕' && moveInfo.category === '물리') {
-      moveInfo.accuracy *= 0.8;
+      accuracy *= 0.8;
     }
-    const hitSuccess = !moveInfo.oneHitKO ? calculateAccuracy(accRate, moveInfo.accuracy, myPokeRank?.accuracy ?? 0, opPokeRank?.dodge ?? 0)
+    const hitSuccess = !moveInfo.oneHitKO ? calculateAccuracy(accRate, accuracy, myPokeRank?.accuracy ?? 0, opPokeRank?.dodge ?? 0)
       : Math.random() < 0.3; // 일격필살기일 경우 30% 확률로 적중
     if (!hitSuccess) {
       isHit = false;
@@ -209,7 +217,6 @@ export async function calculateMoveDamage({
       } else if (opponentPokemon.ability?.defensive) { // 상대 포켓몬이 방어적 특성 있을 경우 
         opponentPokemon.ability?.defensive?.forEach((category: string) => {
           if (category === 'damage_nullification' || category === 'type_nullification' || category === 'damage_reduction') {
-            console.log(`${opponentPokemon.name}의 방어적 특성이 적용되었다!`)
             types *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
           }
         })
@@ -323,6 +330,14 @@ export async function calculateMoveDamage({
     } else if (disasterEffect.includes('재앙의목간') && moveInfo.category === '물리') {
       attackStat *= 0.75;
     }
+  }
+
+  // 6-4. 빛의장막, 리플렉터, 오로라베일 적용 
+  if ((enemyEnv.screen === '리플렉터' || enemyEnv.screen === '오로라베일') && moveInfo.category === '물리') {
+    rate *= 0.5;
+  }
+  if ((enemyEnv.screen === '빛의장막' || enemyEnv.screen === '오로라베일') && moveInfo.category === '특수') {
+    rate *= 0.5;
   }
 
   // 7. 공격 관련 특성 적용 (배율)
@@ -522,7 +537,9 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
       }
       if (moveInfo.room) {
         setRoom(moveInfo.room);
-        console.log(`${side}는 룸 상태를 ${moveInfo.room}으로 바꿨다!`);
+      }
+      if (moveInfo.screen) {
+        setScreen(side, moveInfo.screen);
       }
     }
   }

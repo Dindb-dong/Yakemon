@@ -75,9 +75,9 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
                       <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
                         myPokemon.base.moves.find((m) => m.name === move.name)?.pp ?? "?"}</span>
                       <span className="move-power">
-                        위력: {move.getPower ? move.getPower(myTeam) : move.power}
+                        위력: {move.getPower ? move.getPower(myTeam, 'my') : move.power}
                       </span>
-                      <span className="move-accuracy">명중율: {move.accuracy}</span>
+                      <span className="move-accuracy">명중율: {move.getAccuracy ? move.getAccuracy(useBattleStore.getState().publicEnv, 'my') : move.accuracy}</span>
                       <span className={`move-type ${move.type}`}>{move.type}</span>
                     </button>
                   );

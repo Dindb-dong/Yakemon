@@ -9,6 +9,8 @@ type StatChange = {
   change: -6 | -5 | -4 | -3 | -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
 }
 
+export type ScreenType = '빛의장막' | '리플렉터' | '오로라베일' | null;
+
 type MoveEffect = {
   chance: number; // 발동 확률, 0.1 ~ 1
   status?: StatusState;
@@ -19,7 +21,7 @@ type MoveEffect = {
   multiHit?: boolean; // 2~5회 타격 여부 (isAlwaysHit), 명중 여부는 초기에 계산 
   doubleHit?: boolean; // 2회 타격 (isAlwaysHit)
   tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
-
+  breakScreen?: boolean; // 빛의장막, 리플렉터 부수는 기술 (사이코팽, 깨트리다)
   rank_nullification?: boolean; // DD래리어트, 성스러운칼, 야금야금 같이 상대 능력변화 무시하고 데미지 주는 기술.
 }
 
@@ -50,8 +52,10 @@ export type MoveInfo = {
   position?: '땅' | '하늘' | '바다' | '공허' | null; // 공허(고스트, 섀도우다이브), 하늘, 바다, 땅 등 
   oneHitKO?: boolean; // 일격필살기 여부. 절대영도, 땅가르기, 뿔드릴, 가위자르기 
   firstTurnOnly?: boolean; // 등장한 턴에만 사용 가능한 기술.
-  getPower?: (team: BattlePokemon[], side?: 'my' | 'enemy') => number;
+  getPower?: (team: BattlePokemon[], side: 'my' | 'enemy', basePower?: number) => number;
+  getAccuracy?: (env: any, side: 'my' | 'enemy', baseAccuracy?: number) => number;
   selfKill?: boolean; // 목숨걸기, 추억의선물, 자폭, 대폭발 등
+  screen?: ScreenType;
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )
 };
 

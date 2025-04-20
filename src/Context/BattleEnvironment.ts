@@ -1,4 +1,5 @@
 import { FieldType } from "../models/Field";
+import { ScreenType } from "../models/Move";
 import { WeatherType } from "../models/Weather";
 
 export type PublicBattleEnvironment = {
@@ -13,8 +14,7 @@ export type PublicBattleEnvironment = {
 
 export type IndividualBattleEnvironment = {
   trap: string[];                // 스텔스록, 독압정 등
-  reflect?: boolean;        // 리플렉터 (물리 반감)
-  lightScreen?: boolean;      // 빛의장막 (특수 반감)
+  screen?: ScreenType;         // 빛의장막 (특수 반감)
   substitute?: boolean;    // 대타출동
   disguise?: boolean;   // 따라큐 탈 
 };
