@@ -98,6 +98,7 @@ export function applyDefensiveAbilityEffectBeforeDamage(
       }
     }
   )
+  if (rate < 1) { console.log('방어적 특성이 적용되었다!') }
   return rate;
 }
 
@@ -129,10 +130,6 @@ export function applyOffensiveAbilityEffectBeforeDamage(
           }
           if (ability.name === '철주먹' && usedMove.affiliation === '펀치') {
             rate *= 1.2; // 철주먹은 1.2배
-            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
-          }
-          if (ability.name === '테크니션' && usedMove.power <= 60) {
-            rate *= 1.5; // 테크니션은 1.5배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
           if (ability.name === '단단한발톱' && usedMove.isTouch) {

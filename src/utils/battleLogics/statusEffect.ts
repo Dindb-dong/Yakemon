@@ -10,6 +10,7 @@ export function applyStatusEffectBefore(
   move: MoveInfo,
   side: "my" | "enemy",
 ): { rate: number, isHit: boolean } {
+  const roll = Math.random();
   const durationState = useDurationStore.getState();
   const { activeMy, activeEnemy, addLog, updatePokemon, myTeam, enemyTeam } = useBattleStore.getState();
   const activeTeam = side === 'my' ? myTeam : enemyTeam;
@@ -29,7 +30,7 @@ export function applyStatusEffectBefore(
       else if (remaining === 1) recoveryChance = 1 / 2;
       else if (remaining <= 0) recoveryChance = 1;
 
-      if (Math.random() < recoveryChance) {
+      if (roll < recoveryChance) {
         // ✅ 잠듦 해제
         durationState.removeEffect(side, "잠듦");
         update(side, activeIndex, (prev) => removeStatus(prev, "잠듦"));
@@ -45,7 +46,7 @@ export function applyStatusEffectBefore(
   if (status.includes("화상") && move.category === "물리") {
     return { rate: currentRate * 0.5, isHit: true };
   } else if (status.includes('마비')) {
-    if (Math.random() > 0.25) {
+    if (roll > 0.25) {
       return { rate: currentRate, isHit: true };
     } else {
       addLog(`${activeTeam[activeIndex].base.name}은/는 몸이 저렸다!`);
@@ -61,7 +62,8 @@ export function applyStatusEffectBefore(
     console.log(`${activeTeam[activeIndex].base.name}은/는 소리기술 사용에 실패했다!`);
     return { rate: currentRate, isHit: false };
   } else if (status.includes('얼음')) {
-    if (Math.random() > 0.1 || move.type === '불') {
+    console.log('확률: ', roll);
+    if (roll < 0.1 || move.type === '불') {
       update(side, activeIndex, (prev) => removeStatus(prev, '얼음'));
       addLog(`🏋️‍♂️ ${activeTeam[activeIndex].base.name}의 얼음이 녹았다!`);
       console.log(`${activeTeam[activeIndex].base.name}의 얼음이 녹았다!`);
@@ -72,7 +74,7 @@ export function applyStatusEffectBefore(
       return { rate: currentRate, isHit: false };
     }
   } else if (status.includes('헤롱헤롱')) {
-    if (Math.random() > 0.5) {
+    if (roll > 0.5) {
       return { rate: currentRate, isHit: true };
     } else {
       addLog(`😍 ${activeTeam[activeIndex].base.name}은/는 헤롱헤롱해있다!`);
@@ -88,7 +90,7 @@ export function applyStatusEffectBefore(
     } else {
       addLog(`😵‍💫 ${activeTeam[activeIndex].base.name}은/는 혼란에 빠져있다!`);
       console.log(`${activeTeam[activeIndex].base.name}은/는 혼란에 빠져있다!`);
-      if (Math.random() < 0.33) {
+      if (roll < 0.33) {
         const selfDamage = 40 * activeTeam[activeIndex].base.attack;
         const durability = (activeTeam[activeIndex].base.defense * activeTeam[activeIndex].base.hp) / 0.411
         const finalDamage = Math.min(activeTeam[activeIndex].currentHp, Math.round((selfDamage / durability) * activeTeam[activeIndex].base.hp));

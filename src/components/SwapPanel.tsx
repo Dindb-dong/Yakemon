@@ -60,7 +60,9 @@ function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
                       <ul>
                         {poke.base.moves.map((m) => (
                           <li key={m.name}>
-                            {m.name}: {poke.pp[m.name]}, ({m.getPower ? m.getPower(team) : m.power}, {m.accuracy}), {m.type}
+                            {m.name}: {poke.pp[m.name]}, ({m.getPower ? m.getPower(team, 'my') : m.power},
+                            {m.getAccuracy ? m.getAccuracy(useBattleStore.getState().publicEnv, 'my') : m.accuracy}),
+                            {m.type}
                           </li>
                         ))}
                       </ul>

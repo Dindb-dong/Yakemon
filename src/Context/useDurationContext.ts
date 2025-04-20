@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useBattleStore } from "./useBattleStore";
 import { StatusState } from "../models/Status";
-import { removeStatus } from "../utils/battleLogics/updateBattlePokemon";
+import { addStatus, removeStatus } from "../utils/battleLogics/updateBattlePokemon";
 
 export type TimedEffect = {
   name: string;
@@ -13,11 +13,16 @@ type DurationState = {
   myEffects: TimedEffect[];
   enemyEffects: TimedEffect[];
   publicEffects: TimedEffect[];
+  myEnvEffects: TimedEffect[];
+  enemyEnvEffects: TimedEffect[];
+
+  addEnvEffect: (target: "my" | "enemy", effect: TimedEffect) => void;
+  removeEnvEffect: (target: "my" | "enemy", effectName: string) => void;
 
   addEffect: (target: "my" | "enemy" | "public", effect: TimedEffect) => void;
   removeEffect: (target: "my" | "enemy" | "public", effectName: string) => void;
   decrementTurns: () => {
-    my: string[], enemy: string[], public: string[]
+    my: string[], enemy: string[], public: string[], myEnv: string[], enemyEnv: string[]
   };
 };
 
@@ -25,6 +30,8 @@ export const useDurationStore = create<DurationState>((set, get) => ({
   myEffects: [],
   enemyEffects: [],
   publicEffects: [],
+  myEnvEffects: [],
+  enemyEnvEffects: [],
 
   addEffect: (target, effect) => {
     set((state) => {
@@ -32,6 +39,22 @@ export const useDurationStore = create<DurationState>((set, get) => ({
       const list = state[listKey] as TimedEffect[]; // ✅ 명시적으로 배열임을 선언
       const updated = [...list.filter(e => e.name !== effect.name), effect];
       return { [listKey]: updated };
+    });
+  },
+  addEnvEffect: (target, effect) => {
+    const listKey = `${target}EnvEffects` as keyof DurationState;
+    set((state) => {
+      const list = state[listKey] as TimedEffect[];
+      const updated = [...list.filter(e => e.name !== effect.name), effect];
+      return { [listKey]: updated };
+    });
+  },
+
+  removeEnvEffect: (target, effectName) => {
+    const listKey = `${target}EnvEffects` as keyof DurationState;
+    set((state) => {
+      const list = state[listKey] as TimedEffect[];
+      return { [listKey]: list.filter(e => e.name !== effectName) };
     });
   },
 
@@ -46,7 +69,7 @@ export const useDurationStore = create<DurationState>((set, get) => ({
   },
 
   decrementTurns: () => {
-    const expired: { my: string[]; enemy: string[]; public: string[] } = { my: [], enemy: [], public: [] };
+    const expired: { my: string[]; enemy: string[]; public: string[], myEnv: string[], enemyEnv: string[] } = { my: [], enemy: [], public: [], myEnv: [], enemyEnv: [] };
     const battleStore = useBattleStore.getState();
 
     const dec = (list: TimedEffect[], side: "my" | "enemy" | "public") => {
@@ -68,10 +91,24 @@ export const useDurationStore = create<DurationState>((set, get) => ({
         .filter((e) => e.remainingTurn > 0);
     };
 
+    const decEnv = (list: TimedEffect[], side: "myEnv" | "enemyEnv") => {
+      return list
+        .map((e) => {
+          const newTurn = e.remainingTurn - 1;
+          if (newTurn <= 0) {
+            expired[side].push(e.name);
+          }
+          return { ...e, remainingTurn: newTurn };
+        })
+        .filter((e) => e.remainingTurn > 0);
+    };
+
     set((state) => ({
       myEffects: dec(state.myEffects, "my"),
       enemyEffects: dec(state.enemyEffects, "enemy"),
       publicEffects: dec(state.publicEffects, "public"),
+      myEnvEffects: decEnv(state.myEnvEffects, "myEnv"),
+      enemyEnvEffects: decEnv(state.enemyEnvEffects, "enemyEnv"),
     }));
 
     // 날씨 또는 필드 효과 만료 시 BattleStore 상태에서 제거
@@ -89,6 +126,30 @@ export const useDurationStore = create<DurationState>((set, get) => ({
   }
 }));
 
+export function decrementYawnTurn(side: "my" | "enemy", index: number): boolean {
+  const { myEffects, enemyEffects, removeEffect } = useDurationStore.getState();
+  const { updatePokemon } = useBattleStore.getState();
+  const effectList = side === "my" ? myEffects : enemyEffects;
+  const yawn = effectList.find((e) => e.name === "잠듦");
+  if (!yawn) return false;
+  const nextTurn = yawn.remainingTurn - 1;
+  const shouldBeSleep = nextTurn <= 0;
+  if (shouldBeSleep) {
+    // 잠듦 상태 추가 
+    updatePokemon(side, index, (prev) => addStatus(prev, "잠듦", side));
+    // 하품 상태 제거 
+    removeEffect(side, "하품");
+    updatePokemon(side, index, (prev) => removeStatus(prev, "하품"));
+    return true;
+  } else {
+    // 아직 잠듦 상태 유지 (지속 턴 -1)
+    useDurationStore.getState().addEffect(side, {
+      name: "하품",
+      remainingTurn: nextTurn,
+    });
+    return false;
+  }
+}
 
 export function decrementConfusionTurn(side: "my" | "enemy", index: number): boolean {
   const { myEffects, enemyEffects, removeEffect } = useDurationStore.getState();

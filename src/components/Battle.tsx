@@ -295,6 +295,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
         const rightAction = redMode ? await RLChooseAction('enemy') : aiChooseAction("enemy");
         await delay(500)
         console.log('오른쪽 플레이어 행동:', rightAction);
+        await delay(500)
         await battleSequence(leftAction, rightAction, watchMode);
         console.log(`${turn}턴 종료`);
         addLog(`${turn}번째 턴 종료`);
@@ -461,8 +462,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
                                 {poke.base.moves.map((m) => (
                                   <li key={m.name}>
                                     {m.name}: {poke.pp[m.name]}, (
-                                    {m.getPower ? m.getPower(myTeam) : m.power}
-                                    , {m.accuracy}), {m.type}
+                                    {m.getPower ? m.getPower(myTeam, 'my') : m.power}
+                                    , {m.getAccuracy ? m.getAccuracy(useBattleStore.getState().publicEnv, 'my') : m.accuracy}),
+                                    {m.type}
                                   </li>
                                 ))}
                               </ul>

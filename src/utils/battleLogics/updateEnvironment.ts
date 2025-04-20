@@ -1,8 +1,38 @@
 import { useBattleStore } from "../../Context/useBattleStore";
 import { useDurationStore } from "../../Context/useDurationContext";
 import { FieldType } from "../../models/Field";
+import { ScreenType } from "../../models/Move";
 import { WeatherType } from "../../models/Weather";
 
+// 스크린 설정 (개인)
+export function setScreen(side: 'my' | 'enemy', screen: ScreenType) {
+  const env = side === "my" ? useBattleStore.getState().myEnv : useBattleStore.getState().enemyEnv;
+  const setter = side === "my" ? useBattleStore.getState().setMyEnv : useBattleStore.getState().setEnemyEnv;
+  const { addEffect } = useDurationStore.getState()
+  if (screen !== null) {
+    if (env.screen?.includes(screen)) {
+      // 이미 있으면 기술 실패
+      useBattleStore.getState().addLog(`${screen}이 이미 발동되어 있다!`);
+      console.log(`${screen}이 이미 발동되어 있다!`);
+    } else {
+      if (screen === '오로라베일' && (env.screen?.includes('빛의장막') || env.screen?.includes('리플렉터'))) {
+        // 오로라베일은 빛의장막, 리플렉터와 중복 불가
+        useBattleStore.getState().addLog(`오로라베일은 빛의장막, 리플렉터와 중복 발동할 수 없다!`);
+        console.log(`오로라베일은 빛의장막, 리플렉터와 중복 발동할 수 없다!`);
+      } else if ((screen === '빛의장막' || screen === '리플렉터') && env.screen?.includes('오로라베일')) {
+        // 빛의장막, 리플렉터는 오로라베일과 중복 불가
+        useBattleStore.getState().addLog(`빛의장막, 리플렉터는 오로라베일과 중복 발동할 수 없다!`);
+        console.log(`빛의장막, 리플렉터는 오로라베일과 중복 발동할 수 없다!`);
+      } else {
+        // 스크린 효과 추가
+        setter({ screen: screen });
+        addEffect(side, { name: screen, remainingTurn: 5 });
+        useBattleStore.getState().addLog(`${screen}이 발동되었다!`);
+        console.log(`${screen}이 발동되었다!`);
+      }
+    }
+  }
+}
 // 📍 날씨 설정 (공유)
 export function setWeather(weather: WeatherType) {
   const { addEffect } = useDurationStore.getState()
@@ -23,9 +53,18 @@ export function setField(field: FieldType) {
 
 // 📍 룸 설정 (공유)
 export function setRoom(room: string) {
+  const env = useBattleStore.getState().publicEnv;
   const { addEffect } = useDurationStore.getState()
   if (room !== null) {
-    addEffect("public", { name: room, remainingTurn: 5 });
+    if (env.room === room) {
+      // 이미 같은 룸이 있으면 기술 실패
+      useBattleStore.getState().addLog(`${room}이 이미 발동되어 있다!`);
+      console.log(`${room}이 이미 발동되어 있다!`);
+    } else {
+      useBattleStore.getState().addLog(`${room}이 발동됐다!`);
+      console.log(`${room}이 발동됐다!`);
+      addEffect("public", { name: room, remainingTurn: 5 });
+    }
   }
   useBattleStore.getState().setPublicEnv({ room });
 }

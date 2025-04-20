@@ -34,7 +34,7 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
-  const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+  const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const ability = defender.base.ability;
   ability?.defensive?.forEach((category: string) => {
     switch (category) {
@@ -111,7 +111,7 @@ async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", atta
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
-  const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+  const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const ability = attacker.base.ability;
   ability?.offensive?.forEach((category: string) => {
     switch (category) {
@@ -119,8 +119,8 @@ async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", atta
         if (ability.name === '독수' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
             updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, '독', opponentSide));
-            addLog(`🤢 ${opponentTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
-            console.log(`${opponentTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
+            addLog(`🤢 ${mirroredTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
+            console.log(`${mirroredTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
           }
         }
       default:
@@ -137,7 +137,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
-  const opponentTeam = side === 'my' ? enemyTeam : myTeam;
+  const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const enemyPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
 
   let shouldWaitForSwitch = false;
@@ -145,7 +145,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   if (usedMove.uTurn) {
     console.log('유턴 기술 사용!')
 
-    const availableOpponent = opponentTeam
+    const availableOpponent = mirroredTeam
       .map((p, i) => ({ ...p, index: i }))
       .filter((p, i) => p.currentHp > 0 && i !== activeOpponent);
     if (side === 'my' && availableOpponent.length === 0 && enemyPokemon.currentHp === 0) {
@@ -206,16 +206,18 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     await switchPromise;
     console.log('유턴 로직 실행중...5 (완료)');
   }
-  demeritEffect?.forEach((demerit) => {
+  if (usedMove.selfKill) { // 대폭발, 자폭, 추억의선물, 목숨걸기
+    updatePokemon(side, activeMine, (attacker) => changeHp(attacker, -attacker.base.hp));
+    addLog(`🤕 ${attacker.base.name}은/는 반동으로 기절했다...!`);
+    console.log(`🤕 ${attacker.base.name}은/는 반동으로 기절했다...!`);
+  }
+  demeritEffect?.forEach(async (demerit) => {
     if (demerit && Math.random() < demerit.chance) {
       console.log(`${usedMove.name}의 디메리트 효과 발동!`)
-      if (demerit?.recoil == 1) { // 대폭발, 자폭, 추억의선물, 목숨걸기
-        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, -attacker.base.hp));
-        addLog(`🤕 ${attacker.base.name}은/는 반동으로 기절했다...!`);
-      }
       if (demerit?.recoil && appliedDameage) {
         // 반동 데미지 적용
-        applyRecoilDamage(attacker, activeMine, appliedDameage);
+        const { updated: updatedAttacker } = await applyRecoilDamage(attacker, (demerit.recoil ?? 0), appliedDameage);
+        updatePokemon(side, activeMine, (attacker) => updatedAttacker);
       }
       if (demerit.statChange) {
         demerit.statChange.forEach((statChange) => {
@@ -291,11 +293,13 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             const stat = statChange.stat;
             const change = statChange.change;
             const activeTeam = targetSide === 'my' ? myTeam : enemyTeam;
+            const mirroredTeam = targetSide === 'enemy' ? myTeam : enemyTeam;
             const activeIndex = targetSide === 'my' ? activeMy : activeEnemy;
+            const mirroredIndex = targetSide === 'enemy' ? activeMy : activeEnemy;
             // 미러아머 효과 적용 
             const finalTarget = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? side : targetSide;
-            const finalActiveIndex = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? activeMine : activeIndex;
-            const finalActiveTeam = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? myTeam : enemyTeam;
+            const finalActiveIndex = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredIndex : activeIndex;
+            const finalActiveTeam = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredTeam : activeTeam;
             updatePokemon(finalTarget, finalActiveIndex, (target) => changeRank(target, stat as keyof RankState, change))
             console.log(`${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
             addLog(`🔃 ${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
@@ -348,8 +352,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             }
           }
           if (!noStatusCondition) {
-            addLog(`🍄 ${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
-            console.log(`${opponentTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
+            addLog(`🍄 ${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
+            console.log(`${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
           }
         }
         if (effect.heal && appliedDameage && appliedDameage > 0) {
@@ -363,9 +367,9 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   }
   if (usedMove.exile) {
     console.log('💨 강제 교체 발동!');
-    if (opponentTeam[activeOpponent].currentHp === 0) { return; }
+    if (mirroredTeam[activeOpponent].currentHp === 0) { return; }
     // 이 기술로 상대 죽이면 강제교체 발동 안함
-    const available = opponentTeam
+    const available = mirroredTeam
       .map((p, i) => ({ ...p, index: i }))
       .filter((p, i) => p.currentHp > 0 && i !== activeOpponent);
 
@@ -376,7 +380,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
 
     const random = available[Math.floor(Math.random() * available.length)];
     await switchPokemon(opponentSide, random.index);
-    addLog(`💨 ${opponentTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
+    addLog(`💨 ${mirroredTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
   }
 
   return;
