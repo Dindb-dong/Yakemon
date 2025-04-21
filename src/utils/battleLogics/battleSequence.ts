@@ -187,9 +187,9 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
   const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
-
   if (isTripleHit) {
     const hitCount = getHitCount(move);
+
     // 리베로, 변환자재
     if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
       updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
@@ -204,10 +204,10 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       ];
 
       if (currentDefender.currentHp <= 0) break;
-
-      const result = await calculateMoveDamage({ moveName: move.name, side });
+      const currentPower = move.power + (move.name === "트리플킥" ? 10 * i : 20 * i); // 0→1→2단계 누적
+      const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, });
       if (result?.success) {
-        move.power += (move.name === "트리플킥" ? 10 : 20);
+        await delay(1000);
         await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode);
       } else {
         break; // 빗나가면 중단
@@ -235,6 +235,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         ];
 
         if (currentDefender.currentHp <= 0) break;
+        await delay(1000);
         console.log(`${i + 2}번째 타격!`)
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
         if (result?.success) {

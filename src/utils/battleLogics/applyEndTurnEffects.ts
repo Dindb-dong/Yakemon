@@ -122,12 +122,12 @@ export function applyEndTurnEffects() {
   }
   // 리플렉터 등 없애기 
   if (myEnv.screen && expired.myEnv.includes(myEnv.screen)) {
-    setScreen('my', myEnv.screen);
+    setScreen('my', null);
     addLog(`내 필드의 ${myEnv.screen}이/가 사라졌다!`);
     console.log(`내 필드의 ${myEnv.screen}이/가 사라졌다!`);
   }
   if (enemyEnv.screen && expired.enemyEnv.includes(enemyEnv.screen)) {
-    setScreen('enemy', enemyEnv.screen);
+    setScreen('enemy', null);
     addLog(`상대 필드의 ${myEnv.screen}이/가 사라졌다!`);
     console.log(`상대 필드의 ${myEnv.screen}이/가 사라졌다!`);
   }

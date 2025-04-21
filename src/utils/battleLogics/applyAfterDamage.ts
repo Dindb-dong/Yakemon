@@ -317,9 +317,9 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             if (defender.hadRankUp) {
               if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
                 applyConfusionStatus(opponentSide, activeOpponent);
-              } else {
-                noStatusCondition = true;
               }
+            } else {
+              noStatusCondition = true;
             }
           } else {
             if (status === '화상' && defender.base.types.includes('불')) { noStatusCondition = true };

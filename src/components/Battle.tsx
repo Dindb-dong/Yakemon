@@ -35,7 +35,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     setTurn,
     setMyTeam,
     setEnemyTeam, clearSwitchRequest,
-    addLog
+    addLog, updatePokemon
   } = useBattleStore.getState();
 
   const [musicPrefix, setMusicPrefix] = useState("battle");
@@ -95,9 +95,15 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     // TODO: 여기마저도 calculateOrder 써야 함 
     if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
       applyAppearance(myTeam[activeMy], "my");
+      updatePokemon('my', activeMy, (prev) => ({
+        ...prev, isFirstTurn: true
+      }));
       addLog(`🐶 my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
       console.log(`my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
       applyAppearance(enemyTeam[activeEnemy], "enemy");
+      updatePokemon('enemy', activeEnemy, (prev) => ({
+        ...prev, isFirstTurn: true
+      }));
       addLog(`🐱 enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
       console.log(`enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
     }

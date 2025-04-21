@@ -5,11 +5,15 @@ import { ScreenType } from "../../models/Move";
 import { WeatherType } from "../../models/Weather";
 
 // 스크린 설정 (개인)
-export function setScreen(side: 'my' | 'enemy', screen: ScreenType) {
+export function setScreen(side: 'my' | 'enemy', screen: ScreenType, remove?: boolean) {
   const env = side === "my" ? useBattleStore.getState().myEnv : useBattleStore.getState().enemyEnv;
   const setter = side === "my" ? useBattleStore.getState().setMyEnv : useBattleStore.getState().setEnemyEnv;
-  const { addEffect } = useDurationStore.getState()
+  const { addEnvEffect } = useDurationStore.getState()
   if (screen !== null) {
+    if (remove) {
+      setter({ screen });
+      return;
+    }
     if (env.screen?.includes(screen)) {
       // 이미 있으면 기술 실패
       useBattleStore.getState().addLog(`${screen}이 이미 발동되어 있다!`);
@@ -26,7 +30,7 @@ export function setScreen(side: 'my' | 'enemy', screen: ScreenType) {
       } else {
         // 스크린 효과 추가
         setter({ screen: screen });
-        addEffect(side, { name: screen, remainingTurn: 5 });
+        addEnvEffect(side, { name: screen, remainingTurn: 5 });
         useBattleStore.getState().addLog(`${screen}이 발동되었다!`);
         console.log(`${screen}이 발동되었다!`);
       }
