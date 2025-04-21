@@ -24,15 +24,9 @@ import { useEffect } from "react";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { delay } from "../delay";
 
-type BattleAction = MoveInfo | { type: "switch", index: number };
+export type BattleAction = MoveInfo | { type: "switch", index: number } | null;
 
-function isMoveAction(action: BattleAction): action is MoveInfo {
-  return (action as MoveInfo).power !== undefined;
-}
 
-function isSwitchAction(action: BattleAction): action is { type: "switch", index: number } {
-  return (action as any).type === "switch";
-}
 
 
 
@@ -41,35 +35,59 @@ export async function battleSequence(
   enemyAction: BattleAction,
   watchMode?: boolean
 ) {
-  const { addLog, myTeam, enemyTeam, activeEnemy, activeMy } = useBattleStore.getState();
-  const myPokemon = myTeam[activeMy];
-  const aiPokemon = enemyTeam[activeEnemy];
+  const { addLog } = useBattleStore.getState();
+
+  // === 0. 한 쪽만 null ===
+  if (myAction === null && enemyAction !== null) {
+    addLog(`🙅‍♂️ 내 포켓몬은 행동할 수 없었다...`);
+    console.log(`🙅‍♂️ 내 포켓몬은 행동할 수 없었다...`);
+    if (isMoveAction(enemyAction)) {
+      await delay(1500);
+      await handleMove("enemy", enemyAction, watchMode);
+    } else if (isSwitchAction(enemyAction)) {
+      await delay(1500);
+      await switchPokemon("enemy", enemyAction.index);
+    }
+    applyEndTurnEffects();
+    return;
+  }
+
+  if (enemyAction === null && myAction !== null) {
+    addLog(`🙅‍♀️ 상대 포켓몬은 행동할 수 없었다...`);
+    console.log(`🙅‍♀️ 상대 포켓몬은 행동할 수 없었다...`);
+    if (isMoveAction(myAction)) {
+      await delay(1500);
+      await handleMove("my", myAction, watchMode);
+    } else if (isSwitchAction(myAction)) {
+      await delay(1500);
+      await switchPokemon("my", myAction.index);
+    }
+    applyEndTurnEffects();
+    return;
+  }
+
+  if (enemyAction === null && myAction === null) {
+    addLog(`😴 양측 모두 행동할 수 없었다...`);
+    console.log(`😴 양측 모두 행동할 수 없었다...`);
+    await delay(1500);
+    applyEndTurnEffects();
+    return;
+  }
   addLog("우선도 및 스피드 계산중...");
   console.log("우선도 및 스피드 계산중...");
+  function isMoveAction(action: BattleAction): action is MoveInfo {
+    return (action as MoveInfo).power !== undefined;
+  }
 
-  // // === 0. 기절한 포켓몬 자동 교체 (행동과 무관하게 즉시 처리) ===
-  // if (aiPokemon.currentHp <= 0 && isSwitchAction(enemyAction)) {
-  //   switchPokemon("enemy", enemyAction.index);
-  //   const updatedEnemy = useBattleStore.getState().enemyTeam[
-  //     useBattleStore.getState().activeEnemy
-  //   ];
-  //   if (updatedEnemy.currentHp <= 0) return; // 남은 포켓몬이 없으면 턴 종료
-  //   return;
-  // }
-
-  // if (myPokemon.currentHp <= 0 && isSwitchAction(myAction)) {
-  //   switchPokemon("my", myAction.index);
-  //   const updatedMine = useBattleStore.getState().myTeam[
-  //     useBattleStore.getState().activeMy
-  //   ];
-  //   if (updatedMine.currentHp <= 0) return;
-  //   return;
-  // }
-
+  function isSwitchAction(action: BattleAction): action is { type: "switch", index: number } {
+    return (action as any).type === "switch";
+  }
   const whoIsFirst = await calculateOrder(
     isMoveAction(myAction) ? myAction : undefined,
     isMoveAction(enemyAction) ? enemyAction : undefined
   );
+
+
 
   // === 1. 둘 다 교체 ===
   if (isSwitchAction(myAction) && isSwitchAction(enemyAction)) {
@@ -96,7 +114,7 @@ export async function battleSequence(
         return;
       }
       await delay(1500);
-      await handleMove("enemy", enemyAction, watchMode);
+      await handleMove("enemy", enemyAction, watchMode, true);
     }
     applyEndTurnEffects();
     return;
@@ -111,7 +129,7 @@ export async function battleSequence(
         return;
       }
       await delay(1500);
-      await handleMove("my", myAction, watchMode);
+      await handleMove("my", myAction, watchMode, true);
     }
     applyEndTurnEffects();
     return;
@@ -142,7 +160,7 @@ export async function battleSequence(
         return;
       }
       await delay(1500);
-      await handleMove("enemy", enemyAction as MoveInfo, watchMode);
+      await handleMove("enemy", enemyAction as MoveInfo, watchMode, true);
     } else { // 상대가 선공일 경우 
       if (enemyAction.name === '기습' && myAction.category === '변화') {
         addLog(`enemy의 기습은 실패했다...`)
@@ -165,14 +183,14 @@ export async function battleSequence(
         return;
       }
       await delay(1500);
-      await handleMove("my", myAction as MoveInfo, watchMode);
+      await handleMove("my", myAction as MoveInfo, watchMode, true);
     }
   }
 
   applyEndTurnEffects();
 }
 
-async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: boolean) {
+async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: boolean, wasLate?: boolean) {
   const {
     myTeam,
     enemyTeam,
@@ -187,9 +205,9 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
   const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
-
   if (isTripleHit) {
     const hitCount = getHitCount(move);
+
     // 리베로, 변환자재
     if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
       updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
@@ -204,10 +222,10 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       ];
 
       if (currentDefender.currentHp <= 0) break;
-
-      const result = await calculateMoveDamage({ moveName: move.name, side });
+      const currentPower = move.power + (move.name === "트리플킥" ? 10 * i : 20 * i); // 0→1→2단계 누적
+      const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate });
       if (result?.success) {
-        move.power += (move.name === "트리플킥" ? 10 : 20);
+        await delay(1000);
         await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode);
       } else {
         break; // 빗나가면 중단
@@ -222,7 +240,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
       console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
-    const result = await calculateMoveDamage({ moveName: move.name, side });
+    const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
     console.log('1번째 타격!')
     if (result?.success) {
 
@@ -235,8 +253,9 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         ];
 
         if (currentDefender.currentHp <= 0) break;
+        await delay(1000);
         console.log(`${i + 2}번째 타격!`)
-        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true });
+        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate });
         if (result?.success) {
           await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
         }
@@ -254,7 +273,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
       console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
-    const result = await calculateMoveDamage({ moveName: move.name, side });
+    const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
     if (result?.success) {
       if (deffender.base.ability?.name === '매직가드' && move.category === '변화') {
         addLog(`${deffender.base.name}은 매직가드로 피해를 입지 않았다!`);

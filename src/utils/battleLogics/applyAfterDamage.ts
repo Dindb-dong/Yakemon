@@ -139,7 +139,14 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const enemyPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-
+  if (usedMove.cannotMove) {
+    updatePokemon(side, activeMine, (prev) => ({
+      ...prev,
+      cannotMove: true
+    }));
+    console.log(`💥 ${attacker.base.name}은 피로로 인해 다음 턴 움직일 수 없다!`);
+    addLog(`💥 ${attacker.base.name}은 피로로 인해 다음 턴 움직일 수 없다!`);
+  }
   let shouldWaitForSwitch = false;
   let switchPromise: Promise<void> | null = null;
   if (usedMove.uTurn) {
@@ -234,6 +241,10 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     }
   })
   if (attacker.base.ability?.name !== '우격다짐' && usedMove.target === 'opponent') { // 우격다짐일 때에는 부가효과 적용안함.
+    let roll: number = Math.random();
+    if (attacker.base.ability?.name === '하늘의은총') {
+      roll *= 2;
+    }
     effect?.forEach((effect) => {
       if (defender.base.ability?.name === '매직미러' && usedMove.category === '변화') {
         console.log(`${defender.base.name}의 매직미러 발동!`);
@@ -261,7 +272,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           });
         }
       }
-      else if (effect && Math.random() < effect.chance) {
+      else if (effect && roll < effect.chance) {
         console.log(`${usedMove.name}의 부가효과 발동!`)
         if (effect.heal && !appliedDameage) {
           const healRate = effect.heal;
@@ -317,9 +328,9 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             if (defender.hadRankUp) {
               if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
                 applyConfusionStatus(opponentSide, activeOpponent);
-              } else {
-                noStatusCondition = true;
               }
+            } else {
+              noStatusCondition = true;
             }
           } else {
             if (status === '화상' && defender.base.types.includes('불')) { noStatusCondition = true };
@@ -382,6 +393,5 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     await switchPokemon(opponentSide, random.index);
     addLog(`💨 ${mirroredTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
   }
-
   return;
 }

@@ -26,8 +26,17 @@ export async function applyTrapDamage(
           console.log(`${pokemon.base.name} 은 ${item}의 피해를 입었다!`)
         }
       }
+      if (item === "끈적끈적네트") {
+        if (types.includes("비행") || pokemon.base.ability?.name === '부유') {
+          log = "끈적끈적네트는 영향을 주지 않았다!";
+          continue;
+        } else {
+          status_condition = '끈적끈적네트';
+          log = "끈적끈적네트를 밟았다!";
+        }
+      }
       if (item === "독압정") {
-        if (types.includes("비행") || types.includes("고스트") || types.includes("강철") || types.includes("독")) {
+        if (types.includes("비행") || pokemon.base.ability?.name === '부유' || types.includes("강철") || types.includes("독")) {
           log = "독압정은 영향을 주지 않았다!";
           continue;
         } else if (pokemon.base.types.includes('독')) {
@@ -48,6 +57,27 @@ export async function applyTrapDamage(
         } else {
           status_condition = '맹독'
           if (status_condition) log = `${item}이 ${pokemon.base.name}에게 ${status_condition}을 유발했다!`;
+        }
+      }
+      // 🧷 압정뿌리기
+      if (item.startsWith("압정뿌리기")) {
+        if (types.includes("비행") || pokemon.base.ability?.name === "부유") {
+          log = "압정뿌리기는 효과가 없었다!";
+          continue;
+        }
+
+        // 압정 단계별 데미지
+        let spikeDamageRatio = 1 / 8;
+        if (item === "압정뿌리기2") {
+          spikeDamageRatio = 1 / 6;
+        } else if (item === "압정뿌리기3") {
+          spikeDamageRatio = 1 / 4;
+        }
+
+        const spikeDamage = Math.floor(pokemon.base.hp * spikeDamageRatio);
+        if (spikeDamage > 0) {
+          damage += spikeDamage;
+          log = `${pokemon.base.name}은(는) ${item}의 피해를 입었다!`;
         }
       }
     }
@@ -82,7 +112,7 @@ export async function applyRecoilDamage(
 ): Promise<{ updated: BattlePokemon; log?: string; }> {
   let damage: number = 0;
   const { addLog } = useBattleStore.getState();
-  if (pokemon.base.ability?.name !== '매직가드') {
+  if (pokemon.base.ability?.name !== '매직가드' && pokemon.base.ability?.name !== '돌머리') {
     damage = Math.floor(appliedDameage * recoil);
     addLog(`${pokemon.base.name}은 반동으로 피해를 입었다!`);
   }

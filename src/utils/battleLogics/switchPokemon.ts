@@ -2,7 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
-import { addStatus, changeHp, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
+import { addStatus, changeHp, changeRank, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
 export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
@@ -18,7 +18,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
-  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기', '소리기술사용불가', '하품']; // 비주요 상태이상
+  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기', '소리기술사용불가', '하품', '혼란']; // 비주요 상태이상
   const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
@@ -79,6 +79,9 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   // 3. 새 포켓몬 활성화
   console.log('3. 새 포켓몬 활성화')
   updatePokemon(side, newIndex, (newPokemon) => setActive(newPokemon, true));
+  updatePokemon(side, newIndex, (prev) => ({
+    ...prev, isFirstTurn: true
+  }));
 
   if (side === "my") {
     setActiveMy(newIndex);
@@ -98,6 +101,8 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
         console.log('독압정 제거됨')
         removeTrap(side, '독압정')
         removeTrap(side, '맹독압정')
+      } else if (trapCondition === '끈적끈적네트') {
+        updatePokemon(side, newIndex, (prev) => changeRank(prev, 'speed', -1));
       } else {
         updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState, side))
       }

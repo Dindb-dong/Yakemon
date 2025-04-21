@@ -122,12 +122,12 @@ export function applyEndTurnEffects() {
   }
   // 리플렉터 등 없애기 
   if (myEnv.screen && expired.myEnv.includes(myEnv.screen)) {
-    setScreen('my', myEnv.screen);
+    setScreen('my', null);
     addLog(`내 필드의 ${myEnv.screen}이/가 사라졌다!`);
     console.log(`내 필드의 ${myEnv.screen}이/가 사라졌다!`);
   }
   if (enemyEnv.screen && expired.enemyEnv.includes(enemyEnv.screen)) {
-    setScreen('enemy', enemyEnv.screen);
+    setScreen('enemy', null);
     addLog(`상대 필드의 ${myEnv.screen}이/가 사라졌다!`);
     console.log(`상대 필드의 ${myEnv.screen}이/가 사라졌다!`);
   }
@@ -147,6 +147,10 @@ export function applyEndTurnEffects() {
         updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 22 / 96));
         addLog(`➕ ${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
       }
+    }
+    if (pokemon.base.ability?.name === "아이스바디" && publicEnv.weather === '싸라기눈') {
+      updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 1 / 16));
+      addLog(`➕ ${pokemon.base.name}은 아이스바디로 체력을 회복했다!`);
     }
     if (pokemon.base.ability?.name === '가속') {
       updatePokemon(side, activeIndex, (prev) => changeRank(prev, 'speed', 1));

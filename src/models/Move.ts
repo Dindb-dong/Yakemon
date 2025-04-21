@@ -32,13 +32,13 @@ export type MoveInfo = {
   power: number; // 위력 
   pp: number;
   isTouch: boolean; // 접촉 기술 여부 
-  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | '파동' | '물기' | null; // 계열 
+  affiliation?: '펀치' | '폭탄' | '바람' | '가루' | '소리' | '파동' | '물기' | '베기' | null; // 계열 
   accuracy: number; // 명중율. 
   criticalRate: number; // 급소율. 랭크로 나타냄. 0이 기본, 1이 깜짝베기같은거, 3은 확정임 
   demeritEffects?: MoveEffect[]; // 엄청난힘, 인파이트, 플레어드라이브 같은 디메리트 효과. 
   effects?: MoveEffect[];
   priority?: number; // 우선도. 신속은 2, 방어는 4, 기습은 1 등...
-  trap?: '독압정' | '스텔스록' | '압정뿌리기' | '압정뿌리기2' | '압정뿌리기3';
+  trap?: '독압정' | '스텔스록' | '압정뿌리기' | '압정뿌리기2' | '압정뿌리기3' | '끈적끈적네트';
   field?: FieldType;
   room?: string;
   weather?: string;
@@ -56,6 +56,7 @@ export type MoveInfo = {
   getAccuracy?: (env: any, side: 'my' | 'enemy', baseAccuracy?: number) => number;
   selfKill?: boolean; // 목숨걸기, 추억의선물, 자폭, 대폭발 등
   screen?: ScreenType;
+  cannotMove?: boolean;  // 파괴광선 등 ㅍ
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )
 };
 

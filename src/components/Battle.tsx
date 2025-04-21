@@ -35,7 +35,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     setTurn,
     setMyTeam,
     setEnemyTeam, clearSwitchRequest,
-    addLog
+    addLog, updatePokemon
   } = useBattleStore.getState();
 
   const [musicPrefix, setMusicPrefix] = useState("battle");
@@ -95,9 +95,15 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     // TODO: 여기마저도 calculateOrder 써야 함 
     if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
       applyAppearance(myTeam[activeMy], "my");
+      updatePokemon('my', activeMy, (prev) => ({
+        ...prev, isFirstTurn: true
+      }));
       addLog(`🐶 my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
       console.log(`my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
       applyAppearance(enemyTeam[activeEnemy], "enemy");
+      updatePokemon('enemy', activeEnemy, (prev) => ({
+        ...prev, isFirstTurn: true
+      }));
       addLog(`🐱 enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
       console.log(`enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
     }
@@ -203,6 +209,15 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     const handleChargingMove = async () => {
       if (!watchMode && !isGameOver) {
         const current = myTeam[activeMy];
+        if (current.cannotMove) {
+          addLog(`😵 ${current.base.name}은 아직 회복되지 않아 움직이지 못한다!`);
+          console.log(`😵 ${current.base.name}은 아직 회복되지 않아 움직이지 못한다!`);
+          updatePokemon('my', activeMy, (prev) => ({
+            ...prev,
+            cannotMove: false, // 이번 턴은 못 움직이고, 다음 턴엔 가능하도록 초기화
+          }));
+          await executeTurn(null);; // 이 턴의 행동을 스킵 (기술 선택/사용 X)
+        }
         if (current.isCharging && current.chargingMove) {
           console.log('차징 기술 대기중...');
           // 강제 행동 실행
@@ -332,7 +347,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
   }, [isFainted])
 
-  const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number }) => {
+  const executeTurn = async (playerAction: MoveInfo | { type: "switch"; index: number } | null) => {
     if (!watchMode) {
       setIsTurnProcessing(true);
       // const aiAction = aiChooseAction('enemy');
@@ -340,10 +355,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       console.log('ai행동:' + aiAction)
       await battleSequence(playerAction, aiAction);
 
-      console.log(`${turn}턴 종료`);
-      addLog(`${turn}번째 턴 종료`);
-      setTurn(turn + 1);
-      setSelectedMove(null);
+
       // 🔥 최신 상태 다시 불러오기!
       const { enemyTeam: updatedEnemyTeam, activeEnemy: updatedActiveEnemy } = useBattleStore.getState();
       const faintedEnemy = updatedEnemyTeam[updatedActiveEnemy];
@@ -359,7 +371,10 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
         const switchIndex = getBestSwitchIndex('enemy');
         await switchPokemon('enemy', switchIndex);
       }
-
+      console.log(`${turn}턴 종료`);
+      addLog(`${turn}번째 턴 종료`);
+      setTurn(turn + 1);
+      setSelectedMove(null);
       setIsTurnProcessing(false);
     }
   };
