@@ -112,8 +112,19 @@ export function applyAppearance(
           const updatedOpponent = (enemyPokemon) => changeRank(enemyPokemon, "attack", -1);
           updatePokemon(opponentSide, activeOpponent, updatedOpponent);
           addLog(`🔃 ${pokemon.base.name}의 등장으로 상대의 공격력이 떨어졌다!`);
-
-        } else if (ability.name === "고대활성" && publicEnv.weather === "쾌청") {
+        }
+        else if (ability.name === '다운로드') {
+          if (enemyPokemon.base.defense >= enemyPokemon.base.spDefense) {
+            const updatedMy = (myPokemon) => changeRank(myPokemon, 'spAttack', 1);
+            updatePokemon(side, activeMine, updatedMy);
+            addLog(`🔃 상대의 특수방어가 낮아서 ${pokemon.base.name}의 특수공격이 상승했다!`);
+          } else {
+            const updatedMy = (myPokemon) => changeRank(myPokemon, 'attack', 1);
+            updatePokemon(side, activeMine, updatedMy);
+            addLog(`🔃 상대의 방어가 낮아서 ${pokemon.base.name}의 공격이 상승했다!`);
+          }
+        }
+        else if (ability.name === "고대활성" && publicEnv.weather === "쾌청") {
           const stats = myPokemon.base;
           const statEntries: [keyof RankState, number][] = [
             ["attack", stats.attack],

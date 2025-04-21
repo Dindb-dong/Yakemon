@@ -54,6 +54,22 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
     console.log('쓱쓱 발동!');
     opponentSpeed *= 2;
   }
+  if (myPokemon.base.ability?.name === '눈치우기' && publicEnv.weather === '싸라기눈') {
+    console.log('눈치우기 발동!');
+    mySpeed *= 2;
+  }
+  if (opponentPokemon.base.ability?.name === '눈치우기' && publicEnv.weather === '싸라기눈') {
+    console.log('눈치우기 발동!');
+    opponentSpeed *= 2;
+  }
+  if (myPokemon.base.ability?.name === '모래헤치기' && publicEnv.weather === '모래바람') {
+    console.log('모래헤치기 발동!');
+    mySpeed *= 2;
+  }
+  if (opponentPokemon.base.ability?.name === '모래헤치기' && publicEnv.weather === '모래바람') {
+    console.log('모래헤치기 발동!');
+    opponentSpeed *= 2;
+  }
   if (publicEnv.room === '트릭룸') {
     mySpeed *= -1;
     opponentSpeed *= -1;

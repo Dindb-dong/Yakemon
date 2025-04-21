@@ -31,6 +31,9 @@ export function changeRank(
   if (pokemon.base.ability?.name === '하얀연기' || pokemon.base.ability?.name === '클리어바디' || pokemon.base.ability?.name === '메탈프로텍트') {
     return { ...pokemon };
   }
+  if (pokemon.base.ability?.name === '하얀연기' && (stat === 'defense' || stat === 'spDefense')) {
+    return { ...pokemon };
+  }
   if (pokemon.base.ability?.name === '심술꾸러기') {
     if (amount > 0) {
       manager.decreaseState(stat as keyof RankState, amount);

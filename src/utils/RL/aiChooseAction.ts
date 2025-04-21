@@ -6,7 +6,7 @@ import { calculateRankEffect } from "../battleLogics/rankEffect";
 import { calculateTypeEffectiveness } from "../typeRalation";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
-  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
+  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv, updatePokemon } = useBattleStore.getState();
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
@@ -163,6 +163,16 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   // 0. isCharging일 경우 
   if (myPokemon.isCharging && myPokemon.chargingMove) {
     return myPokemon.chargingMove;
+  }
+  // 0-1. 행동불능 상태일 경우
+  if (myPokemon.cannotMove) {
+    addLog(`😵 ${myPokemon.base.name}은 아직 회복되지 않아 움직이지 못한다!`);
+    console.log(`😵 ${myPokemon.base.name}은 아직 회복되지 않아 움직이지 못한다!`);
+    updatePokemon('enemy', activeEnemy, (prev) => ({
+      ...prev,
+      cannotMove: false, // 이번 턴은 못 움직이고, 다음 턴엔 가능하도록 초기화
+    }));
+    return null; // 이 턴의 행동을 스킵 (기술 선택/사용 X)
   }
   // === 1. 내 포켓몬이 쓰러졌으면 무조건 교체 ===
   if (myPokemon.currentHp <= 0) {

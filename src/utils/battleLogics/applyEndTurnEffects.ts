@@ -148,6 +148,10 @@ export function applyEndTurnEffects() {
         addLog(`➕ ${pokemon.base.name}은 포이즌힐로 체력을 회복했다!`);
       }
     }
+    if (pokemon.base.ability?.name === "아이스바디" && publicEnv.weather === '싸라기눈') {
+      updatePokemon(side, activeIndex, (prev) => changeHp(prev, prev.base.hp * 1 / 16));
+      addLog(`➕ ${pokemon.base.name}은 아이스바디로 체력을 회복했다!`);
+    }
     if (pokemon.base.ability?.name === '가속') {
       updatePokemon(side, activeIndex, (prev) => changeRank(prev, 'speed', 1));
       addLog(`🦅 ${pokemon.base.name}의 가속 특성 발동!`);

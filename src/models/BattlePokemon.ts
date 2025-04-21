@@ -20,4 +20,5 @@ export type BattlePokemon = {
   chargingMove?: MoveInfo;         // 차징중인 기술 이름
   receivedDamage?: number;         // 이번 턴에 받은 데미지
   isFirstTurn?: boolean;         // 이번 턴에 등장했는지
+  cannotMove?: boolean;           // 아무 행동도 못하는 상태인지 (예: 파괴광선, 기가임팩트, 시간의포효 등)
 };

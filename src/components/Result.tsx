@@ -10,7 +10,7 @@ import { resetEnvironment } from "../utils/battleLogics/updateEnvironment";
 import { replace, useNavigate } from "react-router-dom";
 import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
-import { createWin10Pokemon, createWin5Pokemon } from "../data/createWincountPokemon";
+import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "../data/createWincountPokemon";
 
 function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
   const {
@@ -26,9 +26,15 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
     setWinCount,
     resetAll
   } = useBattleStore();
-  const mockPokemon = createMockPokemon();
-  const win10Pokemon = mockPokemon.concat(createWin10Pokemon());
-  const win20Pokemon = win10Pokemon.concat(createWin5Pokemon());
+  const gen1Pokemon = createGen1Pokemon();
+  const gen2Pokemon = gen1Pokemon.concat(createGen2Pokemon());
+  const gen3Pokemon = gen2Pokemon.concat(createGen3Pokemon());
+  const gen4Pokemon = gen3Pokemon.concat(createGen4Pokemon());
+  const gen5Pokemon = gen4Pokemon.concat(createGen5Pokemon());
+  const gen6Pokemon = gen5Pokemon.concat(createGen6Pokemon());
+  const gen7Pokemon = gen6Pokemon.concat(createGen7Pokemon());
+  const gen8Pokemon = gen7Pokemon.concat(createGen8Pokemon());
+  const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
   const [musicOn, setMusicOn] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
@@ -50,10 +56,21 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   }, [musicOn]);
 
   function generateNewRandomPokemon() {
-    let pokemonList = mockPokemon;
-    if (winCount >= 1) {
-      pokemonList = win20Pokemon;
-    }
+    const allGens = [
+      gen1Pokemon,
+      gen2Pokemon,
+      gen3Pokemon,
+      gen4Pokemon,
+      gen5Pokemon,
+      gen6Pokemon,
+      gen7Pokemon,
+      gen8Pokemon,
+      gen9Pokemon,
+    ];
+
+    // winCount가 0이면 gen1, 1이면 gen2, ..., 8 이상이면 gen9
+    const index = Math.min(winCount, allGens.length - 1);
+    const pokemonList = shuffleArray(allGens[index]);
 
     const enemyRaw: PokemonInfo[] = [];
 

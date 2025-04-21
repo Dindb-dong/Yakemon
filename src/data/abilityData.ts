@@ -162,6 +162,28 @@ const availableAbilities: AbilityInfo[] = [
   { id: 78, name: '모래날림', appear: ['weather_change'] },
   { id: 79, name: '모래숨기', util: ['rank_buff'] },
   { id: 80, name: '눈퍼뜨리기', appear: ['weather_change'] },
+  { id: 81, name: '돌머리', offensive: ['remove_demerit'] },
+  { id: 82, name: '건조피부', defensive: ['type_nullification'], util: ['heal'] },
+  { id: 83, name: '애널라이즈', offensive: ['damage_buff'] },
+  { id: 84, name: '하드록', defensive: ['damage_reduction'] },
+  { id: 85, name: '하늘의은총', util: ['etc'] },
+  { id: 86, name: '전기엔진', defensive: ['type_nullification'], util: ['rank_change'] },
+  { id: 87, name: '색안경', offensive: ['damage_buff'] },
+  { id: 88, name: '눈숨기', util: ['rank_buff'] },
+  { id: 89, name: '아이스바디', util: ['heal'] },
+  { id: 90, name: '포이즌힐', util: ['heal'] },
+  { id: 91, name: '다운로드', appear: ['rank_change'] },
+  { id: 92, name: '예리함', offensive: ['damage_buff'] }, //
+  { id: 93, name: '배짱', offensive: ['type_nullification'], util: ['intimidate_nullification'] },
+  { id: 94, name: '초식', defensive: ['type_nullification'] },
+  { id: 95, name: '모래헤치기', util: ['rank_buff'] },
+  { id: 96, name: '미라클스킨', defensive: ['status_change'], util: ['statusMove_nullification'] },
+  { id: 97, name: '무기력', offensive: ['demerit'], util: ['demerit'] },
+  { id: 98, name: '복안', util: ['rank_buff'] },
+  { id: 99, name: '눈치우기', util: ['rank_buff'] },
+  { id: 100, name: '노가드', util: ['certainly'] },
+  { id: 101, name: '방진', defensive: ['damage_nullification'], util: ['status_nullification'] },
+  { id: 102, name: '부풀린가슴', offensive: ['rank_buff'] },
 ]
 
 export function abilityData(abilities: string[]) {
@@ -169,9 +191,12 @@ export function abilityData(abilities: string[]) {
     .map(name => availableAbilities.find(m => m.name === name))
     .filter((m): m is AbilityInfo => !!m);
 
-  if (selected.length === 0) {
-    console.warn(`[abilityData] 유효하지 않은 특성 이름이 감지됨: ${abilities}`);
-    selected = [availableAbilities[0]];
+  // ❗ 유효하지 않은 이름만 추출
+  const invalidNames = abilities.filter(name => !availableAbilities.some(m => m.name === name));
+
+  if (invalidNames.length > 0) {
+    console.warn(`[abilityData] 유효하지 않은 특성 이름${invalidNames.length > 1 ? '들' : ''} 감지됨:\n- ${invalidNames.join('\n- ')}`);
+    return availableAbilities[0]; // fallback (또는 필요시 throw 등 처리 가능)
   }
 
   return shuffleArray(selected)[0];

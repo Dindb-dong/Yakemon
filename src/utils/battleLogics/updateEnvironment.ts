@@ -92,21 +92,58 @@ export function removeAura(aura: string) {
 export function addTrap(side: "my" | "enemy", newTrap: string) {
   const env = side === "my" ? useBattleStore.getState().myEnv : useBattleStore.getState().enemyEnv;
   const setter = side === "my" ? useBattleStore.getState().setMyEnv : useBattleStore.getState().setEnemyEnv;
-  console.log("트랩이 설치되려한다!");
-  if (env.trap.includes('독압정') && newTrap === '독압정') {
-    const memorizedTrap = env.trap.filter((v) => v !== newTrap);
-    memorizedTrap.push('맹독압정');
-    console.log(`맹독압정이 설치되었다!`);
-    useBattleStore.getState().addLog(`맹독압정이 설치되었다!`);
-    setter({
-      //trap: [...env.trap[env.trap.length]]
-      trap: memorizedTrap,
-    });
+  const addLog = useBattleStore.getState().addLog;
+
+  console.log("트랩이 설치되려 한다!");
+
+  const trapList = [...env.trap]; // 현재 트랩 복사
+
+  // 맹독압정 진화 로직
+  if (newTrap === '독압정') {
+    if (trapList.includes('독압정')) {
+      // 기존 독압정 제거 → 맹독압정으로 대체
+      const filtered = trapList.filter((t) => t !== '독압정');
+      filtered.push('맹독압정');
+      setter({ trap: filtered });
+      console.log("맹독압정이 설치되었다!");
+      addLog("☠️ 맹독압정이 설치되었다!");
+      return;
+    }
   }
-  else if (!env.trap.includes(newTrap)) {
+
+  // 압정뿌리기 진화 로직
+  const spikeLevels = ['압정뿌리기', '압정뿌리기2', '압정뿌리기3'];
+  if (spikeLevels.includes(newTrap)) {
+    const currentLevel = spikeLevels.findIndex(level => trapList.includes(level));
+    if (currentLevel < 0) {
+      // 아직 없음
+      trapList.push('압정뿌리기');
+      setter({ trap: trapList });
+      console.log("압정뿌리기가 설치되었다!");
+      addLog("🧷 압정뿌리기가 설치되었다!");
+      return;
+    } else if (currentLevel < 2) {
+      // 진화 가능
+      trapList.splice(trapList.indexOf(spikeLevels[currentLevel]), 1); // 기존 제거
+      trapList.push(spikeLevels[currentLevel + 1]); // 다음 단계 추가
+      setter({ trap: trapList });
+      console.log(`${spikeLevels[currentLevel + 1]}가 설치되었다!`);
+      addLog(`🧷 ${spikeLevels[currentLevel + 1]}가 설치되었다!`);
+      return;
+    } else {
+      // 이미 최대
+      console.log("이미 압정뿌리기3이 설치되어 있습니다.");
+      addLog("⚠️ 이미 압정뿌리기3이 설치되어 있습니다.");
+      return;
+    }
+  }
+
+  // 그 외 트랩
+  if (!trapList.includes(newTrap)) {
+    trapList.push(newTrap);
+    setter({ trap: trapList });
     console.log(`${newTrap}이 설치되었다!`);
-    useBattleStore.getState().addLog(`${newTrap}이 설치되었다!`);
-    setter({ trap: [...env.trap, newTrap] });
+    addLog(`⚙️ ${newTrap}이 설치되었다!`);
   }
 }
 

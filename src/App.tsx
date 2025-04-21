@@ -10,9 +10,19 @@ import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 import { BattlePokemon } from "./models/BattlePokemon";
 import BottomBar from "./components/BottomBar";
 import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
-
+import { shuffleArray } from "./utils/shuffle";
+import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "./data/createWincountPokemon";
+// const gen1Pokemon = createGen1Pokemon();
+// const gen2Pokemon = gen1Pokemon.concat(createGen2Pokemon());
+// const gen3Pokemon = gen2Pokemon.concat(createGen3Pokemon());
+// const gen4Pokemon = gen3Pokemon.concat(createGen4Pokemon());
+// const gen5Pokemon = gen4Pokemon.concat(createGen5Pokemon());
+// const gen6Pokemon = gen5Pokemon.concat(createGen6Pokemon());
+// const gen7Pokemon = gen6Pokemon.concat(createGen7Pokemon());
+// const gen8Pokemon = gen7Pokemon.concat(createGen8Pokemon());
+// const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
 function MainApp() {
-  const mockPokemon = createMockPokemon();
+  const mockPokemon = createGen1Pokemon();
   const [isSelected, setIsSelected] = useState(false);
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
@@ -50,7 +60,7 @@ function MainApp() {
         ['불', '물', '풀'].map((type) =>
           getRandomByType(type, myRaw)
         );
-      const shuffledEnemyRaw = [...enemyRaw].sort(() => Math.random() - 0.5);
+      const shuffledEnemyRaw = shuffleArray(enemyRaw);
       let myBattleTeam: BattlePokemon[] = [];
 
       if (playerPokemons.length !== 3) {

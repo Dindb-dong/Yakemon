@@ -933,7 +933,7 @@ const moveDatas: MoveInfo[] = [
     power: 90,
     pp: 15,
     isTouch: true,
-    affiliation: null,
+    affiliation: '베기',
     accuracy: 100,
     criticalRate: 0,
     effects: [{
@@ -1221,7 +1221,7 @@ const moveDatas: MoveInfo[] = [
     power: 90,
     pp: 15,
     isTouch: true,
-    affiliation: null,
+    affiliation: '베기',
     accuracy: 100,
     criticalRate: 1,
     target: 'opponent',
@@ -1543,7 +1543,7 @@ const moveDatas: MoveInfo[] = [
     power: 70,
     pp: 15,
     isTouch: true,
-    affiliation: null,
+    affiliation: '베기',
     accuracy: 100,
     criticalRate: 1, // 급소율 높음 
     target: 'opponent',
@@ -2626,7 +2626,7 @@ const moveDatas: MoveInfo[] = [
     isTouch: true,
     affiliation: null,
     accuracy: 100,
-    criticalRate: 1,
+    criticalRate: 0,
     priority: 2,
     firstTurnOnly: true,
     getPower(team, side) {
@@ -3059,6 +3059,325 @@ const moveDatas: MoveInfo[] = [
       if (env === '싸라기눈') return 100;
       else return 70;
     },
+  },
+  {
+    name: "속이기",
+    type: "노말",
+    category: "물리",
+    power: 40,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 2,
+    firstTurnOnly: true,
+    effects: [{ chance: 1, status: '풀죽음' }],
+    target: "opponent"
+  },
+  {
+    name: "고드름떨구기",
+    type: "얼음",
+    category: "물리",
+    power: 85,
+    pp: 10,
+    isTouch: false,
+    accuracy: 90,
+    criticalRate: 0,
+    effects: [{ chance: 0.3, status: '풀죽음' }],
+    target: "opponent"
+  },
+  {
+    name: "프리즈드라이",
+    type: "프리즈드라이", // 고유 속성으로 구분
+    category: "특수",
+    power: 70,
+    pp: 15,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 0.1, status: "얼음" }],
+    target: "opponent"
+  },
+  {
+    name: "머드샷",
+    type: "땅",
+    category: "특수",
+    power: 55,
+    pp: 15,
+    isTouch: false,
+    accuracy: 95,
+    criticalRate: 0,
+    effects: [{ chance: 1, statChange: [{ target: "opponent", stat: "speed", change: -1 }] }],
+    target: "opponent"
+  },
+  {
+    name: "고드름침",
+    type: "얼음",
+    category: "물리",
+    power: 25,
+    pp: 30,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1, multiHit: true }],
+    target: "opponent"
+  },
+  {
+    name: "트라이어택",
+    type: "노말",
+    category: "특수",
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      { chance: 1 / 15, status: "얼음" },
+      { chance: 1 / 15, status: "마비" },
+      { chance: 1 / 15, status: "화상" }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "파괴광선",
+    type: "노말",
+    category: "특수",
+    power: 150,
+    pp: 5,
+    isTouch: false,
+    accuracy: 90,
+    criticalRate: 0,
+    // TODO: 다음턴 아무것도 못하는 상태 추가해야 함. 
+    effects: [],
+    cannotMove: true,
+    target: "opponent"
+  },
+  {
+    name: "사이코커터",
+    type: "에스퍼",
+    category: "물리",
+    power: 70,
+    pp: 20,
+    isTouch: false,
+    affiliation: '베기',
+    accuracy: 100,
+    criticalRate: 1,
+    effects: [],
+    target: "opponent"
+  },
+  {
+    name: "아쿠아커터",
+    type: "물",
+    category: "물리",
+    power: 70,
+    pp: 20,
+    isTouch: false,
+    affiliation: '베기',
+    accuracy: 100,
+    criticalRate: 1,
+    effects: [],
+    target: "opponent"
+  },
+  {
+    name: "설경",
+    type: "얼음",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "none",
+    weather: "싸라기눈",
+  },
+  {
+    name: "기가임팩트",
+    type: "노말",
+    category: "물리",
+    power: 150,
+    pp: 5,
+    isTouch: true,
+    accuracy: 90,
+    criticalRate: 0,
+    cannotMove: true,
+    target: "opponent"
+  },
+  {
+    name: "모래바람",
+    type: "바위",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "none",
+    weather: "모래바람",
+  },
+  {
+    name: "코스믹파워",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "self", stat: "defense", change: 1 },
+          { target: "self", stat: "spDefense", change: 1 }
+        ]
+      }
+    ],
+    target: "self"
+  },
+  {
+    name: "끈적끈적네트",
+    type: "벌레",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    trap: "끈적끈적네트",
+    target: "none"
+  },
+  {
+    name: "기어체인지",
+    type: "강철",
+    category: "변화",
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "self", stat: "attack", change: 1 },
+          { target: "self", stat: "speed", change: 2 }
+        ]
+      }
+    ],
+    target: "self"
+  },
+  {
+    name: "기어소서",
+    type: "강철",
+    category: "물리",
+    power: 50,
+    pp: 15,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [{ chance: 1, doubleHit: true }],
+    target: "opponent"
+  },
+  {
+    name: "싫은소리",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 40,
+    isTouch: false,
+    affiliation: '소리',
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "opponent", stat: "defense", change: -2 }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "섀도펀치",
+    type: "고스트",
+    category: "물리",
+    power: 60,
+    pp: 20,
+    isTouch: true,
+    affiliation: '펀치',
+    accuracy: 1000,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "폭발펀치",
+    type: "격투",
+    category: "물리",
+    power: 100,
+    pp: 5,
+    isTouch: true,
+    affiliation: '펀치',
+    accuracy: 50,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: "혼란"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "브레이크클로",
+    type: "노말",
+    category: "물리",
+    power: 75,
+    pp: 10,
+    isTouch: true,
+    accuracy: 95,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 0.5,
+        statChange: [
+          { target: "opponent", stat: "defense", change: -1 }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "부추기기",
+    type: "악",
+    category: "변화",
+    power: 0,
+    pp: 15,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "opponent", stat: "spAttack", change: 2 }
+        ],
+        status: '혼란'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "속임수",
+    type: "악",
+    category: "물리",
+    power: 95, // damagecalcul에서 상대 공격력 적용하기 
+    pp: 10,
+    isTouch: true,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
   }
 ]
 

@@ -2,7 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
-import { addStatus, changeHp, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
+import { addStatus, changeHp, changeRank, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
 export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
@@ -101,6 +101,8 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
         console.log('독압정 제거됨')
         removeTrap(side, '독압정')
         removeTrap(side, '맹독압정')
+      } else if (trapCondition === '끈적끈적네트') {
+        updatePokemon(side, newIndex, (prev) => changeRank(prev, 'speed', -1));
       } else {
         updatePokemon(side, newIndex, (prev) => addStatus(prev, trapCondition as StatusState, side))
       }

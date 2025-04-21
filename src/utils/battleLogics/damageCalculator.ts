@@ -24,13 +24,15 @@ export async function calculateMoveDamage({
   side,
   isAlwaysHit,
   additionalDamage,
-  overridePower
+  overridePower,
+  wasLate
 }: {
   moveName: string;
   side: 'my' | 'enemy';
   isAlwaysHit?: boolean;
   additionalDamage?: number;
   overridePower?: number;
+  wasLate?: boolean;
 }) {
   // 데이터 가져오기
   const {
@@ -70,9 +72,18 @@ export async function calculateMoveDamage({
   let accuracy = moveInfo.getAccuracy
     ? moveInfo.getAccuracy(publicEnv, side) : moveInfo.accuracy;
 
-  let accRate = 1; // 기본 명중율 배율 (복안 1.3, 승리의별 1.1), 곱해서 적용
+  let accRate = 1; // 기본 명중율 배율 
+  if (defender.base.ability?.name === '눈숨기' && weatherEffect === '싸라기눈') accRate *= 0.8;
+  if (defender.base.ability?.name === '모래숨기' && weatherEffect === '모래바람') accRate *= 0.8;
+  if (attacker.base.ability?.name === '복안') accRate *= 1.3;
+  if (attacker.base.ability?.name === '승리의별') accRate *= 1.1;
+
   let criRate = 0; // 급소율 배율 (대운 -> 1), 더해서 적용 
   let rate = 1; // 데미지 배율
+  if (wasLate && attacker.base.ability?.name === '애널라이즈') {
+    console.log('애널라이즈로 강화됐다!')
+    rate *= 1.3
+  }
   let isHit = true; // 공격 적중 여부
   let isCritical = false; // 공격 급소 여부
   let wasEffective = 0; // 약점 효과 여부, -1은 별로, 0은 평범, 1은 좋음 
@@ -86,7 +97,17 @@ export async function calculateMoveDamage({
   if (moveName === '바디프레스') {
     attackStat = myPokemon.defense;
   }
+  if (moveName === '속임수') {
+    attackStat = opponentPokemon.attack;
+  }
+  if (attacker.base.ability?.name === '무기력' && attacker.currentHp <= (attacker.base.hp / 2)) {
+    attackStat *= 0.5;
+  }
   let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
+  if (attacker.base.ability?.name === '노가드' || defender.base.ability?.name === '노가드') {
+    isAlwaysHit = true; // 필중처리
+  }
+
 
   // 0. 방어상태 확인
   if (defender.isProtecting) {
@@ -122,20 +143,23 @@ export async function calculateMoveDamage({
   }
 
   // 0-3. 차징 기술 차지상태 설정 
-  if (moveInfo.chargeTurn && !attacker.isCharging) {
-    // 차징 상태 아닐때만 차징하도록. 차징상태면 여기 통과하고 쁑 발사함! 
-    updatePokemon(side, activeMine, (prev) => {
-      return {
-        ...prev,
-        isCharging: true,
-        chargingMove: moveInfo,
-        position: moveInfo.position ?? null,
-      };
-    });
-    addLog(`${attacker.base.name}은(는) 힘을 모으기 시작했다!`);
-    console.log(`${attacker.base.name}은(는) 힘을 모으기 시작했다!`);
-    return { success: true }; // 공격 안 하고 대기
+  if (!(moveInfo.name === '솔라빔' && weatherEffect === '쾌청')) { // 쾌청상태일 때 솔라빔은 바로 발동함.
+    if (moveInfo.chargeTurn && !attacker.isCharging) {
+      // 차징 상태 아닐때만 차징하도록. 차징상태면 여기 통과하고 쁑 발사함! 
+      updatePokemon(side, activeMine, (prev) => {
+        return {
+          ...prev,
+          isCharging: true,
+          chargingMove: moveInfo,
+          position: moveInfo.position ?? null,
+        };
+      });
+      addLog(`${attacker.base.name}은(는) 힘을 모으기 시작했다!`);
+      console.log(`${attacker.base.name}은(는) 힘을 모으기 시작했다!`);
+      return { success: true }; // 공격 안 하고 대기
+    }
   }
+
 
   // 0-4. 위치 확인
   if (defender.position != null) {
@@ -192,18 +216,6 @@ export async function calculateMoveDamage({
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
-      if (moveInfo.oneHitKO) {
-        if (defender.base.ability?.name === '옹골참') {
-          updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
-          addLog(`🚫 ${attacker.base.name}의 공격은 상대의 옹골참으로 인해 통하지 않았다!`)
-          return; // 일격필살기 무효화
-        }
-        updatePokemon(opponentSide, activeOpponent, (prev) => changeHp(prev, -prev.base.hp));
-        updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-        updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
-        addLog(`💥 ${opponentPokemon.name}은/는 일격필살기에 쓰러졌다!`);
-      }
     }
   }
 
@@ -215,6 +227,17 @@ export async function calculateMoveDamage({
         if (moveInfo.type === '풀' && opponentPokemon.types.includes('풀')) {
           types *= 0;
         } // 추가 가능 
+        if (defender.base.ability?.name === '미라클스킨') {
+          wasNull = true;
+          addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
+          console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+          addLog(`🚫 ${attacker.base.name}의 공격은 효과가 없었다...`);
+          console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
+          updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
+          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')) // pp 깎기
+          updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'dodge', 2));
+          return;
+        }
       } else if (opponentPokemon.ability?.defensive) { // 상대 포켓몬이 방어적 특성 있을 경우 
         opponentPokemon.ability?.defensive?.forEach((category: string) => {
           if (category === 'damage_nullification' || category === 'type_nullification' || category === 'damage_reduction') {
@@ -228,7 +251,11 @@ export async function calculateMoveDamage({
 
     if (moveInfo.category === '변화' && isHit) { // 변화기술일 경우
       if (types === 0) {
-        wasNull = true; addLog(`🚫 ${attacker.base.name}의 공격은 효과가 없었다...`); console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
+        wasNull = true;
+        addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
+        console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+        addLog(`🚫 ${attacker.base.name}의 공격은 효과가 없었다...`);
+        console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
         updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
         updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')) // pp 깎기
         return;
@@ -276,9 +303,30 @@ export async function calculateMoveDamage({
     }
   }
 
+  if (moveInfo.oneHitKO) {
+    if (defender.base.ability?.name === '옹골참') {
+      updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+      addLog(`🚫 ${attacker.base.name}의 공격은 상대의 옹골참으로 인해 통하지 않았다!`)
+      return; // 일격필살기 무효화
+    }
+    updatePokemon(opponentSide, activeOpponent, (prev) => changeHp(prev, -prev.base.hp));
+    updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, damage));
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+    updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
+    updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
+    updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
+    updatePokemon(side, activeMine, (prev) => changePosition(prev, null)); // 위치 초기화
+    addLog(`💥 ${opponentPokemon.name}은/는 일격필살기에 쓰러졌다!`);
+    return { success: true, damage: defender.currentHp };
+  }
+
 
   // 5-2. 자속보정
-  if (myPokemon.types.some((type) => type === moveInfo.type)) {
+  if (
+    myPokemon.types.includes(moveInfo.type) ||
+    (moveInfo.type === '프리즈드라이' && myPokemon.types.includes('얼음'))
+  ) {
     if (myPokemon.ability?.name === '적응력') {
       types *= 2;
     } else {
@@ -286,6 +334,7 @@ export async function calculateMoveDamage({
     }
   }
   if (moveInfo.boostOnMissedPrev && attacker.hadMissed) {
+    // 전 턴에 빗나갔을때 뻥튀기되는 기술 적용
     rate *= 8 / 5;
   }
 
@@ -367,12 +416,12 @@ export async function calculateMoveDamage({
   }
 
   // 7. 공격 관련 특성 적용 (배율)
-  rate *= applyOffensiveAbilityEffectBeforeDamage(moveInfo, side);
+  rate *= applyOffensiveAbilityEffectBeforeDamage(moveInfo, side, wasEffective);
 
 
   // 8. 상대 방어 특성 적용 (배율)
   // 만약 위에서 이미 types가 0이더라도, 나중에 곱하면 어차피 0 돼서 상관없음.
-  rate *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
+  rate *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side, wasEffective);
 
 
   // 9. 급소 적용
@@ -475,6 +524,13 @@ export async function calculateMoveDamage({
       console.log(`${defender.base.name}의 옹골참 발동!`);
       addLog(`🔃 ${defender.base.name}의 옹골참 발동!`);
       updatePokemon(opponentSide, activeOpponent, (defender) => changeHp(defender, 1 - defender.currentHp));
+      updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, defender.currentHp - 1));
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+      updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
+      updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
+      updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
+      updatePokemon(side, activeMine, (prev) => changePosition(prev, null)); // 위치 초기화
+      return { success: true, damage: defender.currentHp - 1, wasEffective };
     }
     if (damage >= defender.currentHp) { // 쓰러뜨렸을 경우 
       if (moveInfo.name === '마지막일침') {

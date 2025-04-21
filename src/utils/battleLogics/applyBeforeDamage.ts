@@ -10,7 +10,7 @@ import { changeHp, changeRank, setTypes } from "./updateBattlePokemon";
 
 // 내 포켓몬, 상대 포켓몬, 기술, 받은 데미지, 날씨, 필드
 export function applyDefensiveAbilityEffectBeforeDamage(
-  usedMove: MoveInfo, side: 'my' | 'enemy'): number {
+  usedMove: MoveInfo, side: 'my' | 'enemy', wasEffective?: number): number {
 
   const { enemyTeam, activeEnemy, myTeam, activeMy, updatePokemon, addLog } = useBattleStore.getState();
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
@@ -61,6 +61,10 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           } else if (ability.name === '부유' && usedMove.type === '땅') {
             rate = 0;
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+          } else if (ability.name === '초식' && usedMove.type === '풀') {
+            rate = 0;
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'attack', 1));
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           }
           // TODO: 마중물, 노릇노릇바디, 전기엔진 등은 rate 0으로 만들고 각각 특수공격 1랭크, 방어 2랭크, 특수공격 1랭크, 스피드 2랭크 올리기. 
           // updatePokemon("my", 0, changeRank(active, "spAttack", 1)); 같은거 이용해서.
@@ -80,15 +84,24 @@ export function applyDefensiveAbilityEffectBeforeDamage(
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
             rate = 0;
           }
-          // TODO: 방탄, 방진 등 추가하기.
+          else if (ability.name === '방진' && usedMove.affiliation === '가루') {
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+            rate = 0;
+          }
           break;
         case 'damage_reduction':
           if (ability.name === '이상한비늘' && deffender.status.length > 0 && usedMove.category === '물리') {
             rate = 2 / 3;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           } else if (ability.name === '두꺼운지방' && (usedMove.type === '얼음' || usedMove.type === '불')) {
             rate = 1 / 2;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           } else if (ability.name === '내열' && usedMove.type === '불') {
             rate = 1 / 2;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+          } else if ((ability.name === '하드록' || ability.name === '필터') && (wasEffective ?? 0) > 0) {
+            rate = 3 / 4;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           }
           // TODO: 퍼코트, 복슬복슬, 필터, 하드록, 내열, 수포, 멀티스케일, 스펙터가드 등 추가하기 
           break;
@@ -103,7 +116,7 @@ export function applyDefensiveAbilityEffectBeforeDamage(
 }
 
 export function applyOffensiveAbilityEffectBeforeDamage(
-  usedMove: MoveInfo, side: 'my' | 'enemy'
+  usedMove: MoveInfo, side: 'my' | 'enemy', wasEffective?: number
 ): number {
   const { enemyTeam, activeEnemy, myTeam, activeMy, publicEnv, updatePokemon } = useBattleStore.getState();
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
@@ -124,7 +137,7 @@ export function applyOffensiveAbilityEffectBeforeDamage(
             rate *= 1.3; // 우격다짐은 1.3배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
-          if (ability.name === '이판사판' && usedMove.demeritEffects?.some(demerit => demerit.recoil)) {
+          if (ability.name === '이판사판' && usedMove.demeritEffects?.some(demerit => (demerit.recoil || demerit.fail))) {
             rate *= 1.2; // 이판사판은 1.2배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
@@ -168,6 +181,14 @@ export function applyOffensiveAbilityEffectBeforeDamage(
             rate *= 2; // 수포는 2배
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
+          if (ability.name === '색안경' && (wasEffective ?? 0) < 0) {
+            rate *= 2;
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '예리함' && usedMove.affiliation === '베기') {
+            rate *= 1.5;
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
           break;
         case "demerit":
           break;
@@ -188,5 +209,6 @@ export function applyOffensiveAbilityEffectBeforeDamage(
       }
     }
   )
+  if (rate > 1) { console.log('공격적 특성이 적용되었다!') }
   return rate;
 }
