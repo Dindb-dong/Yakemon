@@ -1244,7 +1244,7 @@ export function createGen5Pokemon(): PokemonInfo[] {
       id: 612,
       name: '액스라이즈',
       types: ['드래곤'],
-      moves: moveData(['용의춤', '지진', '스톤에지', '깨물어부수기', '드래곤클로', '개척하기', '독찌르기', '스케일샷', '만나자마자', '인파이트'], ['드래곤']),
+      moves: moveData(['용의춤', '지진', '스톤에지', '깨물어부수기', '드래곤클로', '개척하기', '독찌르기', '스케일샷', '만나자마자', '인파이트', '역린'], ['드래곤']),
       ability: abilityData(['틀깨기']),
       hp: 76, attack: 147, defense: 90, spAttack: 60, spDefense: 70, speed: 97,
       sex: 'male',
@@ -1370,6 +1370,106 @@ export function createGen6Pokemon(): PokemonInfo[] {
       hp: 65, attack: 90, defense: 122, spAttack: 58, spDefense: 75, speed: 84,
       level: 50
     },
+    {
+      id: 671,
+      name: '플라제스',
+      types: ['페어리'],
+      moves: moveData(['문포스', '에너지볼', '에너지볼', '광합성', '드레인키스', '사이코키네시스', '꽃가루경단', '명상'], ['페어리']),
+      ability: abilityData(['플라워베일']),
+      hp: 78, attack: 65, defense: 68, spAttack: 112, spDefense: 154, speed: 75,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 678,
+      name: '냐오닉스',
+      types: ['에스퍼'],
+      moves: moveData(['사이코키네시스', '섀도볼', '매지컬샤인', '에너지볼', '전기자석파', '리플렉터', '빛의장막', '하품'], ['에스퍼']),
+      ability: abilityData(['짓궂은마음']),
+      hp: 74, attack: 48, defense: 76, spAttack: 83, spDefense: 81, speed: 104,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 691,
+      name: '드래캄',
+      types: ['독', '드래곤'],
+      moves: moveData(['용의파동', '오물폭탄', '하이드로펌프', '용성군', '10만볼트', '맹독', '스케일샷', '파도타기'], ['드래곤', '독']),
+      ability: abilityData(['적응력', '독가시']),
+      hp: 65, attack: 75, defense: 90, spAttack: 97, spDefense: 123, speed: 44,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 695,
+      name: '일레도리자드',
+      types: ['전기', '노말'],
+      moves: moveData(['10만볼트', '볼트체인지', '파라볼라차지', '암석봉인', '파도타기', '풀묶기', '용의파동', '파괴광선', '스케일샷', '뱀눈초리'], ['전기', '노말']),
+      ability: abilityData(['건조피부', '모래숨기', '선파워']),
+      hp: 62, attack: 55, defense: 52, spAttack: 109, spDefense: 94, speed: 109,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 697,
+      name: '견고라스',
+      types: ['바위', '드래곤'],
+      moves: moveData(['스톤에지', '양날박치기', '지진', '깨물어부수기', '번개엄니', '얼음엄니', '불꽃엄니', '용의춤', '치근거리기', '사이코팽', '스케일샷', '역린'], ['바위', '드래곤']),
+      ability: abilityData(['옹골찬턱', '돌머리']),
+      hp: 82, attack: 121, defense: 119, spAttack: 69, spDefense: 59, speed: 71,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 699,
+      name: '아마루르가',
+      types: ['바위', '얼음'],
+      moves: moveData(['프리즈드라이', '원시의힘', '문포스', '오로라베일', '눈보라', '파괴광선', '전기자석파', '사이코키네시스'], ['얼음', '바위']),
+      ability: abilityData(['프리즈스킨', '눈퍼뜨리기']),
+      hp: 123, attack: 77, defense: 72, spAttack: 99, spDefense: 92, speed: 58,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 700,
+      name: '님피아',
+      types: ['페어리'],
+      moves: moveData(['문포스', '하이퍼보이스', '매지컬플레임', '사이코쇼크', '명상', '파괴광선', '하품'], ['페어리', '노말']),
+      ability: abilityData(['페어리스킨']),
+      hp: 95, attack: 65, defense: 65, spAttack: 110, spDefense: 130, speed: 60,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 701,
+      name: '루차불',
+      types: ['격투', '비행'],
+      moves: moveData(['플라잉프레스', '스톤에지', '무릎차기', '애크러뱃', '칼춤', '개척하기', '유턴', '번개펀치'], ['격투', '비행']),
+      ability: abilityData(['곡예', '틀깨기']),
+      hp: 78, attack: 92, defense: 75, spAttack: 74, spDefense: 63, speed: 118,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 703,
+      name: '크레베이스',
+      types: ['얼음'],
+      moves: moveData(['눈사태', '스톤에지', '지진', 'HP회복', '철벽', '아이언헤드', '바디프레스', '미러코트', '얼어붙은바람'], ['얼음']),
+      ability: abilityData(['옹골참', '마이페이스']),
+      hp: 95, attack: 117, defense: 184, spAttack: 44, spDefense: 46, speed: 28,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 715,
+      name: '음번',
+      types: ['비행', '드래곤'],
+      moves: moveData(['폭음파', '용성군', '화염방사', '에어슬래시', '폭풍', '기습', '유턴', '사이코키네시스', '악의파동'], ['드래곤', '비행', '노말']),
+      ability: abilityData(['틈새포착']),
+      hp: 85, attack: 70, defense: 80, spAttack: 97, spDefense: 80, speed: 123,
+      sex: 'male',
+      level: 50
+    }
   ]
 }
 
@@ -1489,7 +1589,7 @@ export function createGen8Pokemon(): PokemonInfo[] {
       id: 841,
       name: '애프룡',
       types: ['풀', '드래곤'],
-      moves: moveData(['개척하기', '드래곤클로', 'G의힘', '용의춤', '애크러뱃', '기습', '유턴', '제비반환'], ['풀', '드래곤']),
+      moves: moveData(['개척하기', '드래곤클로', 'G의힘', '용의춤', '애크러뱃', '기습', '유턴', '역린'], ['풀', '드래곤']),
       sex: 'female',
       ability: abilityData(['의욕']),
       hp: 70, attack: 110, defense: 80, spAttack: 95, spDefense: 60, speed: 70,

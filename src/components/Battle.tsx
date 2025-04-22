@@ -218,6 +218,15 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
           }));
           await executeTurn(null);; // 이 턴의 행동을 스킵 (기술 선택/사용 X)
         }
+        if ((current.lockedMoveTurn ?? 0) > 0 && current.lockedMove) {
+          addLog(`😡 ${current.base.name}은/는 난동을 부리고 있다!`);
+          console.log(`😡 ${current.base.name}은/는 난동을 부리고 있다!`);
+          updatePokemon('my', activeMy, (prev) => ({
+            ...prev,
+            lockedMoveTurn: (prev.lockedMoveTurn ?? 0) - 1,
+          }));
+          await executeTurn(current.lockedMove);; // 고정기술 강제사용
+        }
         if (current.isCharging && current.chargingMove) {
           console.log('차징 기술 대기중...');
           // 강제 행동 실행

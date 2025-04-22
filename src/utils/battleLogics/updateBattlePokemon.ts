@@ -255,7 +255,8 @@ export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePo
       isCharging: false,
       chargingMove: undefined,
       lockedMove: undefined,
-      hadMissed: false
+      hadMissed: false,
+      lockedMoveTurn: 0,
     };
   }
 

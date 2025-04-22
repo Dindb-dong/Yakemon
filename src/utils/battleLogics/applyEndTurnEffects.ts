@@ -2,9 +2,10 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { decrementYawnTurn, useDurationStore } from "../../Context/useDurationContext";
 import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
+import { applyConfusionStatus } from "./applyConfusionStatus";
 import { applyStatusConditionDamage } from "./applyNoneMoveDamage";
 import { applyStatusWithDuration } from "./applyStatusWithDuration";
-import { addStatus, changeHp, changeRank, removeStatus, resetState } from "./updateBattlePokemon";
+import { addStatus, changeHp, changeRank, removeStatus, resetState, setLockedMove } from "./updateBattlePokemon";
 import { setField, setScreen, setWeather } from "./updateEnvironment";
 
 // 매 턴 종료 시 적용할 모든 효과를 통합적으로 처리
@@ -188,7 +189,14 @@ export function applyEndTurnEffects() {
   // == resetState == //
   const actives = [activeMy, activeEnemy];
   ["my", "enemy"].forEach((side, i) => {
+    const team = side === 'my' ? myTeam : enemyTeam;
     updatePokemon(side as "my" | "enemy", actives[i], (prev) => resetState(prev));
+    if (team[actives[i]].lockedMove && team[actives[i]].lockedMoveTurn === 0) {
+      // 이제 고정 기술 다 썼으니 고정해제하고 혼란처리
+      updatePokemon(side as "my" | "enemy", actives[i], (prev) => setLockedMove(prev, null));
+      applyConfusionStatus(side as "my" | "enemy", actives[i]);
+    }
   });
+
   return;
 }

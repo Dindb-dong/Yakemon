@@ -12,7 +12,7 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
-import { applyAfterDamage } from "./applyAfterDamage";
+import { applyAfterDamage, applyMoveEffectAfterMultiDamage } from "./applyAfterDamage";
 import { applyEndTurnEffects } from "./applyEndTurnEffects";
 import { calculateOrder } from "./calculateOrder";
 import { calculateMoveDamage } from "./damageCalculator";
@@ -226,7 +226,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate });
       if (result?.success) {
         await delay(1000);
-        await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode);
+        await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
       } else {
         break; // 빗나가면 중단
       }
@@ -257,9 +257,10 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         console.log(`${i + 2}번째 타격!`)
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate });
         if (result?.success) {
-          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode, true);
         }
       }
+      await applyMoveEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
       addLog("📊 총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");
     }
@@ -282,12 +283,6 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         return;
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
-      // await new Promise<void>((resolve) => {
-      //   setTimeout(() => {
-      //     console.log('gsdfv');
-      //     resolve()
-      //   }, 1000)
-      // })
     }
     return;
   }
