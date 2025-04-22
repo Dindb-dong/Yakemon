@@ -6,8 +6,6 @@ import { getHpImagePath } from "./PokemonArea";
 import AudioManager from "../utils/AudioManager";
 import { loadRLModel } from "../utils/RL/RLChooseAction";
 import { shuffleArray } from "../utils/shuffle";
-import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
-import { createGen6Pokemon } from "../data/createWincountPokemon";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => void;
@@ -61,7 +59,7 @@ function PokemonDetailModal({
 
 function PokemonSelect({ onSelect }: Props) {
 
-  const [mockPokemon] = useState(() => createGen6Pokemon());
+  const [mockPokemon] = useState(() => createMockPokemon());
   const [musicOn, setMusicOn] = useState(true);
   useEffect(() => {
     if (musicOn) AudioManager.getInstance().play("main");

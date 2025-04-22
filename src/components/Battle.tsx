@@ -128,7 +128,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   };
   const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
   const isRunningRef = useRef(false);
-  const [timeLeft, setTimeLeft] = useState(20); // 20초 제한
+  const [timeLeft, setTimeLeft] = useState(60); // 60초 제한
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const timeLeftRef = useRef(timeLeft);
   // useEffect(() => {
@@ -139,9 +139,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     setTimeout(() => {
       if (timerRef.current) clearInterval(timerRef.current);
 
-      timeLeftRef.current = 20;
-      setTimeLeft(20);
-      console.log("⌛ 타이머 시작 (20초)");
+      timeLeftRef.current = 60;
+      setTimeLeft(60);
+      console.log("⌛ 타이머 시작 (60초)");
 
       timerRef.current = setInterval(() => {
 

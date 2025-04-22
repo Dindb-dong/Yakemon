@@ -22,4 +22,5 @@ export type PokemonInfo = {
   spDefense: number;
   speed: number;
   level: number; // 레벨에 따라 동료 포획률 조정
+  formChange?: PokemonInfo; // 폼체인지.
 };

@@ -98,9 +98,11 @@ export async function calculateMoveDamage({
   let attackStat = moveInfo.category === '물리' ? myPokemon.attack : myPokemon.spAttack;
   if (moveName === '바디프레스') {
     attackStat = myPokemon.defense;
+    console.log(moveName, '효과 발동!')
   }
   if (moveName === '속임수') {
     attackStat = opponentPokemon.attack;
+    console.log(moveName, '효과 발동!')
   }
   if (attacker.base.ability?.name === '무기력' && attacker.currentHp <= (attacker.base.hp / 2)) {
     attackStat *= 0.5;
@@ -108,6 +110,7 @@ export async function calculateMoveDamage({
   let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
   if (moveName === '사이코쇼크') {
     defenseStat = opponentPokemon.defense;
+    console.log(moveName, '효과 발동!')
   }
 
   if (attacker.base.ability?.name === '노가드' || defender.base.ability?.name === '노가드') {
