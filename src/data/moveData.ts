@@ -493,7 +493,7 @@ const moveDatas: MoveInfo[] = [
     power: 80,
     pp: 15,
     isTouch: true,
-    affiliation: null,
+    affiliation: '물기',
     accuracy: 100,
     criticalRate: 0,
     effects: [{

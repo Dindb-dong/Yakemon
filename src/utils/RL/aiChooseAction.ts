@@ -60,16 +60,25 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
   const getSpeedUpMove = (): MoveInfo | null => {
     const prankster = myPokemon.base.ability?.name === "심술꾸러기";
-    return usableMoves.find((m) =>
-      m.effects?.some((effect) =>
-        effect.chance > 0.5 && (
-          effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change > 0)
-        ) || effect.statChange?.some((s) =>
-          s.target === "opponent" &&
-          s.stat === "speed" && s.change < 0) ||
-        (prankster && effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change < 0))
-      )
-    ) || null;
+    const enemyTypes = enemyPokemon.base.types;
+
+    return (
+      usableMoves.find((move) => {
+        const effectiveness = calculateTypeEffectiveness(move.type, enemyTypes);
+
+        // 무효화되는 기술은 제외
+        if (effectiveness === 0) return false;
+
+        return move.effects?.some((effect) =>
+          // 자신 스피드 업
+          effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change > 0) ||
+          // 상대 스피드 다운
+          effect.statChange?.some((s) => s.target === "opponent" && s.stat === "speed" && s.change < 0) ||
+          // 심술꾸러기 + 자신 스피드 다운도 허용
+          (prankster && effect.statChange?.some((s) => s.target === "self" && s.stat === "speed" && s.change < 0))
+        );
+      }) || null
+    );
   };
 
   const getAttackUpMove = (): MoveInfo | null => {

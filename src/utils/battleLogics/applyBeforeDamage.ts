@@ -189,6 +189,10 @@ export function applyOffensiveAbilityEffectBeforeDamage(
             rate *= 1.5;
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
+          if (ability.name === '옹골찬턱' && usedMove.affiliation === '물기') {
+            rate *= 1.5;
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
           break;
         case "demerit":
           break;

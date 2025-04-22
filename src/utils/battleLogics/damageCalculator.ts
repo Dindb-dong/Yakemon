@@ -256,28 +256,43 @@ export async function calculateMoveDamage({
             if (moveInfo.name === '프리즈드라이' && moveInfo.type === '노말') { moveInfo.type = '프리즈드라이' }
             // 노말스킨 있어도 프리즈드라이, 플라잉프레스의 타입은 계속 적용됨. 
             if (moveInfo.name === '플라잉프레스') {
-              const fightingEffect = calculateTypeEffectivenessWithAbility(
-                myPokemon,
-                opponentPokemon,
-                { ...moveInfo, type: '격투' }
+              console.log('플라잉프레스 타입상성 적용')
+              const fightingEffect = applyDefensiveAbilityEffectBeforeDamage(
+                { ...moveInfo, type: '격투' }, side
               );
-              const flyingEffect = calculateTypeEffectivenessWithAbility(
-                myPokemon,
-                opponentPokemon,
-                { ...moveInfo, type: '비행' }
+              const flyingEffect = applyDefensiveAbilityEffectBeforeDamage(
+                { ...moveInfo, type: '비행' }, side
               );
               types *= fightingEffect * flyingEffect;
-            } else {
-              types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
+            } else { // 일반적인 경우 
+              types *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
             }
           }
         })
+      } // 방어적 특성이 없는 경우 
+      if (moveInfo.name === '프리즈드라이' && moveInfo.type === '노말') { moveInfo.type = '프리즈드라이' }
+      // 노말스킨 있어도 프리즈드라이, 플라잉프레스의 타입은 계속 적용됨. 
+      if (moveInfo.name === '플라잉프레스') {
+        const fightingEffect = calculateTypeEffectivenessWithAbility(
+          myPokemon,
+          opponentPokemon,
+          { ...moveInfo, type: '격투' }
+        );
+        const flyingEffect = calculateTypeEffectivenessWithAbility(
+          myPokemon,
+          opponentPokemon,
+          { ...moveInfo, type: '비행' }
+        );
+        types *= fightingEffect * flyingEffect;
       }
       // 마지막에 또 곱해줘도 상관없음. 0이였으면 어차피 0이니까.
-      types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
+      else { types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo); }
     }
 
     if (moveInfo.category === '변화' && isHit) { // 변화기술일 경우
+      if (myPokemon.ability?.name === '짓궂은마음' && opponentPokemon.types.includes('악')) {
+        types = 0
+      };
       if (types === 0) {
         wasNull = true;
         addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
@@ -560,11 +575,11 @@ export async function calculateMoveDamage({
   // 14. 데미지 적용 및 이후 함수 적용
   if (isHit) {
     // 데미지 적용
-    if (defender.base.ability?.name === '옹골참' && defender.currentHp === defender.base.hp && damage > defender.currentHp) {
+    if (defender.base.ability?.name === '옹골참' && defender.currentHp === defender.base.hp && damage >= defender.currentHp) {
       console.log(`${defender.base.name}의 옹골참 발동!`);
       addLog(`🔃 ${defender.base.name}의 옹골참 발동!`);
       updatePokemon(opponentSide, activeOpponent, (defender) => changeHp(defender, 1 - defender.currentHp));
-      updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, defender.currentHp - 1));
+      updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, defender.base.hp - 1));
       updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
       updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));

@@ -1451,11 +1451,11 @@ export function createGen6Pokemon(): PokemonInfo[] {
       level: 50
     },
     {
-      id: 703,
+      id: 713,
       name: '크레베이스',
-      types: ['얼음'],
-      moves: moveData(['눈사태', '스톤에지', '지진', 'HP회복', '철벽', '아이언헤드', '바디프레스', '미러코트', '얼어붙은바람'], ['얼음']),
-      ability: abilityData(['옹골참', '마이페이스']),
+      types: ['얼음'], // '눈사태', '스톤에지', '지진', 'HP회복', '철벽', 
+      moves: moveData(['아이언헤드', '바디프레스', '미러코트', '얼어붙은바람'], ['얼음']),
+      ability: abilityData(['옹골참']),
       hp: 95, attack: 117, defense: 184, spAttack: 44, spDefense: 46, speed: 28,
       sex: 'female',
       level: 50

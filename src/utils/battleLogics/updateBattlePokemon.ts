@@ -109,6 +109,9 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, side: 'my
   if (publicEnv.weather === '쾌청' && pokemon.base.ability?.name === '리프가드') {
     if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
   }
+  if (pokemon.base.ability?.name === '플라워베일' && pokemon.base.types.includes('풀')) {
+    if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
+  }
 
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);

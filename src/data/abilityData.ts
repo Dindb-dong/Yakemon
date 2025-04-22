@@ -184,6 +184,12 @@ const availableAbilities: AbilityInfo[] = [
   { id: 100, name: '노가드', util: ['certainly'] },
   { id: 101, name: '방진', defensive: ['damage_nullification'], util: ['status_nullification'] },
   { id: 102, name: '부풀린가슴', offensive: ['rank_buff'] },
+  { id: 103, name: '플라워베일', util: ['status_nullification'] }, // 아군 풀타입의 상태이상 방지
+  { id: 104, name: '짓궂은마음', util: ['etc'] }, // 변화기술의 우선도 +1
+  { id: 105, name: '옹골찬턱', offensive: ['damage_buff'] },
+  { id: 106, name: '프리즈스킨', offensive: ['damage_buff'] }, // 노말 → 얼음, 위력 1.2배
+  { id: 107, name: '페어리스킨', offensive: ['damage_buff'] }, // 노말 → 페어리, 위력 1.2배
+  { id: 108, name: '틈새포착', util: ['etc'] },
 ]
 
 export function abilityData(abilities: string[]) {
