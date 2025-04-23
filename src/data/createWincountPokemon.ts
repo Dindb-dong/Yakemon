@@ -1,9 +1,37 @@
+import { AbilityInfo } from "../models/Ability";
+import { MoveInfo } from "../models/Move";
 import { PokemonInfo } from "../models/Pokemon";
 import { abilityData } from "./abilityData";
 import { moveData } from "./moveData";
 
+function createFormChangePokemon(id: number, originalPokemon: PokemonInfo): PokemonInfo {
+  const formChangeMap: Record<number, PokemonInfo> = {
+    746: {
+      id: 746,
+      name: '약어리(단독의모습)',
+      types: ['물'],
+      moves: originalPokemon.moves,
+      sex: originalPokemon.sex,
+      ability: originalPokemon.ability,
+      hp: 45,
+      attack: 20,
+      spAttack: 20,
+      defense: 25,
+      spDefense: 25,
+      speed: 40,
+      level: 50,
+    },
+    // 여기에 다른 폼체인지도 추가 가능
+  };
+
+  if (!formChangeMap[id]) {
+    throw new Error("폼체인지를 찾을 수 없음");
+  }
+  return formChangeMap[id];
+}
+
 export function createGen1Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 3,
       name: '이상해꽃',
@@ -222,10 +250,12 @@ export function createGen1Pokemon(): PokemonInfo[] {
       level: 50,
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen2Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 157,
       name: '블레이범',
@@ -380,10 +410,12 @@ export function createGen2Pokemon(): PokemonInfo[] {
       level: 50,
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen3Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 257,
       name: '번치코',
@@ -538,10 +570,12 @@ export function createGen3Pokemon(): PokemonInfo[] {
       level: 50,
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen4Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 392,
       name: '초염몽',
@@ -994,10 +1028,12 @@ export function createGen4Pokemon(): PokemonInfo[] {
       level: 50
     }, // 4세대 끝 
   ]
+
+  return pokemons;
 }
 
 export function createGen5Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 500,
       name: '염무왕',
@@ -1301,10 +1337,12 @@ export function createGen5Pokemon(): PokemonInfo[] {
       level: 50
     }
   ]
+
+  return pokemons;
 }
 
 export function createGen6Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 655,
       name: '마폭시',
@@ -1471,10 +1509,12 @@ export function createGen6Pokemon(): PokemonInfo[] {
       level: 50
     }
   ]
+
+  return pokemons;
 }
 
 export function createGen7Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 727,
       name: '어흥염',
@@ -1537,11 +1577,51 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hp: 72, attack: 120, defense: 98, spAttack: 50, spDefense: 98, speed: 72,
       level: 50
     },
+    {
+      id: 738,
+      name: '투구뿌논',
+      types: ['벌레', '전기'],
+      moves: moveData(['10만볼트', '볼트체인지', '에어슬래시', '전기자석파', '에너지볼', '벌레의야단법석', '일렉트릭네트', '러스터캐논'], ['벌레', '전기']),
+      ability: abilityData(['부유']),
+      hp: 77, attack: 70, defense: 90, spAttack: 145, spDefense: 75, speed: 43,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 745,
+      name: '루가루암',
+      types: ['바위'],
+      moves: moveData(['스톤에지', '액셀록', '깨트리기', '기습', '인파이트', '아이언헤드', '개척하기', '암석봉인', '사이코팽'
+        , '치근거리기', '드릴라이너'
+      ], ['바위']),
+      ability: abilityData(['단단한발톱']),
+      hp: 75, attack: 117, defense: 65, spAttack: 55, spDefense: 65, speed: 110,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 746,
+      name: '약어리',
+      types: ['물'],
+      moves: moveData(['아쿠아브레이크', '지진', '퀵턴', '잠자기', '스케일샷', '하이드로펌프'], ['물']),
+      ability: abilityData(['어군']),
+      hp: 45, attack: 140, defense: 130, spAttack: 140, spDefense: 135, speed: 30,
+      sex: 'male',
+      level: 50,
+      hasFormChange: true
+    }
   ]
+  pokemons.forEach((p) => {
+    if (p.hasFormChange) {
+      p.formChange = createFormChangePokemon(p.id, p);
+    }
+  });
+
+  return pokemons;
 }
 
 export function createGen8Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 815,
       name: '에이스번',
@@ -1610,10 +1690,12 @@ export function createGen8Pokemon(): PokemonInfo[] {
       level: 50
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen9Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 911,
       name: '라우드본',
@@ -1692,4 +1774,6 @@ export function createGen9Pokemon(): PokemonInfo[] {
       level: 50
     },
   ]
+
+  return pokemons;
 }
