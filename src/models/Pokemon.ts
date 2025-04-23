@@ -22,4 +22,5 @@ export type PokemonInfo = {
   level: number; // 레벨에 따라 동료 포획률 조정
   hasFormChange?: boolean; // 폼체인지 여부 
   formChange?: PokemonInfo; // 폼체인지 포켓몬의 정보.
+  memorizedBase?: PokemonInfo; // 폼체인지용 포켓몬의 기본 정보 (배틀 승리 후 교체시 초기화용)
 };

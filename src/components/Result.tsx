@@ -124,10 +124,10 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   };
 
   const handleExchange = (myIndex: number, enemyIndex: number) => {
-    console.log("🎯 선택된 enemy base:", enemyTeam[enemyIndex].base);
+    console.log("🎯 선택된 enemy base:", enemyTeam[enemyIndex].base.memorizedBase ?? enemyTeam[enemyIndex].base);
     const newMyTeam = [...myTeam];
     // 교체한 포켓몬을 먼저 생성한 뒤 초기화
-    const exchanged = createBattlePokemon(enemyTeam[enemyIndex].base, true);
+    const exchanged = createBattlePokemon(enemyTeam[enemyIndex].base.memorizedBase ?? enemyTeam[enemyIndex].base, true);
     console.log("🧪 생성된 교체 포켓몬:", exchanged);
     newMyTeam[myIndex] = exchanged;
 

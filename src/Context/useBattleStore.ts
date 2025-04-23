@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { PublicBattleEnvironment, IndividualBattleEnvironment } from "./BattleEnvironment";
+import { withFormCheck } from "../middlewares/withFormCheck";
 
 type SwitchRequest = {
   side: 'my' | 'enemy';
@@ -46,7 +47,7 @@ type BattleStore = {
   resetAll: () => void;
 };
 
-export const useBattleStore = create<BattleStore>((set, get) => ({
+export const useBattleStore = create(withFormCheck<BattleStore>((set, get) => ({
   myTeam: [],
   enemyTeam: [],
   activeMy: 0,
@@ -123,4 +124,4 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     winCount: 0,
     enemyRoster: [],
   })),
-}));
+})));

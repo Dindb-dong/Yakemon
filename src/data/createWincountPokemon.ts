@@ -4,6 +4,16 @@ import { PokemonInfo } from "../models/Pokemon";
 import { abilityData } from "./abilityData";
 import { moveData } from "./moveData";
 
+function boostStats(pokemon: PokemonInfo): void {
+  // 폼체인지용 base 만들 때 필요함 
+  pokemon.hp += 75;
+  pokemon.attack += 20;
+  pokemon.defense += 20;
+  pokemon.spAttack += 20;
+  pokemon.spDefense += 20;
+  pokemon.speed += 20;
+}
+
 function createFormChangePokemon(id: number, originalPokemon: PokemonInfo): PokemonInfo {
   const formChangeMap: Record<number, PokemonInfo> = {
     746: {
@@ -1597,7 +1607,7 @@ export function createGen7Pokemon(): PokemonInfo[] {
       ability: abilityData(['단단한발톱']),
       hp: 75, attack: 117, defense: 65, spAttack: 55, spDefense: 65, speed: 110,
       sex: 'male',
-      level: 50
+      level: 50,
     },
     {
       id: 746,
@@ -1611,10 +1621,21 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hasFormChange: true
     }
   ]
+
   pokemons.forEach((p) => {
-    if (p.hasFormChange) {
-      p.formChange = createFormChangePokemon(p.id, p);
-    }
+    if (!p.hasFormChange) return;
+    // 폼체인지 데이터 생성 및 스탯 강화
+    p.formChange = createFormChangePokemon(p.id, p);
+    boostStats(p.formChange);
+    // 기본 폼의 백업 생성 및 강화
+    const memorized: PokemonInfo = {
+      ...p,
+      moves: p.moves,
+      sex: p.sex,
+      ability: p.ability,
+    };
+    boostStats(memorized);
+    p.memorizedBase = memorized;
   });
 
   return pokemons;

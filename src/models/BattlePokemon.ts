@@ -24,4 +24,5 @@ export type BattlePokemon = {
   cannotMove?: boolean;           // 아무 행동도 못하는 상태인지 (예: 파괴광선, 기가임팩트, 시간의포효 등)
   formNum?: number;       // 폼체인지 번호. 폼 1개만 있는 경우 1, 2개 있으면 순서대로. 약어리는 1, 루가루암은 1|2 이런식
   // 원래는 없는 프로퍼티인데, 폼체인지 할때마다 동적으로 부여해주면 될듯
+  formCondition?: (self: BattlePokemon) => boolean; // 폼체인지 조건 (자기 자신 객체를(BattlePokemon타입) 인자로 넣어서, true/false 반환하는 함수)
 };

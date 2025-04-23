@@ -13,6 +13,7 @@ import { WeatherType } from "../../models/Weather";
 import { applyThornDamage } from "./applyNoneMoveDamage";
 import { useDurationStore } from "../../Context/useDurationContext";
 import { applySkinTypeEffect } from "../applySkinTypeEffect";
+import { applyStatusWithDuration } from "./applyStatusWithDuration";
 
 type ItemInfo = {
   id: number;
@@ -661,6 +662,13 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
         if (effect.heal && effect.heal > 0) {
           const heal = effect.heal;
           updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * heal));
+        }
+        if (effect.status) {
+          if (effect.status === '잠듦' && !(activeTeam[activeMine].base.ability?.name === '불면' ||
+            activeTeam[activeMine].base.ability?.name === '의기양양'
+          )) {
+            applyStatusWithDuration(side, activeMine, effect.status); // 스스로 잠듦처리 
+          }
         }
       })
     } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 

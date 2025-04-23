@@ -1477,6 +1477,20 @@ const moveDatas: MoveInfo[] = [
     target: 'self',
   },
   {
+    name: '잠자기',
+    type: '에스퍼',
+    category: '변화',
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1, heal: 1, status: '잠듦' }],
+    target: 'self',
+    // TODO: 상태이상 싹 제거하는 효과 추가해야 함 
+  },
+  {
     name: '플레어송',
     type: '불',
     category: '특수',
@@ -1545,6 +1559,18 @@ const moveDatas: MoveInfo[] = [
     isTouch: true,
     affiliation: '베기',
     accuracy: 100,
+    criticalRate: 1, // 급소율 높음 
+    target: 'opponent',
+  },
+  {
+    name: '드릴라이너',
+    type: '땅',
+    category: '물리',
+    power: 80,
+    pp: 10,
+    isTouch: true,
+    affiliation: '베기',
+    accuracy: 95,
     criticalRate: 1, // 급소율 높음 
     target: 'opponent',
   },
@@ -2000,6 +2026,19 @@ const moveDatas: MoveInfo[] = [
     category: "물리",
     power: 40,
     pp: 30,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 1,
+    target: "opponent"
+  },
+  {
+    name: "액셀록",
+    type: "바위",
+    category: "물리",
+    power: 40,
+    pp: 20,
     isTouch: true,
     affiliation: null,
     accuracy: 100,
@@ -2959,7 +2998,7 @@ const moveDatas: MoveInfo[] = [
     effects: []
   },
   {
-    name: "깨트리다",
+    name: "깨트리기",
     type: "격투",
     category: "물리",
     power: 75,

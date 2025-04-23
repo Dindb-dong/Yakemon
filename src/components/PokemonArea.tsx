@@ -17,7 +17,7 @@ const statDisplayMap: Record<string, string> = {
   critical: "급소율",
 };
 
-export async function getHpImagePath(dexNum: number, hpRatio: number, formNum?: any): Promise<string> {
+export async function getHpImagePath(dexNum: number, hpRatio: number, formNum?: number): Promise<string> {
   const paddedDex = String(dexNum).padStart(4, "0");
   let paddedFormNum = "0001";
   if (formNum) {
@@ -109,7 +109,7 @@ function PokemonArea({ my, enemy }: Props) {
   }, [my]);
 
   useEffect(() => {
-    getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp).then(setEnemyImg);
+    getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp, enemy.formNum).then(setEnemyImg);
     if (enemy.currentHp < enemyPrevHp) {
       setEnemyDamage(true);
       setTimeout(() => setEnemyDamage(false), 400);
