@@ -1567,16 +1567,16 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hp: 68, attack: 64, defense: 60, spAttack: 111, spDefense: 60, speed: 117,
       level: 50
     },
-    {
-      id: 752,
-      name: '깨비물거미',
-      types: ['물', '벌레'],
-      moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
-      sex: 'male',
-      ability: abilityData(['수포', '저수']),
-      hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
-      level: 50
-    },
+    // {
+    //   id: 752,
+    //   name: '깨비물거미',
+    //   types: ['물', '벌레'],
+    //   moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
+    //   sex: 'male',
+    //   ability: abilityData(['수포', '저수']),
+    //   hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
+    //   level: 50
+    // },
     {
       id: 763,
       name: '달코퀸',
@@ -1609,16 +1609,90 @@ export function createGen7Pokemon(): PokemonInfo[] {
       sex: 'male',
       level: 50,
     },
+    // {
+    //   id: 746,
+    //   name: '약어리',
+    //   types: ['물'],
+    //   moves: moveData(['아쿠아브레이크', '지진', '퀵턴', '잠자기', '스케일샷', '하이드로펌프', '냉동빔', '아이언테일'], ['물']),
+    //   ability: abilityData(['어군']),
+    //   hp: 45, attack: 140, defense: 130, spAttack: 140, spDefense: 135, speed: 30,
+    //   sex: 'male',
+    //   level: 50,
+    //   hasFormChange: true
+    // },
+    // {
+    //   id: 748,
+    //   name: '더시마사리',
+    //   types: ['물', '독'],
+    //   moves: moveData(['독압정', 'HP회복', '토치카', '찬물끼얹기', '얼어붙은바람', '머드샷', '아픔나누기', '독찌르기'], ['물', '독']),
+    //   ability: abilityData(['재생력']),
+    //   hp: 50, attack: 63, defense: 152, spAttack: 53, spDefense: 142, speed: 35,
+    //   sex: 'male',
+    //   level: 50
+    // },
     {
-      id: 746,
-      name: '약어리',
-      types: ['물'],
-      moves: moveData(['아쿠아브레이크', '지진', '퀵턴', '잠자기', '스케일샷', '하이드로펌프'], ['물']),
-      ability: abilityData(['어군']),
-      hp: 45, attack: 140, defense: 130, spAttack: 140, spDefense: 135, speed: 30,
+      id: 750,
+      name: '만마드',
+      types: ['땅'],
+      moves: moveData(['지진', '암석봉인', '땅고르기', '스톤에지', '땅가르기', '바디프레스', '아이언헤드', '철벽'], ['땅']),
+      ability: abilityData(['지구력', '마이페이스']),
+      hp: 100, attack: 125, defense: 100, spAttack: 55, spDefense: 85, speed: 35,
       sex: 'male',
-      level: 50,
-      hasFormChange: true
+      level: 50
+    },
+    {
+      id: 754,
+      name: '라란티스',
+      types: ['풀'],
+      moves: moveData(['리프블레이드', '흡혈', '리프스톰', '엄청난힘', '독찌르기', '로킥', '깜짝베기'], ['풀']),
+      ability: abilityData(['리프가드', '심술꾸러기']),
+      hp: 70, attack: 105, defense: 90, spAttack: 80, spDefense: 90, speed: 45,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 764,
+      name: '큐아링',
+      types: ['페어리'],
+      moves: moveData(['드레인키스', '기가드레인', '명상', '씨뿌리기', '애교부리기', '광합성'], ['페어리']),
+      ability: abilityData(['힐링시프트', '자연회복']),
+      hp: 51, attack: 52, defense: 90, spAttack: 82, spDefense: 110, speed: 100,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 768,
+      name: '갑주무사',
+      types: ['벌레', '물'],
+      moves: moveData(['만나자마자', '아쿠아브레이크', '기습', '칼춤', '암석봉인', '흡혈', '인파이트', '독찌르기', '드릴라이너', '아쿠아제트'], ['벌레', '물']),
+      ability: abilityData(['위기회피']),
+      hp: 75, attack: 125, defense: 140, spAttack: 60, spDefense: 90, speed: 40,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 773,
+      name: '실버디',
+      types: ['노말'],
+      moves: moveData([
+        '아이언헤드', '독찌르기', '멀티어택', '냉동빔', '막말내뱉기', '화염방사', '파도타기', '10만볼트', '칼춤', '유턴'
+      ], ['노말']),
+      ability: abilityData(['AR시스템']),
+      hp: 95, attack: 95, defense: 95, spAttack: 95, spDefense: 95, speed: 95,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 781,
+      name: '타타륜',
+      types: ['풀', '고스트'],
+      moves: moveData([
+        '앵커숏', '스톤에지', '지진', '고스트다이브', '파워휩', '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인'
+      ], ['풀', '고스트']),
+      ability: abilityData(['강철술사']),
+      hp: 70, attack: 131, defense: 100, spAttack: 86, spDefense: 90, speed: 40,
+      sex: 'male',
+      level: 50
     }
   ]
 

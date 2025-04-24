@@ -3435,6 +3435,7 @@ const moveDatas: MoveInfo[] = [
     name: "꽃가루경단",
     type: "벌레",
     category: "특수",
+    affiliation: '폭탄',
     power: 90,
     pp: 10,
     isTouch: false,
@@ -3551,7 +3552,51 @@ const moveDatas: MoveInfo[] = [
     criticalRate: 0,
     affiliation: "소리",
     target: "opponent"
-  }
+  },
+  {
+    name: '토치카',
+    type: '독',
+    category: '변화',
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    protect: true,
+    priority: 4,
+    target: 'self'
+  },
+  {
+    name: "애교부리기",
+    type: "페어리",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "opponent", stat: "attack", change: -2 }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "멀티어택",
+    type: "노말",
+    category: "물리",
+    power: 120,
+    pp: 10,
+    isTouch: true,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+  },
 ]
 
 export function moveData(moveNames: string[], types: string[]): MoveInfo[] {

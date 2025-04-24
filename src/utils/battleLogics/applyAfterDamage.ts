@@ -15,14 +15,78 @@ import { calculateTypeEffectiveness } from "../typeRalation";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { calculateRankEffect } from "./rankEffect";
 import { applyRecoilDamage } from "./applyNoneMoveDamage";
+import { delay } from "../delay";
 
+async function applyPanicUturn(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
+  // 여기에 들어오는 side는 기술 쓴 쪽의 opponentSide임. 즉, 원본 handleMove에서 side에 my가 넘어갔으면 
+  // 여기 side에는 enemy가 오는것.
+  const {
+    myTeam,
+    enemyTeam,
+    activeMy,
+    activeEnemy,
+    setSwitchRequest,
+    clearSwitchRequest
+  } = useBattleStore.getState();
+  const team = side === "my" ? myTeam : enemyTeam;
+  const active = side === "my" ? activeMy : activeEnemy;
+
+  defender = team[active];
+  if (
+    defender.base.ability?.name === "위기회피" &&
+    defender.currentHp > 0 &&
+    (defender.currentHp <= defender.base.hp / 2)
+  ) {
+    console.log(`🛡️ ${defender.base.name}의 특성 '위기회피' 발동!`);
+
+
+    const availableIndexes = team
+      .map((p, i) => ({ ...p, index: i }))
+      .filter((p, i) => p.currentHp > 0 && i !== active);
+
+    if (availableIndexes.length === 0) {
+      console.log("⚠️ 위기회피 가능 포켓몬 없음 (교체 생략)");
+      return;
+    }
+
+    let switchPromise: Promise<void> | null = null;
+
+    if (watchMode || side === "enemy") {
+      console.log("👀 관전 모드 또는 AI: 위기회피 자동 교체");
+      const switchIndex = getBestSwitchIndex(side);
+      switchPromise = new Promise<void>(async (resolve) => {
+        await switchPokemon(side, switchIndex);
+        resolve();
+      });
+    } else if (side === "my") {
+      console.log("🎮 플레이어: 위기회피 수동 교체 요청");
+      switchPromise = new Promise<void>((resolve) => {
+        setSwitchRequest({
+          side,
+          reason: "uTurn",
+          onSwitch: async (index: number) => {
+            await switchPokemon(side, index);
+            setSwitchRequest(null);
+            clearSwitchRequest();
+            resolve();
+          },
+        });
+      });
+    }
+
+    if (switchPromise) {
+      await switchPromise;
+    }
+  }
+}
 
 // 사용 주체, 내 포켓몬, 상대 포켓몬, 기술, 내 포켓몬의 남은 체력
 export async function applyAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
-
-  await applyDefensiveAbilityEffectAfterDamage(side, attacker, defender, usedMove, appliedDameage, watchMode);
-  await applyOffensiveAbilityEffectAfrerDamage(side, attacker, defender, usedMove, appliedDameage, watchMode);
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  await applyDefensiveAbilityEffectAfterDamage(side, attacker, defender, usedMove, appliedDameage, watchMode, multiHit);
+  await applyOffensiveAbilityEffectAfrerDamage(side, attacker, defender, usedMove, appliedDameage, watchMode, multiHit);
   await applyMoveEffectAfterDamage(side, attacker, defender, usedMove, appliedDameage, watchMode, multiHit);
+  await applyPanicUturn(opponentSide, attacker, defender, usedMove, appliedDameage, watchMode, multiHit);
 
 }
 
@@ -96,6 +160,7 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
       else {
         // ✅ AI가 유턴 사용한 경우 자동 교체!
         console.log('ai가 유턴 사용');
+        await delay(1500);
         const switchIndex = getBestSwitchIndex(side);
         switchPromise = new Promise<void>(async (resolve) => {
           await switchPokemon(side, switchIndex);
@@ -293,7 +358,29 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
   return;
 }
 
-async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean) {
+export async function applyDefensiveAbilityEffectAfterMultiDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
+  const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
+  const ability = defender.base.ability;
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  ability?.defensive?.forEach((category: string) => {
+    switch (category) {
+      case "rank_change":
+        if (ability.name === '지구력' && (appliedDameage ?? 0) > 0) {
+          if (defender.currentHp > 0) {
+            console.log(`${defender.base.name}의 특성 ${ability.name} 발동!`);
+            addLog(`${defender.base.name}의 특성 ${ability.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'defense', 1));
+          }
+        }
+    }
+  }
+  )
+}
+
+
+async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
+  console.log('applyDefensiveAbilityEffectAfterDamage')
   const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
   const effect = usedMove.effects;
   const demeritEffect = usedMove.demeritEffects;
@@ -324,6 +411,12 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
             console.log(`${defender.base.name}의 특성 ${ability.name} 발동!`);
             addLog(`${defender.base.name}의 특성 ${ability.name} 발동!`);
             updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'attack', 1));
+          }
+        } else if (ability.name === '지구력' && (appliedDameage ?? 0) > 0 && !multiHit) {
+          if (defender.currentHp > 0) {
+            console.log(`${defender.base.name}의 특성 ${ability.name} 발동!`);
+            addLog(`${defender.base.name}의 특성 ${ability.name} 발동!`);
+            updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'defense', 1));
           }
         }
       case "status_change":
@@ -370,7 +463,7 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
 
 }
 
-async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean) {
+async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
   const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
   const effect = usedMove.effects;
   const demeritEffect = usedMove.demeritEffects;
@@ -466,6 +559,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
       else {
         // ✅ AI가 유턴 사용한 경우 자동 교체!
         console.log('ai가 유턴 사용');
+        await delay(1500);
         const switchIndex = getBestSwitchIndex(side);
         switchPromise = new Promise<void>(async (resolve) => {
           await switchPokemon(side, switchIndex);

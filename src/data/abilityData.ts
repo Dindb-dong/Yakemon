@@ -192,6 +192,10 @@ const availableAbilities: AbilityInfo[] = [
   { id: 108, name: '틈새포착', util: ['etc'] },
   { id: 109, name: '단단한발톱', offensive: ['damage_buff'] },
   { id: 110, name: '어군', util: ['form_change'] },
+  { id: 111, name: '지구력', defensive: ['rank_change'] },
+  { id: 112, name: '힐링시프트', util: ['etc'] },
+  { id: 113, name: '위기회피', util: ['etc'] },
+  { id: 114, name: 'AR시스템', appear: ['form_change'] },
 ]
 
 export function abilityData(abilities: string[]) {

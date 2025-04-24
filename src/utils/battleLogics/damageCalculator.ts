@@ -132,6 +132,12 @@ export async function calculateMoveDamage({
       updatePokemon(side, activeMine, (attacker) => updatedPokemon);
       console.log('공격 포켓몬의 남은 체력: ', defender.currentHp);
       console.log(`${opponentSide}는 가시에 상처를 입었다!`);
+    } else if (defender.usedMove?.name === '토치카' && moveInfo.isTouch) {
+      updatePokemon(side, activeMine, (attacker) => addStatus(attacker, '독', opponentSide));
+      if (!(attacker.base.ability?.name === '면역' || attacker.base.types.includes('독') || attacker.base.types.includes('강철'))) {
+        console.log(`${opponentSide}는 가시에 찔려 독 상태가 되었다!`);
+        addLog(`${opponentSide}는 가시에 찔려 독 상태가 되었다!`);
+      }
     }
     return { success: false };
   }

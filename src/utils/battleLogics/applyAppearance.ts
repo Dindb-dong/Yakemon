@@ -104,6 +104,38 @@ export function applyAppearance(
 
       // 아래 항목은 필요 시 확장
       case "form_change":
+        if (ability.name === 'AR시스템') {
+          const allTypes = [
+            '노말', '불', '물', '풀', '전기', '얼음', '격투',
+            '독', '땅', '비행', '에스퍼', '벌레', '바위', '고스트',
+            '드래곤', '악', '강철', '페어리'
+          ];
+
+          // 타입 무작위 선택
+          const randomType = allTypes[Math.floor(Math.random() * allTypes.length)];
+
+          // 타입 변경 + 멀티어택 타입 동기화
+          updatePokemon(side, activeMine, (prev) => {
+            const updatedMoves = prev.base.moves.map((move) => {
+              if (move.name === '멀티어택') {
+                return {
+                  ...move,
+                  type: randomType
+                };
+              }
+              return move;
+            });
+
+            return {
+              ...prev,
+              base: {
+                ...prev.base,
+                types: [randomType],
+                moves: updatedMoves
+              }
+            };
+          })
+        }
         addLog(`🔃 ${pokemon.base.name}의 폼이 변화했다!`);
         break;
 
