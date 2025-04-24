@@ -402,7 +402,7 @@ const moveDatas: MoveInfo[] = [
     category: "변화",
     power: 0,
     pp: 20,
-    isTouch: true,
+    isTouch: false,
     affiliation: null,
     accuracy: 100,
     criticalRate: 0,
@@ -493,7 +493,7 @@ const moveDatas: MoveInfo[] = [
     power: 80,
     pp: 15,
     isTouch: true,
-    affiliation: null,
+    affiliation: '물기',
     accuracy: 100,
     criticalRate: 0,
     effects: [{
@@ -1477,6 +1477,20 @@ const moveDatas: MoveInfo[] = [
     target: 'self',
   },
   {
+    name: '잠자기',
+    type: '에스퍼',
+    category: '변화',
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1, heal: 1, status: '잠듦' }],
+    target: 'self',
+    // TODO: 상태이상 싹 제거하는 효과 추가해야 함 
+  },
+  {
     name: '플레어송',
     type: '불',
     category: '특수',
@@ -1545,6 +1559,18 @@ const moveDatas: MoveInfo[] = [
     isTouch: true,
     affiliation: '베기',
     accuracy: 100,
+    criticalRate: 1, // 급소율 높음 
+    target: 'opponent',
+  },
+  {
+    name: '드릴라이너',
+    type: '땅',
+    category: '물리',
+    power: 80,
+    pp: 10,
+    isTouch: true,
+    affiliation: '베기',
+    accuracy: 95,
     criticalRate: 1, // 급소율 높음 
     target: 'opponent',
   },
@@ -2008,6 +2034,19 @@ const moveDatas: MoveInfo[] = [
     target: "opponent"
   },
   {
+    name: "액셀록",
+    type: "바위",
+    category: "물리",
+    power: 40,
+    pp: 20,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    priority: 1,
+    target: "opponent"
+  },
+  {
     name: "신속",
     type: "노말",
     category: "물리",
@@ -2285,6 +2324,7 @@ const moveDatas: MoveInfo[] = [
     accuracy: 100,
     criticalRate: 0,
     chargeTurn: true,
+    position: '땅',
     target: "opponent"
   },
   {
@@ -2862,16 +2902,16 @@ const moveDatas: MoveInfo[] = [
   {
     name: "벌레의야단법석",
     type: "벌레",
-    category: "물리",
+    category: "특수",
     power: 90,
     pp: 10,
     isTouch: true,
-    affiliation: null,
+    affiliation: '소리',
     accuracy: 100,
     criticalRate: 1,
     priority: 0,
     target: "opponent",
-    effects: []
+    effects: [{ chance: 1, statChange: [{ target: 'opponent', stat: 'spDefense', change: -1 }] }]
   },
   {
     name: "아침햇살",
@@ -2958,7 +2998,7 @@ const moveDatas: MoveInfo[] = [
     effects: []
   },
   {
-    name: "깨트리다",
+    name: "깨트리기",
     type: "격투",
     category: "물리",
     power: 75,
@@ -3372,13 +3412,208 @@ const moveDatas: MoveInfo[] = [
     name: "속임수",
     type: "악",
     category: "물리",
-    power: 95, // damagecalcul에서 상대 공격력 적용하기 
+    power: 95, // damagecalcul에서 상대 공격력 적용하기 ok
     pp: 10,
     isTouch: true,
     accuracy: 100,
     criticalRate: 0,
     target: "opponent"
-  }
+  },
+  {
+    name: "역린",
+    type: "드래곤",
+    category: "물리",
+    power: 120,
+    pp: 10,
+    isTouch: true,
+    accuracy: 100,
+    criticalRate: 0,
+    lockedMove: true,
+    target: "opponent"
+  },
+  {
+    name: "꽃가루경단",
+    type: "벌레",
+    category: "특수",
+    affiliation: '폭탄',
+    power: 90,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "리플렉터",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    screen: "리플렉터",
+    target: "none"
+  },
+  {
+    name: "빛의장막",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    screen: "빛의장막",
+    target: "none"
+  },
+  {
+    name: "용성군",
+    type: "드래곤",
+    category: "특수",
+    power: 130,
+    pp: 5,
+    isTouch: false,
+    accuracy: 90,
+    criticalRate: 0,
+    demeritEffects: [{ chance: 1, statChange: [{ target: "self", stat: "spAttack", change: -2 }] }],
+    target: "opponent"
+  },
+  {
+    name: "파라볼라차지",
+    type: "전기",
+    category: "특수",
+    power: 65,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1, heal: 0.5 }],
+    target: "opponent"
+  },
+  {
+    name: "사이코팽",
+    type: "에스퍼",
+    category: "물리",
+    power: 85,
+    pp: 10,
+    isTouch: true,
+    affiliation: '물기',
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1, breakScreen: true }],
+    target: "opponent"
+  },
+  {
+    name: "하이퍼보이스",
+    type: "노말",
+    category: "특수",
+    power: 90,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    affiliation: "소리",
+    passScreen: true,
+    target: "opponent"
+  },
+  {
+    name: "사이코쇼크",
+    type: "에스퍼",
+    category: "특수",
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+    // 특수공격으로 계산하지만 물리방어 기준이라는 특수 효과는 로직으로 처리 ok
+  },
+  {
+    name: "플라잉프레스",
+    type: "격투",
+    category: "물리",
+    power: 100,
+    pp: 10,
+    isTouch: true,
+    accuracy: 95,
+    criticalRate: 0,
+    target: "opponent"
+    // 격투 + 비행 타입으로 계산되도록 별도 타입 상성 처리 필요 ok 
+  },
+  {
+    name: "폭음파",
+    type: "노말",
+    category: "특수",
+    power: 140,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    affiliation: "소리",
+    target: "opponent"
+  },
+  {
+    name: '토치카',
+    type: '독',
+    category: '변화',
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    protect: true,
+    priority: 4,
+    target: 'self'
+  },
+  {
+    name: "애교부리기",
+    type: "페어리",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          { target: "opponent", stat: "attack", change: -2 }
+        ]
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "멀티어택",
+    type: "노말",
+    category: "물리",
+    power: 120,
+    pp: 10,
+    isTouch: true,
+    accuracy: 100,
+    criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "앵커샷",
+    type: "강철",
+    category: "물리",
+    power: 80,
+    pp: 20,
+    isTouch: true,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      }
+    ],
+    target: "opponent"
+  },
 ]
 
 export function moveData(moveNames: string[], types: string[]): MoveInfo[] {

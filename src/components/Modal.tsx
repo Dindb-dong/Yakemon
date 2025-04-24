@@ -72,7 +72,7 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
       const thumbMap: Record<string, string> = {};
 
       for (const p of all) {
-        const url = await getHpImagePath(p.base.id, 1);
+        const url = await getHpImagePath(p.base.id, 1, p.formNum);
         thumbMap[`${p.base.name}-${p.base.id}`] = url;
       }
 

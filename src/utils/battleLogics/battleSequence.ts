@@ -12,7 +12,7 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
-import { applyAfterDamage } from "./applyAfterDamage";
+import { applyAfterDamage, applyDefensiveAbilityEffectAfterMultiDamage, applyMoveEffectAfterMultiDamage } from "./applyAfterDamage";
 import { applyEndTurnEffects } from "./applyEndTurnEffects";
 import { calculateOrder } from "./calculateOrder";
 import { calculateMoveDamage } from "./damageCalculator";
@@ -35,7 +35,7 @@ export async function battleSequence(
   enemyAction: BattleAction,
   watchMode?: boolean
 ) {
-  const { addLog } = useBattleStore.getState();
+  const { addLog, activeEnemy, activeMy } = useBattleStore.getState();
 
   // === 0. 한 쪽만 null ===
   if (myAction === null && enemyAction !== null) {
@@ -43,7 +43,7 @@ export async function battleSequence(
     console.log(`🙅‍♂️ 내 포켓몬은 행동할 수 없었다...`);
     if (isMoveAction(enemyAction)) {
       await delay(1500);
-      await handleMove("enemy", enemyAction, watchMode);
+      await handleMove("enemy", enemyAction, activeEnemy, watchMode);
     } else if (isSwitchAction(enemyAction)) {
       await delay(1500);
       await switchPokemon("enemy", enemyAction.index);
@@ -57,7 +57,7 @@ export async function battleSequence(
     console.log(`🙅‍♀️ 상대 포켓몬은 행동할 수 없었다...`);
     if (isMoveAction(myAction)) {
       await delay(1500);
-      await handleMove("my", myAction, watchMode);
+      await handleMove("my", myAction, activeMy, watchMode);
     } else if (isSwitchAction(myAction)) {
       await delay(1500);
       await switchPokemon("my", myAction.index);
@@ -111,10 +111,11 @@ export async function battleSequence(
       if (enemyAction.name === '기습') {
         addLog(`enemy의 기습은 실패했다...`)
         console.log(`enemy의 기습은 실패했다...`)
-        return;
+        await delay(1500);
+      } else {
+        await delay(1500);
+        await handleMove("enemy", enemyAction, activeEnemy, watchMode, true);
       }
-      await delay(1500);
-      await handleMove("enemy", enemyAction, watchMode, true);
     }
     applyEndTurnEffects();
     return;
@@ -126,10 +127,12 @@ export async function battleSequence(
       if (myAction.name === '기습') {
         addLog(`my의 기습은 실패했다...`)
         console.log(`my의 기습은 실패했다...`)
-        return;
+        await delay(1500);
       }
-      await delay(1500);
-      await handleMove("my", myAction, watchMode, true);
+      else {
+        await delay(1500);
+        await handleMove("my", myAction, activeMy, watchMode, true);
+      }
     }
     applyEndTurnEffects();
     return;
@@ -139,58 +142,63 @@ export async function battleSequence(
   if (isMoveAction(myAction) && isMoveAction(enemyAction)) {
     if (whoIsFirst === "my") {
       if (myAction.name === '기습' && enemyAction.category === '변화') {
+        // 내 기습 실패 -> 상대만 공격함 
         addLog(`my의 기습은 실패했다...`)
         console.log(`my의 기습은 실패했다...`)
-        return;
+        await delay(1500);
+        await handleMove("enemy", enemyAction as MoveInfo, activeEnemy, watchMode, true);
       } else if (enemyAction.name === '기습') {
-        // 상대 기습보다 내 선공기가 먼저였으면 실패
+        // 상대 기습보다 내 선공기가 먼저였으면 실패 -> 나만 공격함
         addLog(`enemy의 기습은 실패했다...`)
         console.log(`enemy의 기습은 실패했다...`)
-        return;
+        await handleMove("my", myAction as MoveInfo, activeMy, watchMode);
+      } else { // 그 외의 일반적인 경우들
+        await handleMove("my", myAction as MoveInfo, activeMy, watchMode);
+        // 상대가 쓰러졌는지 확인
+        const updatedEnemy = useBattleStore.getState().enemyTeam[
+          useBattleStore.getState().activeEnemy
+        ];
+        if (updatedEnemy.currentHp <= 0) {
+          //removeFaintedPokemon("enemy");
+          applyEndTurnEffects();
+          return;
+        }
+        await delay(1500);
+        await handleMove("enemy", enemyAction as MoveInfo, activeEnemy, watchMode, true);
       }
-      await handleMove("my", myAction as MoveInfo, watchMode);
-
-      // 상대가 쓰러졌는지 확인
-      const updatedEnemy = useBattleStore.getState().enemyTeam[
-        useBattleStore.getState().activeEnemy
-      ];
-      if (updatedEnemy.currentHp <= 0) {
-        //removeFaintedPokemon("enemy");
-        applyEndTurnEffects();
-        return;
-      }
-      await delay(1500);
-      await handleMove("enemy", enemyAction as MoveInfo, watchMode, true);
     } else { // 상대가 선공일 경우 
       if (enemyAction.name === '기습' && myAction.category === '변화') {
+        // 상대 기습 실패, 내 기술만 작동
         addLog(`enemy의 기습은 실패했다...`)
         console.log(`enemy의 기습은 실패했다...`)
-        return;
-      } else if (myAction.name === '기습') {
+        await delay(1500);
+        await handleMove("my", myAction as MoveInfo, activeMy, watchMode, true);
+      } else if (myAction.name === '기습') { // 내 기습이 상대보다 느림 -> 상대 기습만 작동
         addLog(`my의 기습은 실패했다...`)
         console.log(`my의 기습은 실패했다...`)
-        return;
-      }
-      await handleMove("enemy", enemyAction as MoveInfo, watchMode);
+        await handleMove("enemy", enemyAction as MoveInfo, activeEnemy, watchMode);
+      } else {
+        await handleMove("enemy", enemyAction as MoveInfo, activeEnemy, watchMode);
 
-      // 내가 쓰러졌는지 확인
-      const updatedMe = useBattleStore.getState().myTeam[
-        useBattleStore.getState().activeMy
-      ];
-      if (updatedMe.currentHp <= 0) {
-        //removeFaintedPokemon("my");
-        applyEndTurnEffects();
-        return;
+        // 내가 쓰러졌는지 확인
+        const updatedMe = useBattleStore.getState().myTeam[
+          useBattleStore.getState().activeMy
+        ];
+        if (updatedMe.currentHp <= 0) {
+          //removeFaintedPokemon("my");
+          applyEndTurnEffects();
+          return;
+        }
+        await delay(1500);
+        await handleMove("my", myAction as MoveInfo, activeMy, watchMode, true);
       }
-      await delay(1500);
-      await handleMove("my", myAction as MoveInfo, watchMode, true);
     }
   }
 
   applyEndTurnEffects();
 }
 
-async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: boolean, wasLate?: boolean) {
+async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: number, watchMode?: boolean, wasLate?: boolean) {
   const {
     myTeam,
     enemyTeam,
@@ -204,6 +212,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
+  if (currentIndex != activeIndex) return;
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
   if (isTripleHit) {
     const hitCount = getHitCount(move);
@@ -226,7 +235,8 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
       const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate });
       if (result?.success) {
         await delay(1000);
-        await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode);
+        await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
+        await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
       } else {
         break; // 빗나가면 중단
       }
@@ -257,9 +267,11 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         console.log(`${i + 2}번째 타격!`)
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate });
         if (result?.success) {
-          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode, true);
+          await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
         }
       }
+      await applyMoveEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
       addLog("📊 총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");
     }
@@ -282,12 +294,6 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, watchMode?: bool
         return;
       }
       await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
-      // await new Promise<void>((resolve) => {
-      //   setTimeout(() => {
-      //     console.log('gsdfv');
-      //     resolve()
-      //   }, 1000)
-      // })
     }
     return;
   }

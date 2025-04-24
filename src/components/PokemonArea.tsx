@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
+import { useBattleStore } from "../Context/useBattleStore";
 
 type Props = {
   my: BattlePokemon;
@@ -17,19 +18,32 @@ const statDisplayMap: Record<string, string> = {
   critical: "급소율",
 };
 
-export async function getHpImagePath(dexNum: number, hpRatio: number): Promise<string> {
+export async function getHpImagePath(dexNum: number, hpRatio: number, formNum?: number): Promise<string> {
   const paddedDex = String(dexNum).padStart(4, "0");
+  let paddedFormNum = "0001";
+  if (formNum) {
+    paddedFormNum = String(formNum).padStart(4, "0");
+  }
 
   const getCandidatePath = (): string => {
     let folder = "green_hp";
     let file = `${paddedDex}.webp`;
+    if (formNum) {
+      file = `${paddedDex}-${paddedFormNum}.webp`;
+    }
 
     if (hpRatio <= 0.25) {
       folder = "red_hp";
       file = `${paddedDex}_r2_c2.webp`;
+      if (formNum) {
+        file = `${paddedDex}-${paddedFormNum}_r2_c2.webp`;
+      }
     } else if (hpRatio <= 0.5) {
       folder = "yellow_hp";
       file = `${paddedDex}_r1_c3.webp`;
+      if (formNum) {
+        file = `${paddedDex}-${paddedFormNum}_r1_c3.webp`;
+      }
     }
 
     if (dexNum > 995) {
@@ -71,6 +85,9 @@ function formatRankChanges(rank: BattlePokemon["rank"]) {
 }
 
 function PokemonArea({ my, enemy }: Props) {
+  const { myTeam, enemyTeam, activeMy, activeEnemy } = useBattleStore.getState();
+  my = myTeam[activeMy];
+  enemy = enemyTeam[activeEnemy];
   const [myImg, setMyImg] = useState("");
   const [enemyImg, setEnemyImg] = useState("");
 
@@ -83,7 +100,7 @@ function PokemonArea({ my, enemy }: Props) {
 
 
   useEffect(() => {
-    getHpImagePath(my.base.id, my.currentHp / my.base.hp).then(setMyImg);
+    getHpImagePath(my.base.id, my.currentHp / my.base.hp, my.formNum).then(setMyImg);
     if (my.currentHp < myPrevHp) {
       setMyDamage(true);
       setTimeout(() => setMyDamage(false), 400);
@@ -96,7 +113,7 @@ function PokemonArea({ my, enemy }: Props) {
   }, [my]);
 
   useEffect(() => {
-    getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp).then(setEnemyImg);
+    getHpImagePath(enemy.base.id, enemy.currentHp / enemy.base.hp, enemy.formNum).then(setEnemyImg);
     if (enemy.currentHp < enemyPrevHp) {
       setEnemyDamage(true);
       setTimeout(() => setEnemyDamage(false), 400);

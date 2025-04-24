@@ -6,23 +6,25 @@ import { getHpImagePath } from "./PokemonArea";
 import AudioManager from "../utils/AudioManager";
 import { loadRLModel } from "../utils/RL/RLChooseAction";
 import { shuffleArray } from "../utils/shuffle";
-import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
+import { createGen7Pokemon } from "../data/createWincountPokemon";
 
 type Props = {
   onSelect: (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => void;
 };
 
 
-function PokemonDetailModal({
+export function PokemonDetailModal({
   pokemon,
   onClose,
   onSelect,
-  isAlreadySelected
+  isAlreadySelected,
+  realign
 }: {
   pokemon: PokemonInfo;
   onClose: () => void;
   onSelect: (p: PokemonInfo) => void;
   isAlreadySelected: boolean;
+  realign: boolean;
 }) {
   return (
     <div style={{
@@ -33,12 +35,12 @@ function PokemonDetailModal({
         <h2>{pokemon.name}</h2>
         <p>타입: {pokemon.types.join(", ")}</p>
         {/* <p>특성: {typeof pokemon.ability === 'string' ? pokemon.ability : pokemon.ability?.name ?? '없음'}</p> */}
-        <p>체력: {pokemon.hp + 75}</p>
-        <p>공격력: {pokemon.attack + 20}</p>
-        <p>방어력: {pokemon.defense + 20}</p>
-        <p>특수공격력: {pokemon.spAttack + 20}</p>
-        <p>특수방어력: {pokemon.spDefense + 20}</p>
-        <p>스피드: {pokemon.speed + 20}</p>
+        <p>체력: {realign ? pokemon.hp : pokemon.hp + 75}</p>
+        <p>공격력: {realign ? pokemon.attack : pokemon.attack + 20}</p>
+        <p>방어력: {realign ? pokemon.defense : pokemon.defense + 20}</p>
+        <p>특수공격력: {realign ? pokemon.spAttack : pokemon.spAttack + 20}</p>
+        <p>특수방어력: {realign ? pokemon.spDefense : pokemon.spDefense + 20}</p>
+        <p>스피드: {realign ? pokemon.speed : pokemon.speed + 20}</p>
 
         <div style={{ marginTop: "1rem" }}>
           {!isAlreadySelected && (
@@ -321,6 +323,7 @@ function PokemonSelect({ onSelect }: Props) {
             setShowDetailModal(false);
           }}
           isAlreadySelected={selected.includes(selectedPokemonInfo)}
+          realign={false}
         />
       )}</>
 

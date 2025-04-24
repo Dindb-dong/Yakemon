@@ -184,6 +184,19 @@ const availableAbilities: AbilityInfo[] = [
   { id: 100, name: '노가드', util: ['certainly'] },
   { id: 101, name: '방진', defensive: ['damage_nullification'], util: ['status_nullification'] },
   { id: 102, name: '부풀린가슴', offensive: ['rank_buff'] },
+  { id: 103, name: '플라워베일', util: ['status_nullification'] }, // 아군 풀타입의 상태이상 방지
+  { id: 104, name: '짓궂은마음', util: ['etc'] }, // 변화기술의 우선도 +1
+  { id: 105, name: '옹골찬턱', offensive: ['damage_buff'] },
+  { id: 106, name: '프리즈스킨', offensive: ['damage_buff'] }, // 노말 → 얼음, 위력 1.2배
+  { id: 107, name: '페어리스킨', offensive: ['damage_buff'] }, // 노말 → 페어리, 위력 1.2배
+  { id: 108, name: '틈새포착', util: ['etc'] },
+  { id: 109, name: '단단한발톱', offensive: ['damage_buff'] },
+  { id: 110, name: '어군', util: ['form_change'] },
+  { id: 111, name: '지구력', defensive: ['rank_change'] },
+  { id: 112, name: '힐링시프트', util: ['etc'] },
+  { id: 113, name: '위기회피', util: ['etc'] },
+  { id: 114, name: 'AR시스템', appear: ['form_change'] },
+  { id: 115, name: '강철술사', offensive: ['damage_buff'] },
 ]
 
 export function abilityData(abilities: string[]) {

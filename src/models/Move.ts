@@ -21,7 +21,7 @@ type MoveEffect = {
   multiHit?: boolean; // 2~5회 타격 여부 (isAlwaysHit), 명중 여부는 초기에 계산 
   doubleHit?: boolean; // 2회 타격 (isAlwaysHit)
   tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
-  breakScreen?: boolean; // 빛의장막, 리플렉터 부수는 기술 (사이코팽, 깨트리다)
+  breakScreen?: boolean; // 빛의장막, 리플렉터 부수는 기술 (사이코팽, 깨트리기)
   rank_nullification?: boolean; // DD래리어트, 성스러운칼, 야금야금 같이 상대 능력변화 무시하고 데미지 주는 기술.
 }
 
@@ -56,7 +56,9 @@ export type MoveInfo = {
   getAccuracy?: (env: any, side: 'my' | 'enemy', baseAccuracy?: number) => number;
   selfKill?: boolean; // 목숨걸기, 추억의선물, 자폭, 대폭발 등
   screen?: ScreenType;
-  cannotMove?: boolean;  // 파괴광선 등 ㅍ
+  passScreen?: boolean;  // 하이퍼보이스처럼 상대 벽 뚫고 공격하는 기술 
+  cannotMove?: boolean;  // 파괴광선 등
+  lockedMove?: boolean;  // 역린, 대격분같이 쓰면 일정 턴 고정되는 기술 
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )
 };
 

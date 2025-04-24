@@ -1,9 +1,47 @@
+import { AbilityInfo } from "../models/Ability";
+import { MoveInfo } from "../models/Move";
 import { PokemonInfo } from "../models/Pokemon";
 import { abilityData } from "./abilityData";
 import { moveData } from "./moveData";
 
+function boostStats(pokemon: PokemonInfo): void {
+  // 폼체인지용 base 만들 때 필요함 
+  pokemon.hp += 75;
+  pokemon.attack += 20;
+  pokemon.defense += 20;
+  pokemon.spAttack += 20;
+  pokemon.spDefense += 20;
+  pokemon.speed += 20;
+}
+
+function createFormChangePokemon(id: number, originalPokemon: PokemonInfo): PokemonInfo {
+  const formChangeMap: Record<number, PokemonInfo> = {
+    746: {
+      id: 746,
+      name: '약어리(단독의모습)',
+      types: ['물'],
+      moves: originalPokemon.moves,
+      sex: originalPokemon.sex,
+      ability: originalPokemon.ability,
+      hp: 45,
+      attack: 20,
+      spAttack: 20,
+      defense: 25,
+      spDefense: 25,
+      speed: 40,
+      level: 50,
+    },
+    // 여기에 다른 폼체인지도 추가 가능
+  };
+
+  if (!formChangeMap[id]) {
+    throw new Error("폼체인지를 찾을 수 없음");
+  }
+  return formChangeMap[id];
+}
+
 export function createGen1Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 3,
       name: '이상해꽃',
@@ -222,10 +260,12 @@ export function createGen1Pokemon(): PokemonInfo[] {
       level: 50,
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen2Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 157,
       name: '블레이범',
@@ -380,10 +420,12 @@ export function createGen2Pokemon(): PokemonInfo[] {
       level: 50,
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen3Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 257,
       name: '번치코',
@@ -538,10 +580,12 @@ export function createGen3Pokemon(): PokemonInfo[] {
       level: 50,
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen4Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 392,
       name: '초염몽',
@@ -994,10 +1038,12 @@ export function createGen4Pokemon(): PokemonInfo[] {
       level: 50
     }, // 4세대 끝 
   ]
+
+  return pokemons;
 }
 
 export function createGen5Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 500,
       name: '염무왕',
@@ -1244,7 +1290,7 @@ export function createGen5Pokemon(): PokemonInfo[] {
       id: 612,
       name: '액스라이즈',
       types: ['드래곤'],
-      moves: moveData(['용의춤', '지진', '스톤에지', '깨물어부수기', '드래곤클로', '개척하기', '독찌르기', '스케일샷', '만나자마자', '인파이트'], ['드래곤']),
+      moves: moveData(['용의춤', '지진', '스톤에지', '깨물어부수기', '드래곤클로', '개척하기', '독찌르기', '스케일샷', '만나자마자', '인파이트', '역린'], ['드래곤']),
       ability: abilityData(['틀깨기']),
       hp: 76, attack: 147, defense: 90, spAttack: 60, spDefense: 70, speed: 97,
       sex: 'male',
@@ -1301,10 +1347,12 @@ export function createGen5Pokemon(): PokemonInfo[] {
       level: 50
     }
   ]
+
+  return pokemons;
 }
 
 export function createGen6Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 655,
       name: '마폭시',
@@ -1370,11 +1418,113 @@ export function createGen6Pokemon(): PokemonInfo[] {
       hp: 65, attack: 90, defense: 122, spAttack: 58, spDefense: 75, speed: 84,
       level: 50
     },
+    {
+      id: 671,
+      name: '플라제스',
+      types: ['페어리'],
+      moves: moveData(['문포스', '에너지볼', '에너지볼', '광합성', '드레인키스', '사이코키네시스', '꽃가루경단', '명상'], ['페어리']),
+      ability: abilityData(['플라워베일']),
+      hp: 78, attack: 65, defense: 68, spAttack: 112, spDefense: 154, speed: 75,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 678,
+      name: '냐오닉스',
+      types: ['에스퍼'],
+      moves: moveData(['사이코키네시스', '섀도볼', '매지컬샤인', '에너지볼', '전기자석파', '리플렉터', '빛의장막', '하품'], ['에스퍼']),
+      ability: abilityData(['짓궂은마음']),
+      hp: 74, attack: 48, defense: 76, spAttack: 83, spDefense: 81, speed: 104,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 691,
+      name: '드래캄',
+      types: ['독', '드래곤'],
+      moves: moveData(['용의파동', '오물폭탄', '하이드로펌프', '용성군', '10만볼트', '맹독', '스케일샷', '파도타기'], ['드래곤', '독']),
+      ability: abilityData(['적응력', '독가시']),
+      hp: 65, attack: 75, defense: 90, spAttack: 97, spDefense: 123, speed: 44,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 695,
+      name: '일레도리자드',
+      types: ['전기', '노말'],
+      moves: moveData(['10만볼트', '볼트체인지', '파라볼라차지', '암석봉인', '파도타기', '풀묶기', '용의파동', '파괴광선', '스케일샷', '뱀눈초리'], ['전기', '노말']),
+      ability: abilityData(['건조피부', '모래숨기', '선파워']),
+      hp: 62, attack: 55, defense: 52, spAttack: 109, spDefense: 94, speed: 109,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 697,
+      name: '견고라스',
+      types: ['바위', '드래곤'],
+      moves: moveData(['스톤에지', '양날박치기', '지진', '깨물어부수기', '번개엄니', '얼음엄니', '불꽃엄니', '용의춤', '치근거리기', '사이코팽', '스케일샷', '역린'], ['바위', '드래곤']),
+      ability: abilityData(['옹골찬턱', '돌머리']),
+      hp: 82, attack: 121, defense: 119, spAttack: 69, spDefense: 59, speed: 71,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 699,
+      name: '아마루르가',
+      types: ['바위', '얼음'],
+      moves: moveData(['프리즈드라이', '원시의힘', '문포스', '오로라베일', '눈보라', '파괴광선', '전기자석파', '사이코키네시스'], ['얼음', '바위']),
+      ability: abilityData(['프리즈스킨', '눈퍼뜨리기']),
+      hp: 123, attack: 77, defense: 72, spAttack: 99, spDefense: 92, speed: 58,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 700,
+      name: '님피아',
+      types: ['페어리'],
+      moves: moveData(['문포스', '하이퍼보이스', '매지컬플레임', '사이코쇼크', '명상', '파괴광선', '하품'], ['페어리', '노말']),
+      ability: abilityData(['페어리스킨']),
+      hp: 95, attack: 65, defense: 65, spAttack: 110, spDefense: 130, speed: 60,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 701,
+      name: '루차불',
+      types: ['격투', '비행'],
+      moves: moveData(['플라잉프레스', '스톤에지', '무릎차기', '애크러뱃', '칼춤', '개척하기', '유턴', '번개펀치'], ['격투', '비행']),
+      ability: abilityData(['곡예', '틀깨기']),
+      hp: 78, attack: 92, defense: 75, spAttack: 74, spDefense: 63, speed: 118,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 713,
+      name: '크레베이스',
+      types: ['얼음'],
+      moves: moveData(['눈사태', '스톤에지', '지진', 'HP회복', '철벽', '아이언헤드', '바디프레스', '미러코트', '얼어붙은바람'], ['얼음']),
+      ability: abilityData(['옹골참', '마이페이스']),
+      hp: 95, attack: 117, defense: 184, spAttack: 44, spDefense: 46, speed: 28,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 715,
+      name: '음번',
+      types: ['비행', '드래곤'],
+      moves: moveData(['폭음파', '용성군', '화염방사', '에어슬래시', '폭풍', '기습', '유턴', '사이코키네시스', '악의파동'], ['드래곤', '비행', '노말']),
+      ability: abilityData(['틈새포착']),
+      hp: 85, attack: 70, defense: 80, spAttack: 97, spDefense: 80, speed: 123,
+      sex: 'male',
+      level: 50
+    }
   ]
+
+  return pokemons;
 }
 
 export function createGen7Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 727,
       name: '어흥염',
@@ -1417,16 +1567,16 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hp: 68, attack: 64, defense: 60, spAttack: 111, spDefense: 60, speed: 117,
       level: 50
     },
-    {
-      id: 752,
-      name: '깨비물거미',
-      types: ['물', '벌레'],
-      moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
-      sex: 'male',
-      ability: abilityData(['수포', '저수']),
-      hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
-      level: 50
-    },
+    // {
+    //   id: 752,
+    //   name: '깨비물거미',
+    //   types: ['물', '벌레'],
+    //   moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
+    //   sex: 'male',
+    //   ability: abilityData(['수포', '저수']),
+    //   hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
+    //   level: 50
+    // },
     {
       id: 763,
       name: '달코퀸',
@@ -1437,11 +1587,136 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hp: 72, attack: 120, defense: 98, spAttack: 50, spDefense: 98, speed: 72,
       level: 50
     },
+    {
+      id: 738,
+      name: '투구뿌논',
+      types: ['벌레', '전기'],
+      moves: moveData(['10만볼트', '볼트체인지', '에어슬래시', '전기자석파', '에너지볼', '벌레의야단법석', '일렉트릭네트', '러스터캐논'], ['벌레', '전기']),
+      ability: abilityData(['부유']),
+      hp: 77, attack: 70, defense: 90, spAttack: 145, spDefense: 75, speed: 43,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 745,
+      name: '루가루암',
+      types: ['바위'],
+      moves: moveData(['스톤에지', '액셀록', '깨트리기', '기습', '인파이트', '아이언헤드', '개척하기', '암석봉인', '사이코팽'
+        , '치근거리기', '드릴라이너'
+      ], ['바위']),
+      ability: abilityData(['단단한발톱']),
+      hp: 75, attack: 117, defense: 65, spAttack: 55, spDefense: 65, speed: 110,
+      sex: 'male',
+      level: 50,
+    },
+    // {
+    //   id: 746,
+    //   name: '약어리',
+    //   types: ['물'],
+    //   moves: moveData(['아쿠아브레이크', '지진', '퀵턴', '잠자기', '스케일샷', '하이드로펌프', '냉동빔', '아이언테일'], ['물']),
+    //   ability: abilityData(['어군']),
+    //   hp: 45, attack: 140, defense: 130, spAttack: 140, spDefense: 135, speed: 30,
+    //   sex: 'male',
+    //   level: 50,
+    //   hasFormChange: true
+    // },
+    // {
+    //   id: 748,
+    //   name: '더시마사리',
+    //   types: ['물', '독'],
+    //   moves: moveData(['독압정', 'HP회복', '토치카', '찬물끼얹기', '얼어붙은바람', '머드샷', '아픔나누기', '독찌르기'], ['물', '독']),
+    //   ability: abilityData(['재생력']),
+    //   hp: 50, attack: 63, defense: 152, spAttack: 53, spDefense: 142, speed: 35,
+    //   sex: 'male',
+    //   level: 50
+    // },
+    {
+      id: 750,
+      name: '만마드',
+      types: ['땅'],
+      moves: moveData(['지진', '암석봉인', '땅고르기', '스톤에지', '땅가르기', '바디프레스', '아이언헤드', '철벽'], ['땅']),
+      ability: abilityData(['지구력', '마이페이스']),
+      hp: 100, attack: 125, defense: 100, spAttack: 55, spDefense: 85, speed: 35,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 754,
+      name: '라란티스',
+      types: ['풀'],
+      moves: moveData(['리프블레이드', '흡혈', '리프스톰', '엄청난힘', '독찌르기', '로킥', '깜짝베기'], ['풀']),
+      ability: abilityData(['리프가드', '심술꾸러기']),
+      hp: 70, attack: 105, defense: 90, spAttack: 80, spDefense: 90, speed: 45,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 764,
+      name: '큐아링',
+      types: ['페어리'],
+      moves: moveData(['드레인키스', '기가드레인', '명상', '씨뿌리기', '애교부리기', '광합성'], ['페어리']),
+      ability: abilityData(['힐링시프트', '자연회복']),
+      hp: 51, attack: 52, defense: 90, spAttack: 82, spDefense: 110, speed: 100,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 768,
+      name: '갑주무사',
+      types: ['벌레', '물'],
+      moves: moveData(['만나자마자', '아쿠아브레이크', '기습', '칼춤', '암석봉인', '흡혈', '인파이트', '독찌르기', '드릴라이너', '아쿠아제트'], ['벌레', '물']),
+      ability: abilityData(['위기회피']),
+      hp: 75, attack: 125, defense: 140, spAttack: 60, spDefense: 90, speed: 40,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 773,
+      name: '실버디',
+      types: ['노말'],
+      moves: moveData([
+        '아이언헤드', '독찌르기', '멀티어택', '냉동빔', '막말내뱉기', '화염방사', '파도타기', '10만볼트', '칼춤', '유턴'
+      ], ['노말']),
+      ability: abilityData(['AR시스템']),
+      hp: 95, attack: 95, defense: 95, spAttack: 95, spDefense: 95, speed: 95,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 781,
+      name: '타타륜',
+      types: ['풀', '고스트'],
+      moves: moveData([ // , '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인', '스톤에지'
+        '앵커샷', '지진', '고스트다이브', '파워휩'
+      ], ['풀', '고스트']),
+      ability: abilityData(['강철술사']),
+      hp: 70, attack: 131, defense: 100, spAttack: 86, spDefense: 90, speed: 40,
+      sex: 'male',
+      level: 50
+    }
   ]
+
+  pokemons.forEach((p) => {
+    if (!p.hasFormChange) return;
+    // 폼체인지 데이터 생성 및 스탯 강화
+    p.formChange = createFormChangePokemon(p.id, p);
+    boostStats(p.formChange);
+    // 기본 폼의 백업 생성 및 강화
+    const memorized: PokemonInfo = {
+      ...p,
+      moves: p.moves,
+      sex: p.sex,
+      ability: p.ability,
+    };
+    boostStats(memorized);
+    p.memorizedBase = memorized;
+  });
+
+  return pokemons;
 }
 
 export function createGen8Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 815,
       name: '에이스번',
@@ -1489,7 +1764,7 @@ export function createGen8Pokemon(): PokemonInfo[] {
       id: 841,
       name: '애프룡',
       types: ['풀', '드래곤'],
-      moves: moveData(['개척하기', '드래곤클로', 'G의힘', '용의춤', '애크러뱃', '기습', '유턴', '제비반환'], ['풀', '드래곤']),
+      moves: moveData(['개척하기', '드래곤클로', 'G의힘', '용의춤', '애크러뱃', '기습', '유턴', '역린'], ['풀', '드래곤']),
       sex: 'female',
       ability: abilityData(['의욕']),
       hp: 70, attack: 110, defense: 80, spAttack: 95, spDefense: 60, speed: 70,
@@ -1510,10 +1785,12 @@ export function createGen8Pokemon(): PokemonInfo[] {
       level: 50
     },
   ]
+
+  return pokemons;
 }
 
 export function createGen9Pokemon(): PokemonInfo[] {
-  return [
+  const pokemons: PokemonInfo[] = [
     {
       id: 911,
       name: '라우드본',
@@ -1592,4 +1869,6 @@ export function createGen9Pokemon(): PokemonInfo[] {
       level: 50
     },
   ]
+
+  return pokemons;
 }

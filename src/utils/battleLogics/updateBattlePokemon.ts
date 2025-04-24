@@ -82,7 +82,9 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, side: 'my
       return { ...pokemon };
     }
   }
-
+  if (status === '교체불가' && pokemon.base.types.includes('고스트')) {
+    return { ...pokemon };
+  }
   if ((status === '도발' || status === '헤롱헤롱') &&
     pokemon.base.ability?.name === '둔감') {
     return { ...pokemon };
@@ -107,6 +109,9 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, side: 'my
     { return { ...pokemon }; }
   }
   if (publicEnv.weather === '쾌청' && pokemon.base.ability?.name === '리프가드') {
+    if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
+  }
+  if (pokemon.base.ability?.name === '플라워베일' && pokemon.base.types.includes('풀')) {
     if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
   }
 
@@ -255,7 +260,8 @@ export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePo
       isCharging: false,
       chargingMove: undefined,
       lockedMove: undefined,
-      hadMissed: false
+      hadMissed: false,
+      lockedMoveTurn: 0,
     };
   }
 

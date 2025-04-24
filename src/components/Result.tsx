@@ -1,8 +1,9 @@
 // Result.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AudioManager from "../utils/AudioManager";
 import { useBattleStore } from "../Context/useBattleStore";
 import Modal from "./Modal"; // 선택 UI용 모달 컴포넌트 필요 (아래에 예시도 있음)
+import HintModal from "./HintModal";
 import { createMockPokemon } from "../data/mockPokemon";
 import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
 import { resetBattlePokemon } from "../utils/resetBattlePokemon";
@@ -11,6 +12,8 @@ import { replace, useNavigate } from "react-router-dom";
 import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
 import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "../data/createWincountPokemon";
+import RealignModal from "./RealignModal";
+import { BattlePokemon } from "../models/BattlePokemon";
 
 function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
   const {
@@ -36,14 +39,24 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   const gen8Pokemon = gen7Pokemon.concat(createGen8Pokemon());
   const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
   const [musicOn, setMusicOn] = useState(true);
-  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
-
+  const [showHintModal, setShowHintModal] = useState(false);         // 힌트용 모달
+  const [showExchangeModal, setShowExchangeModal] = useState(false); // 교체용 모달
+  const [showRealignModal, setShowRealignModal] = useState(false);   // 순서 정렬 모달
+  const memorizedEnemyRef = useRef<BattlePokemon[] | null>(null);
   useEffect(() => {
     if (isVictory) {
-      setShowModal(true);
+      memorizedEnemyRef.current = enemyTeam.map((p) => ({
+        ...p,
+        base: { ...p.base },
+        pp: { ...p.pp },
+        rank: { ...p.rank },
+        status: [...p.status],
+      }));
+      generateNewRandomPokemon(); // 미리 다음 상대팀 구성
+      setShowHintModal(true);     // 힌트 모달부터 시작
     }
 
     if (musicOn) {
@@ -101,14 +114,13 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
     // 무작위 셔플
     const shuffledEnemy = enemyRaw.sort(() => Math.random() - 0.5);
     const newEnemyTeam = shuffledEnemy.map((p) => createBattlePokemon(p));
+    newEnemyTeam.forEach((p) => p.currentHp = 0);
     setEnemyTeam(newEnemyTeam);
   }
 
   const startNextBattle = () => {
-    // 다음 enemyTeam 생성
-    generateNewRandomPokemon();
-
     // 상태 초기화
+    enemyTeam.forEach((p) => p.currentHp = p.base.hp);
     resetEnvironment();
     setActiveMy(0);
     setActiveEnemy(0);
@@ -124,36 +136,61 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   };
 
   const handleExchange = (myIndex: number, enemyIndex: number) => {
-    console.log("🎯 선택된 enemy base:", enemyTeam[enemyIndex].base);
+    const memorizedTeam = memorizedEnemyRef.current;
+    if (!memorizedTeam) return;
+    console.log("🎯 선택된 enemy base:", memorizedTeam[enemyIndex].base.memorizedBase ?? memorizedTeam[enemyIndex].base);
     const newMyTeam = [...myTeam];
     // 교체한 포켓몬을 먼저 생성한 뒤 초기화
-    const exchanged = createBattlePokemon(enemyTeam[enemyIndex].base, true);
+    const exchanged = createBattlePokemon(memorizedTeam[enemyIndex].base.memorizedBase ?? memorizedTeam[enemyIndex].base, true);
     console.log("🧪 생성된 교체 포켓몬:", exchanged);
     newMyTeam[myIndex] = exchanged;
 
     const resetTeam = newMyTeam.map((p) => resetBattlePokemon(p)); // 나머지도 초기화
 
     setMyTeam(resetTeam);
-    setShowModal(false);
-    startNextBattle();
+    setShowExchangeModal(false);
+    setShowRealignModal(true);
   };
 
   const handleSkip = () => {
     setMyTeam(myTeam.map((p) => resetBattlePokemon(p)));
-    setShowModal(false);
-    startNextBattle();
+    setShowExchangeModal(false);
+    setShowRealignModal(true);
   };
 
   return (
     <>
-      {showModal && isVictory && randomMode && (
+      {showHintModal && isVictory && randomMode && (
+        <HintModal
+          enemyTeam={enemyTeam}
+          onClose={() => {
+            setShowHintModal(false);
+            setShowExchangeModal(true); // 교체 모달로 이동
+          }}
+        />
+      )}
+      {showExchangeModal && (
         <Modal
           myTeam={myTeam}
-          enemyTeam={enemyTeam}
-          onExchange={handleExchange}
+          enemyTeam={memorizedEnemyRef.current ?? []}
+          onExchange={(myIndex, enemyIndex) => {
+            handleExchange(myIndex, enemyIndex);
+          }}
           onSkip={handleSkip}
         />
       )}
+      {showRealignModal && (
+        <RealignModal
+          myTeam={myTeam}
+          onConfirm={(newOrder) => {
+            const newTeam = newOrder.map((i) => myTeam[i]);
+            setMyTeam(newTeam);
+            setShowRealignModal(false);
+            startNextBattle(); // 최종적으로 전투 시작
+          }}
+        />
+      )}
+
       <button
         onClick={() => {
           setMusicOn((prev) => {
@@ -169,7 +206,7 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
-      {!showModal && isVictory && randomMode && (
+      {isVictory && randomMode && !showExchangeModal && !showHintModal && !showRealignModal && (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
           <button onClick={handleSkip}>다음 전투 시작</button>

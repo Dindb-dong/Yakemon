@@ -12,6 +12,31 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
   const { publicEnv, myTeam, activeMy, enemyTeam, activeEnemy, addLog } = useBattleStore.getState();
   const myPokemon = myTeam[activeMy];
   const opponentPokemon = enemyTeam[activeEnemy];
+  // 우선도에 변경이 생기는 로직 
+  if (myPokemon.base.ability?.name === '힐링시프트' && playerMove?.effects?.some((e) => e.heal)) {
+    console.log('힐링시프트 발동!');
+    if (playerMove.priority !== undefined) {
+      playerMove.priority += 3;
+    } else playerMove.priority = 3;
+  }
+  if (opponentPokemon.base.ability?.name === '힐링시프트' && aiMove?.effects?.some((e) => e.heal)) {
+    console.log('힐링시프트 발동!');
+    if (aiMove.priority !== undefined) {
+      aiMove.priority += 3;
+    } else aiMove.priority = 3;
+  }
+  if (myPokemon.base.ability?.name === '짓궂은마음' && playerMove?.category === '변화') {
+    console.log('짓궂은마음 발동!');
+    if (playerMove.priority !== undefined) {
+      playerMove.priority += 1;
+    } else playerMove.priority = 1;
+  }
+  if (opponentPokemon.base.ability?.name === '짓궂은마음' && aiMove?.category === '변화') {
+    console.log('짓궂은마음 발동!');
+    if (aiMove.priority !== undefined) {
+      aiMove.priority += 1;
+    } else aiMove.priority = 1;
+  }
   if (myPokemon.base.ability?.name === '질풍날개' && playerMove?.type === '비행' && myPokemon.currentHp === myPokemon.base.hp) {
     console.log('질풍날개 발동!');
     playerMove.priority = 1;
@@ -20,6 +45,7 @@ export async function calculateOrder(playerMove: MoveInfo | void, aiMove: MoveIn
     console.log('질풍날개 발동!');
     aiMove.priority = 1;
   }
+  // 이 아래는 스피드 바꾸는 로직 
   let mySpeed = myPokemon.base.speed;
   mySpeed *= calculateRankEffect(myPokemon.rank.speed);
   if (myPokemon.status.includes('마비')) {

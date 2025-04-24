@@ -1,11 +1,15 @@
-// utils/resetBattlePokemon.ts
 import { BattlePokemon } from "../models/BattlePokemon";
 
 export function resetBattlePokemon(pokemon: BattlePokemon): BattlePokemon {
   const base = pokemon.base;
+
   return {
     ...pokemon,
-    base: { ...base, types: [...(base.originalTypes || [])], ability: base.originalAbility ?? null },
+    base: {
+      ...base,
+      types: [...(base.originalTypes ?? base.types)],
+      ability: base.originalAbility ?? base.ability,
+    },
     currentHp: base.hp,
     status: [],
     rank: {
@@ -16,11 +20,25 @@ export function resetBattlePokemon(pokemon: BattlePokemon): BattlePokemon {
       speed: 0,
       critical: 0,
       accuracy: 0,
-      dodge: 0
+      dodge: 0,
     },
     pp: base.moves.reduce((acc, move) => {
       acc[move.name] = move.pp;
       return acc;
-    }, {} as { [key: string]: number }),
+    }, {} as Record<string, number>),
+
+    // 선택 속성 초기화
+    lockedMove: undefined,
+    lockedMoveTurn: undefined,
+    usedMove: undefined,
+    isCharging: false,
+    chargingMove: undefined,
+    hadMissed: false,
+    hadRankUp: false,
+    formNum: undefined,
+    isProtecting: false,
+    cannotMove: false,
+    receivedDamage: 0,
+    isFirstTurn: false,
   };
 }

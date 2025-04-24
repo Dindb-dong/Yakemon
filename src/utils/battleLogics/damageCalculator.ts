@@ -1,4 +1,4 @@
-import { MoveInfo } from "../../models/Move";
+import { MoveInfo, ScreenType } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";
 import { calculateAccuracy, calculateCritical, calculateRankEffect } from "./rankEffect";
 import { applyStatusEffectBefore } from "./statusEffect";
@@ -12,6 +12,8 @@ import { addTrap, setField, setRoom, setScreen, setWeather } from "./updateEnvir
 import { WeatherType } from "../../models/Weather";
 import { applyThornDamage } from "./applyNoneMoveDamage";
 import { useDurationStore } from "../../Context/useDurationContext";
+import { applySkinTypeEffect } from "../applySkinTypeEffect";
+import { applyStatusWithDuration } from "./applyStatusWithDuration";
 
 type ItemInfo = {
   id: number;
@@ -50,7 +52,8 @@ export async function calculateMoveDamage({
   const defender: BattlePokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const myPokemon: PokemonInfo = side === 'my' ? myTeam[activeMy].base : enemyTeam[activeEnemy].base;
   const opponentPokemon: PokemonInfo = side === 'enemy' ? myTeam[activeMy].base : enemyTeam[activeEnemy].base;
-  const moveInfo: MoveInfo = getMoveInfo(myPokemon, moveName);
+  let moveInfo: MoveInfo = getMoveInfo(myPokemon, moveName);
+  moveInfo = applySkinTypeEffect(moveInfo, (myPokemon.ability?.name ?? null)); // 스카이스킨 등 적용 
   const weatherEffect = publicEnv.weather;
   const filedEffect = publicEnv.field;
   const disasterEffect = publicEnv.disaster;
@@ -96,18 +99,29 @@ export async function calculateMoveDamage({
   let attackStat = moveInfo.category === '물리' ? myPokemon.attack : myPokemon.spAttack;
   if (moveName === '바디프레스') {
     attackStat = myPokemon.defense;
+    console.log(moveName, '효과 발동!')
   }
   if (moveName === '속임수') {
     attackStat = opponentPokemon.attack;
+    console.log(moveName, '효과 발동!')
   }
   if (attacker.base.ability?.name === '무기력' && attacker.currentHp <= (attacker.base.hp / 2)) {
     attackStat *= 0.5;
   }
   let defenseStat = moveInfo.category === '물리' ? opponentPokemon.defense : opponentPokemon.spDefense;
+  if (moveName === '사이코쇼크') {
+    defenseStat = opponentPokemon.defense;
+    console.log(moveName, '효과 발동!')
+  }
+
   if (attacker.base.ability?.name === '노가드' || defender.base.ability?.name === '노가드') {
     isAlwaysHit = true; // 필중처리
   }
-
+  // 0-0. 고정기술 고정 처리 
+  if (moveInfo.lockedMove) {
+    updatePokemon(side, activeMine, (prev) => ({ ...prev, lockedMoveTurn: Math.random() < 0.5 ? 3 : 2 }))
+    updatePokemon(side, activeMine, (prev) => setLockedMove(prev, moveInfo))
+  }
 
   // 0. 방어상태 확인
   if (defender.isProtecting) {
@@ -118,6 +132,12 @@ export async function calculateMoveDamage({
       updatePokemon(side, activeMine, (attacker) => updatedPokemon);
       console.log('공격 포켓몬의 남은 체력: ', defender.currentHp);
       console.log(`${opponentSide}는 가시에 상처를 입었다!`);
+    } else if (defender.usedMove?.name === '토치카' && moveInfo.isTouch) {
+      updatePokemon(side, activeMine, (attacker) => addStatus(attacker, '독', opponentSide));
+      if (!(attacker.base.ability?.name === '면역' || attacker.base.types.includes('독') || attacker.base.types.includes('강철'))) {
+        console.log(`${opponentSide}는 가시에 찔려 독 상태가 되었다!`);
+        addLog(`${opponentSide}는 가시에 찔려 독 상태가 되었다!`);
+      }
     }
     return { success: false };
   }
@@ -129,7 +149,9 @@ export async function calculateMoveDamage({
     if (!statusResult.isHit) {
       addLog(`🚫 ${attacker.base.name}의 기술은 실패했다!`);
       console.log(`${attacker.base.name}의 기술은 실패했다!`);
-
+      if ((attacker.lockedMoveTurn ?? 0) > 0) { // 기술 실패시 고정 해제처리
+        updatePokemon(side, activeMine, (prev) => ({ ...prev, lockedMoveTurn: 0 }));
+      }
       return { success: false }; // 바로 함수 종료 
     }; // 공격 성공 여부 (풀죽음, 마비, 헤롱헤롱, 얼음, 잠듦 등)
   }
@@ -241,15 +263,46 @@ export async function calculateMoveDamage({
       } else if (opponentPokemon.ability?.defensive) { // 상대 포켓몬이 방어적 특성 있을 경우 
         opponentPokemon.ability?.defensive?.forEach((category: string) => {
           if (category === 'damage_nullification' || category === 'type_nullification' || category === 'damage_reduction') {
-            types *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
+            if (moveInfo.name === '프리즈드라이' && moveInfo.type === '노말') { moveInfo.type = '프리즈드라이' }
+            // 노말스킨 있어도 프리즈드라이, 플라잉프레스의 타입은 계속 적용됨. 
+            if (moveInfo.name === '플라잉프레스') {
+              console.log('플라잉프레스 타입상성 적용')
+              const fightingEffect = applyDefensiveAbilityEffectBeforeDamage(
+                { ...moveInfo, type: '격투' }, side
+              );
+              const flyingEffect = applyDefensiveAbilityEffectBeforeDamage(
+                { ...moveInfo, type: '비행' }, side
+              );
+              types *= fightingEffect * flyingEffect;
+            } else { // 일반적인 경우 
+              types *= applyDefensiveAbilityEffectBeforeDamage(moveInfo, side);
+            }
           }
         })
+      } // 방어적 특성이 없는 경우 
+      if (moveInfo.name === '프리즈드라이' && moveInfo.type === '노말') { moveInfo.type = '프리즈드라이' }
+      // 노말스킨 있어도 프리즈드라이, 플라잉프레스의 타입은 계속 적용됨. 
+      if (moveInfo.name === '플라잉프레스') {
+        const fightingEffect = calculateTypeEffectivenessWithAbility(
+          myPokemon,
+          opponentPokemon,
+          { ...moveInfo, type: '격투' }
+        );
+        const flyingEffect = calculateTypeEffectivenessWithAbility(
+          myPokemon,
+          opponentPokemon,
+          { ...moveInfo, type: '비행' }
+        );
+        types *= fightingEffect * flyingEffect;
       }
       // 마지막에 또 곱해줘도 상관없음. 0이였으면 어차피 0이니까.
-      types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo);
+      else { types *= calculateTypeEffectivenessWithAbility(myPokemon, opponentPokemon, moveInfo); }
     }
 
     if (moveInfo.category === '변화' && isHit) { // 변화기술일 경우
+      if (myPokemon.ability?.name === '짓궂은마음' && opponentPokemon.types.includes('악')) {
+        types = 0
+      };
       if (types === 0) {
         wasNull = true;
         addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
@@ -396,24 +449,36 @@ export async function calculateMoveDamage({
   }
 
   // 6-4. 빛의장막, 리플렉터, 오로라베일 적용 
-  const { enemyEnvEffects, myEnvEffects } = useDurationStore.getState(); // duration store에서 스크린 효과 확인
+  const { enemyEnvEffects, myEnvEffects, removeEffect } = useDurationStore.getState(); // duration store에서 스크린 효과 확인
   const envEffec = side === 'my' ? enemyEnvEffects : myEnvEffects;
   const hasActiveScreen = (name: string) =>
     envEffec.some((effect) => effect.name === name);
+  if (moveInfo.effects?.some((e) => e.breakScreen)) { // 깨트리기, 사이코팽 
+    // 깨야 할 스크린 목록
+    const screenList: ScreenType[] = ['리플렉터', '빛의장막', '오로라베일'];
+    screenList.forEach((screenName) => {
+      if (screenName && hasActiveScreen(screenName)) {
+        removeEffect(opponentSide, screenName); // 턴 감소가 아닌 즉시 삭제
+        addLog(`💥 ${screenName}이 ${side === 'my' ? '상대' : '내'} 필드에서 깨졌다!`);
+      }
+    });
+  }
+  if (!(moveInfo.passScreen || myPokemon.ability?.name === '틈새포착')) { // 벽 통과하는 기술이나 틈새포착이 아닐 경우 
+    // 물리 기술이면 리플렉터나 오로라베일 적용
+    if (moveInfo.category === "물리" && (hasActiveScreen("리플렉터") || hasActiveScreen("오로라베일"))) {
+      rate *= 0.5;
+      addLog(`🧱 장막 효과로 데미지가 줄었다!`);
+      console.log("장막효과 적용됨");
+    }
 
-  // 물리 기술이면 리플렉터나 오로라베일 적용
-  if (moveInfo.category === "물리" && (hasActiveScreen("리플렉터") || hasActiveScreen("오로라베일"))) {
-    rate *= 0.5;
-    addLog(`🧱 장막 효과로 데미지가 줄었다!`);
-    console.log("장막효과 적용됨");
+    // 특수 기술이면 라이트스크린이나 오로라베일 적용
+    if (moveInfo.category === "특수" && (hasActiveScreen("빛의장막") || hasActiveScreen("오로라베일"))) {
+      rate *= 0.5;
+      addLog(`🧱 장막 효과로 데미지가 줄었다!`);
+      console.log("장막효과 적용됨");
+    }
   }
 
-  // 특수 기술이면 라이트스크린이나 오로라베일 적용
-  if (moveInfo.category === "특수" && (hasActiveScreen("빛의장막") || hasActiveScreen("오로라베일"))) {
-    rate *= 0.5;
-    addLog(`🧱 장막 효과로 데미지가 줄었다!`);
-    console.log("장막효과 적용됨");
-  }
 
   // 7. 공격 관련 특성 적용 (배율)
   rate *= applyOffensiveAbilityEffectBeforeDamage(moveInfo, side, wasEffective);
@@ -520,11 +585,11 @@ export async function calculateMoveDamage({
   // 14. 데미지 적용 및 이후 함수 적용
   if (isHit) {
     // 데미지 적용
-    if (defender.base.ability?.name === '옹골참' && defender.currentHp === defender.base.hp && damage > defender.currentHp) {
+    if (defender.base.ability?.name === '옹골참' && defender.currentHp === defender.base.hp && damage >= defender.currentHp) {
       console.log(`${defender.base.name}의 옹골참 발동!`);
       addLog(`🔃 ${defender.base.name}의 옹골참 발동!`);
       updatePokemon(opponentSide, activeOpponent, (defender) => changeHp(defender, 1 - defender.currentHp));
-      updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, defender.currentHp - 1));
+      updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, defender.base.hp - 1));
       updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
       updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
@@ -554,6 +619,9 @@ export async function calculateMoveDamage({
     updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
     updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
     updatePokemon(side, activeMine, (prev) => changePosition(prev, null)); // 위치 초기화
+    if (moveInfo.lockedMove) {
+      updatePokemon(side, activeMine, (prev) => ({ ...prev, lockedMoveTurn: Math.random() < 0.5 ? 3 : 2 }));
+    }
     return { success: true, damage, wasEffective };
   }
 
@@ -600,6 +668,13 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
         if (effect.heal && effect.heal > 0) {
           const heal = effect.heal;
           updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * heal));
+        }
+        if (effect.status) {
+          if (effect.status === '잠듦' && !(activeTeam[activeMine].base.ability?.name === '불면' ||
+            activeTeam[activeMine].base.ability?.name === '의기양양'
+          )) {
+            applyStatusWithDuration(side, activeMine, effect.status); // 스스로 잠듦처리 
+          }
         }
       })
     } else if (moveInfo.target === 'none') { // 필드에 거는 기술일 경우 

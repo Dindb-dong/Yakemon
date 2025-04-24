@@ -128,7 +128,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   };
   const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
   const isRunningRef = useRef(false);
-  const [timeLeft, setTimeLeft] = useState(20); // 20초 제한
+  const [timeLeft, setTimeLeft] = useState(60); // 60초 제한
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const timeLeftRef = useRef(timeLeft);
   // useEffect(() => {
@@ -139,9 +139,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     setTimeout(() => {
       if (timerRef.current) clearInterval(timerRef.current);
 
-      timeLeftRef.current = 20;
-      setTimeLeft(20);
-      console.log("⌛ 타이머 시작 (20초)");
+      timeLeftRef.current = 60;
+      setTimeLeft(60);
+      console.log("⌛ 타이머 시작 (60초)");
 
       timerRef.current = setInterval(() => {
 
@@ -217,6 +217,15 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
             cannotMove: false, // 이번 턴은 못 움직이고, 다음 턴엔 가능하도록 초기화
           }));
           await executeTurn(null);; // 이 턴의 행동을 스킵 (기술 선택/사용 X)
+        }
+        if ((current.lockedMoveTurn ?? 0) > 0 && current.lockedMove) {
+          addLog(`😡 ${current.base.name}은/는 난동을 부리고 있다!`);
+          console.log(`😡 ${current.base.name}은/는 난동을 부리고 있다!`);
+          updatePokemon('my', activeMy, (prev) => ({
+            ...prev,
+            lockedMoveTurn: (prev.lockedMoveTurn ?? 0) - 1,
+          }));
+          await executeTurn(current.lockedMove);; // 고정기술 강제사용
         }
         if (current.isCharging && current.chargingMove) {
           console.log('차징 기술 대기중...');

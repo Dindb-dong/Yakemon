@@ -15,6 +15,12 @@ const defaultRank: RankState = {
   critical: 0,
 };
 
+// 도감번호 → formCondition 매핑
+export const formConditionMap: Record<number, (self: BattlePokemon) => boolean> = {
+  746: (self) => self.currentHp / self.base.hp < 0.25, // 약어리: 체력 25% 미만
+  // 필요 시 더 추가
+};
+
 // BattlePokemon 생성 함수
 export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): BattlePokemon {
   if (!base || !base.moves) {
@@ -39,10 +45,14 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
         speed: base.speed + 20,
         originalAbility: base.ability ?? null, // 원본 특성 복사
         originalTypes: base.types // 원본 타입 복사, 기본값 빈 배열
+      } : base.memorizedBase ? {
+        ...base.memorizedBase,
+        ability: base.memorizedBase.ability ?? base.ability ?? null,
+        types: base.memorizedBase.types ?? base.types ?? []// 원본 타입 복사, 기본값 빈 배열
       } : {
         ...base,
-        ability: base.originalAbility ?? null,
-        types: base.originalTypes ?? [] // 원본 타입 복사, 기본값 빈 배열
+        ability: base.originalAbility ?? base.ability ?? null,
+        types: base.originalTypes ?? base.types ?? [] // 원본 타입 복사, 기본값 빈 배열
       },
     currentHp: !exchange ? base.hp + 75 : base.hp,
     pp,
@@ -51,6 +61,7 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
     position: null,
     lockedMove: undefined,
     isActive: false,
+    formCondition: formConditionMap[base.id] ?? undefined,
   };
 }
 // Example:
