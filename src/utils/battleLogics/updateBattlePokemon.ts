@@ -82,7 +82,9 @@ export function addStatus(pokemon: BattlePokemon, status: StatusState, side: 'my
       return { ...pokemon };
     }
   }
-
+  if (status === '교체불가' && pokemon.base.types.includes('고스트')) {
+    return { ...pokemon };
+  }
   if ((status === '도발' || status === '헤롱헤롱') &&
     pokemon.base.ability?.name === '둔감') {
     return { ...pokemon };

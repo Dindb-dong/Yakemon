@@ -3539,7 +3539,7 @@ const moveDatas: MoveInfo[] = [
     accuracy: 95,
     criticalRate: 0,
     target: "opponent"
-    // 격투 + 비행 타입으로 계산되도록 별도 타입 상성 처리 필요
+    // 격투 + 비행 타입으로 계산되도록 별도 타입 상성 처리 필요 ok 
   },
   {
     name: "폭음파",
@@ -3595,6 +3595,23 @@ const moveDatas: MoveInfo[] = [
     isTouch: true,
     accuracy: 100,
     criticalRate: 0,
+    target: "opponent"
+  },
+  {
+    name: "앵커샷",
+    type: "강철",
+    category: "물리",
+    power: 80,
+    pp: 20,
+    isTouch: true,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      }
+    ],
     target: "opponent"
   },
 ]

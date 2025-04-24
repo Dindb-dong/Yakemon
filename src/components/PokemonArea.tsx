@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
+import { useBattleStore } from "../Context/useBattleStore";
 
 type Props = {
   my: BattlePokemon;
@@ -84,6 +85,9 @@ function formatRankChanges(rank: BattlePokemon["rank"]) {
 }
 
 function PokemonArea({ my, enemy }: Props) {
+  const { myTeam, enemyTeam, activeMy, activeEnemy } = useBattleStore.getState();
+  my = myTeam[activeMy];
+  enemy = enemyTeam[activeEnemy];
   const [myImg, setMyImg] = useState("");
   const [enemyImg, setEnemyImg] = useState("");
 

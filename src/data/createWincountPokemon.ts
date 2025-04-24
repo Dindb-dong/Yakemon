@@ -1686,8 +1686,8 @@ export function createGen7Pokemon(): PokemonInfo[] {
       id: 781,
       name: '타타륜',
       types: ['풀', '고스트'],
-      moves: moveData([
-        '앵커숏', '스톤에지', '지진', '고스트다이브', '파워휩', '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인'
+      moves: moveData([ // , '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인', '스톤에지'
+        '앵커샷', '지진', '고스트다이브', '파워휩'
       ], ['풀', '고스트']),
       ability: abilityData(['강철술사']),
       hp: 70, attack: 131, defense: 100, spAttack: 86, spDefense: 90, speed: 40,

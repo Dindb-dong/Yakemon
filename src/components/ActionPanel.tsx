@@ -43,7 +43,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
           <button
             className="action-toggle-btn"
             onClick={() => setCurrentTab("switch")}
-            disabled={isTurnProcessing}
+            disabled={isTurnProcessing || myPokemon.status.includes('교체불가')}
           >교체</button>
         </div>
       )}

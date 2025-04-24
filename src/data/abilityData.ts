@@ -196,6 +196,7 @@ const availableAbilities: AbilityInfo[] = [
   { id: 112, name: '힐링시프트', util: ['etc'] },
   { id: 113, name: '위기회피', util: ['etc'] },
   { id: 114, name: 'AR시스템', appear: ['form_change'] },
+  { id: 115, name: '강철술사', offensive: ['damage_buff'] },
 ]
 
 export function abilityData(abilities: string[]) {

@@ -161,7 +161,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const healMove = getHealMove();
   const supportMove = usableMoves.find((m) => m.category === "변화" && m !== rankUpMove);
 
-  const hasSwitchOption = mineTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0);
+  const hasSwitchOption = mineTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0) && !myPokemon.status.includes('교체불가');
   const isAi_lowHp = aiHpRation < 0.35;
   const isAi_highHp = aiHpRation > 0.8;
   const isUser_lowHp = userHpRation < 0.35;

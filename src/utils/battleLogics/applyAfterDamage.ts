@@ -110,7 +110,7 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
   }
   let shouldWaitForSwitch = false;
   let switchPromise: Promise<void> | null = null;
-  if (usedMove.uTurn) {
+  if (usedMove.uTurn && !attacker.status.includes('교체불가')) {
     console.log('유턴 기술 사용!')
 
     const availableOpponent = mirroredTeam
@@ -509,7 +509,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   }
   let shouldWaitForSwitch = false;
   let switchPromise: Promise<void> | null = null;
-  if (usedMove.uTurn) {
+  if (usedMove.uTurn && !attacker.status.includes('교체불가')) {
     console.log('유턴 기술 사용!')
 
     const availableOpponent = mirroredTeam
