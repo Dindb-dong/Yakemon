@@ -499,6 +499,8 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const enemyPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  defender = mirroredTeam[activeOpponent];
+  attacker = mineTeam[activeMine];
   if (usedMove.cannotMove) {
     updatePokemon(side, activeMine, (prev) => ({
       ...prev,
