@@ -2,9 +2,12 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
+import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { addStatus, changeHp, changeRank, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
+export const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기', '소리기술사용불가', '하품', '혼란', '교체불가', '조이기']; // 비주요 상태이상
+export const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
 export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
   const {
     myTeam,
@@ -18,8 +21,6 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
-  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기', '소리기술사용불가', '하품', '혼란']; // 비주요 상태이상
-  const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
   const env = side === "my" ? myEnv : enemyEnv;
@@ -110,12 +111,18 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     if (trapLog) addLog(trapLog); console.log(trapLog);
     next = trapped;
   }
-
-  // 5. 등장 특성 적용
-  console.log('5. 등장 특성 적용')
-  const wncp = side === 'my' ? '나' : '상대';
-  console.log(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
-  addLog(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
-  applyAppearance(next, side);
+  if (next.currentHp <= 0 && side === 'enemy') {
+    // 관전모드 아니고 ai 포켓몬이 쓰러졌을 경우 (스텔스록 밟고 기절 등)
+    console.log('ai 포켓몬이 등장하자마자 쓰러져서 교체')
+    const switchIndex = getBestSwitchIndex(side);
+    await switchPokemon(side, switchIndex);
+  } else {
+    // 5. 등장 특성 적용
+    console.log('5. 등장 특성 적용')
+    const wncp = side === 'my' ? '나' : '상대';
+    console.log(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
+    addLog(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
+    applyAppearance(next, side);
+  }
   return;
 }

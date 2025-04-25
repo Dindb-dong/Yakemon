@@ -16,6 +16,7 @@ import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { calculateRankEffect } from "./rankEffect";
 import { applyRecoilDamage } from "./applyNoneMoveDamage";
 import { delay } from "../delay";
+import { setWeather } from "./updateEnvironment";
 
 async function applyPanicUturn(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
   // 여기에 들어오는 side는 기술 쓴 쪽의 opponentSide임. 즉, 원본 handleMove에서 side에 my가 넘어갔으면 
@@ -274,6 +275,10 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
             const finalActiveIndex = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredIndex : activeIndex;
             const finalActiveTeam = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredTeam : activeTeam;
             updatePokemon(finalTarget, finalActiveIndex, (target) => changeRank(target, stat as keyof RankState, change))
+            if (finalActiveIndex === mirroredIndex) {
+              console.log(`미러아머 발동!`);
+              addLog(`미러아머 발동!`);
+            }
             console.log(`${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
             addLog(`🔃 ${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
           });
@@ -392,6 +397,12 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
   const ability = defender.base.ability;
   ability?.defensive?.forEach((category: string) => {
     switch (category) {
+      case "weather_change":
+        if (ability.name === '모래뿜기') {
+          setWeather("모래바람");
+          addLog(`🏜️ ${defender.base.name}의 특성으로 날씨가 모래바람이 되었다!`);
+        }
+        break;
       case "rank_change":
         if (ability.name === '증기기관' && (usedMove.type === '물' || usedMove.type === '불')) {
           if (defender.currentHp > 0) {
@@ -674,7 +685,11 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             const finalTarget = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? side : targetSide;
             const finalActiveIndex = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredIndex : activeIndex;
             const finalActiveTeam = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredTeam : activeTeam;
-            updatePokemon(finalTarget, finalActiveIndex, (target) => changeRank(target, stat as keyof RankState, change))
+            updatePokemon(finalTarget, finalActiveIndex, (target) => changeRank(target, stat as keyof RankState, change));
+            if (finalActiveIndex === mirroredIndex) {
+              console.log(`미러아머 발동!`);
+              addLog(`미러아머 발동!`);
+            }
             console.log(`${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`);
             addLog(`🔃 ${finalActiveTeam[finalActiveIndex].base.name}의 ${stat}이/가 ${change}랭크 변했다!`)
           });

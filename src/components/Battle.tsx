@@ -21,6 +21,7 @@ import { delay } from "../utils/delay";
 import { useNavigate } from "react-router-dom";
 import { aiChooseAction } from "../utils/RL/aiChooseAction";
 import { BattlePokemon } from "../models/BattlePokemon";
+import { calculateOrder } from "../utils/battleLogics/calculateOrder";
 
 
 
@@ -62,14 +63,6 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   }, [musicPrefix]);
 
   useEffect(() => {
-    if (!watchMode) {
-      AudioManager.getInstance().play("battle");
-    }
-    return () => {
-      AudioManager.getInstance().stop(); // 다음 진입 대비
-    };
-  }, []);
-  useEffect(() => {
     if (!watchMode && musicOn) {
       console.log("🎵 초기 배틀 브금 강제 재생");
       AudioManager.getInstance().play("battle");
@@ -92,22 +85,30 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     return <div style={{ padding: "2rem", textAlign: "center" }}>잘못된 접근입니다. 메인 화면으로 이동 중...</div>;
   }
   useEffect(() => {
-    // TODO: 여기마저도 calculateOrder 써야 함 
-    if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
-      applyAppearance(myTeam[activeMy], "my");
-      updatePokemon('my', activeMy, (prev) => ({
-        ...prev, isFirstTurn: true
-      }));
-      addLog(`🐶 my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
-      console.log(`my ${myTeam[activeMy].base.name}이/가 전투에 나왔다!`);
-      applyAppearance(enemyTeam[activeEnemy], "enemy");
-      updatePokemon('enemy', activeEnemy, (prev) => ({
-        ...prev, isFirstTurn: true
-      }));
-      addLog(`🐱 enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
-      console.log(`enemy ${enemyTeam[activeEnemy].base.name}이/가 전투에 나왔다!`);
-    }
+    const initializeBattle = async () => {
+      // TODO: 여기마저도 calculateOrder 써야 함 
+      const whoIsFirst = await calculateOrder();
+      console.log(whoIsFirst);
+      const applyFirstAppear = (team: BattlePokemon[], activeIndex: number) => {
+        applyAppearance(team[activeIndex], "my");
+        updatePokemon('my', activeIndex, (prev) => ({
+          ...prev, isFirstTurn: true
+        }));
+        addLog(`🐶 ${team[activeIndex].base.name}이/가 전투에 나왔다!`);
+        console.log(` ${team[activeIndex].base.name}이/가 전투에 나왔다!`);
+      }
+      if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
+        if (whoIsFirst === 'my') {
+          applyFirstAppear(myTeam, activeMy);
+          applyFirstAppear(enemyTeam, activeEnemy);
+        } else {
+          applyFirstAppear(enemyTeam, activeEnemy);
+          applyFirstAppear(myTeam, activeMy);
+        }
+      }
+    };
 
+    initializeBattle();
   }, []);
   useEffect(() => {
     return () => {

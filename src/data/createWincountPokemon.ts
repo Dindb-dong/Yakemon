@@ -1686,8 +1686,8 @@ export function createGen7Pokemon(): PokemonInfo[] {
       id: 781,
       name: '타타륜',
       types: ['풀', '고스트'],
-      moves: moveData([ // , '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인', '스톤에지'
-        '앵커샷', '지진', '고스트다이브', '파워휩'
+      moves: moveData([
+        '앵커샷', '지진', '고스트다이브', '파워휩', '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인', '스톤에지'
       ], ['풀', '고스트']),
       ability: abilityData(['강철술사']),
       hp: 70, attack: 131, defense: 100, spAttack: 86, spDefense: 90, speed: 40,
@@ -1784,6 +1784,56 @@ export function createGen8Pokemon(): PokemonInfo[] {
       hp: 110, attack: 80, defense: 120, spAttack: 80, spDefense: 90, speed: 30,
       level: 50
     },
+    {
+      id: 823,
+      name: '아머까오',
+      types: ['비행', '강철'],
+      moves: moveData(['아이언헤드', '공중날기', '벌크업', '날개쉬기', '바디프레스', '제비반환'], ['강철', '비행']),
+      ability: abilityData(['프레셔', '미러아머']),
+      hp: 98, attack: 87, defense: 105, spAttack: 53, spDefense: 85, speed: 67,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 826,
+      name: '이올브',
+      types: ['벌레', '에스퍼'],
+      moves: moveData(['사이코키네시스', '벌레의야단법석', '이상한빛', '미러코트', '에너지볼', '바디프레스', '끈적끈적네트'], ['에스퍼', '벌레']),
+      ability: abilityData(['벌레의알림']),
+      hp: 60, attack: 45, defense: 110, spAttack: 80, spDefense: 120, speed: 90,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 834,
+      name: '갈가부기',
+      types: ['물', '바위'],
+      moves: moveData(['비바라기', '깨물어부수기', '양날박치기', '아쿠아브레이크', '얼음엄니', '독찌르기', '껍질깨기', '지진', '스톤에지'], ['물', '바위']),
+      ability: abilityData(['옹골찬턱', '쓱쓱']),
+      hp: 90, attack: 115, defense: 90, spAttack: 48, spDefense: 68, speed: 74,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 836,
+      name: '펄스멍',
+      types: ['전기'],
+      moves: moveData(['10만볼트', '사이코팽', '불꽃엄니', '볼부비부비', '볼트체인지', '치근거리기', '깨물어부수기'], ['전기']),
+      ability: abilityData(['옹골찬턱', '승기']),
+      hp: 69, attack: 90, defense: 60, spAttack: 90, spDefense: 60, speed: 121,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 844,
+      name: '사다이사',
+      types: ['땅'],
+      moves: moveData(['모래지옥', '지진', '스톤샤워', '뱀눈초리', '똬리틀기', '바디프레스', '번개엄니', '스텔스록'], ['땅']),
+      ability: abilityData(['모래뿜기', '탈피']),
+      hp: 72, attack: 107, defense: 125, spAttack: 65, spDefense: 70, speed: 71,
+      sex: 'male',
+      level: 50
+    }
   ]
 
   return pokemons;

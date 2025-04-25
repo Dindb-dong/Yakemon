@@ -147,6 +147,9 @@ export async function applyStatusConditionDamage(
     if (status === "독") {
       damage = Math.floor(pokemon.base.hp * 0.125);
       addLog(`🍄 ${pokemon.base.name}은 독으로 피해를 입었다!`);
+    } if (status === "조이기") {
+      damage = Math.floor(pokemon.base.hp * 0.125);
+      addLog(`🪢 ${pokemon.base.name}은 조임 피해를 입었다!`);
     }
     if (status === "맹독") {
       damage = Math.floor(pokemon.base.hp * (1 / 6));

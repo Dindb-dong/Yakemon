@@ -704,6 +704,26 @@ const moveDatas: MoveInfo[] = [
     target: 'self',
   },
   {
+    name: '똬리틀기',
+    type: '독',
+    category: '변화',
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 1,
+      statChange: [
+        { target: 'self', stat: 'attack', change: 1 },
+        { target: 'self', stat: 'defense', change: 1 },
+        { target: 'self', stat: 'accuracy', change: 1 }
+      ],
+    }],
+    target: 'self',
+  },
+  {
     name: '스텔스록',
     type: '바위',
     category: '변화',
@@ -3610,6 +3630,69 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         status: '교체불가'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "모래지옥",
+    type: "땅",
+    category: "물리",
+    power: 35,
+    pp: 20,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      },
+      {
+        chance: 1,
+        status: '조이기'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "회오리불꽃",
+    type: "불",
+    category: "특수",
+    power: 35,
+    pp: 20,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      },
+      {
+        chance: 1,
+        status: '조이기'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "바다회오리",
+    type: "물",
+    category: "특수",
+    power: 35,
+    pp: 20,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      },
+      {
+        chance: 1,
+        status: '조이기'
       }
     ],
     target: "opponent"

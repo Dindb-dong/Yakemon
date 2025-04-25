@@ -197,6 +197,15 @@ const availableAbilities: AbilityInfo[] = [
   { id: 113, name: '위기회피', util: ['etc'] },
   { id: 114, name: 'AR시스템', appear: ['form_change'] },
   { id: 115, name: '강철술사', offensive: ['damage_buff'] },
+  { id: 116, name: '미러아머', util: ['etc'] },
+  // 상대의 능력치 감소 효과를 자신에게 반사
+
+  { id: 117, name: '모래뿜기', defensive: ['weather_change'] },
+  // 피격 시 날씨를 모래바람으로 설정
+
+  { id: 118, name: '탈피', util: ['etc'] },
+  // 상태이상에 걸렸을 때 일정 확률로 상태이상 해제
+
 ]
 
 export function abilityData(abilities: string[]) {
