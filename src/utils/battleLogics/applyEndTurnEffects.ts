@@ -41,21 +41,6 @@ export function applyEndTurnEffects() {
     }
   });
 
-  // === 하품 처리 === 
-  [myActive, enemyActive].forEach((pokemon, i) => {
-    const side = i === 0 ? "my" : "enemy";
-    if (pokemon.status.includes("하품")) {
-      if (!(pokemon.base.ability?.name === '불면' || pokemon.base.ability?.name === '의기양양' ||
-        pokemon.base.ability?.name === '스위트베일' || pokemon.status.includes('잠듦'))) { // 잚들 수 있으면 
-        const shouldBeSleep = decrementYawnTurn(side, i === 0 ? activeMy : activeEnemy);
-        if (shouldBeSleep) {
-          console.log('하품으로 인해 잠듦 처리');
-          addLog(`😴 ${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
-        }
-      }
-    }
-  });
-
   // === 상태이상, 날씨데미지 효과 처리 ===
   [myActive, enemyActive].forEach(async (pokemon, i) => {
     const side = i === 0 ? "my" : "enemy";
@@ -65,21 +50,11 @@ export function applyEndTurnEffects() {
     const opponentTeam = i === 0 ? enemyTeam : myTeam;
     const activeOpponent = i === 0 ? activeEnemy : activeMy;
     // 이렇게 효율적으로 처리할 수도 있구만! 
-    if (pokemon.status.includes("화상")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "화상")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
-    }
-    if (pokemon.status.includes("맹독")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "맹독")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
-    }
-    if (pokemon.status.includes("독")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "독")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
-    }
-    if (pokemon.status.includes("조이기")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "조이기")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
+    for (const status of ["화상", "맹독", "독", "조이기"] as const) {
+      if (pokemon.status.includes(status)) {
+        const { updated } = await applyStatusConditionDamage(pokemon, status);
+        updatePokemon(side, activeIndex, (prev) => updated);
+      }
     }
     if (pokemon.status.includes("씨뿌리기")) {
       if (!(pokemon.base.ability?.name === '매직가드')) {
@@ -113,15 +88,12 @@ export function applyEndTurnEffects() {
   // === 지속형 효과 턴 감소 처리 ===
   const expired = decrementTurns();
 
-  // ✅ [NEW] '풀죽음', '앵콜', '도발' 등 my/enemy 쪽 효과 만료 처리
-  expired.my.forEach((effectName) => {
-    updatePokemon("my", activeMy, (p) => removeStatus(p, effectName as StatusState));
-    addLog(`🏋️‍♂️ 내 포켓몬의 ${effectName} 상태가 해제되었다!`);
-  });
-
-  expired.enemy.forEach((effectName) => {
-    updatePokemon("enemy", activeEnemy, (p) => removeStatus(p, effectName as StatusState));
-    addLog(`🏋️‍♂️ 상대 포켓몬의 ${effectName} 상태가 해제되었다!`);
+  ["my", "enemy"].forEach((side, i) => {
+    const active = i === 0 ? activeMy : activeEnemy;
+    expired[side as "my" | "enemy"].forEach((effectName) => {
+      updatePokemon(side as "my" | "enemy", active, (p) => removeStatus(p, effectName as StatusState));
+      addLog(`🏋️‍♂️ ${side === "my" ? "내" : "상대"} 포켓몬의 ${effectName} 상태가 해제되었다!`);
+    });
   });
 
   if (publicEnv.weather && expired.public.includes(publicEnv.weather)) {

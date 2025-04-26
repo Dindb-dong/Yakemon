@@ -144,6 +144,8 @@ export function addStatus(
     const activeOpponent = side === 'my' ? activeEnemy : activeMy;
     const opponentPokemon = opponentSide === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
     if (opponentPokemon.base.ability?.name !== '싱크로') {
+      console.log(`${pokemon.base.name}의 싱크로 발동!`);
+      addLog(`${pokemon.base.name}의 싱크로 발동!`);
       updatePokemon(opponentSide, activeOpponent, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
     }
   }
@@ -296,7 +298,7 @@ export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePo
       ...baseReset,
       base: {
         ...pokemon.base,
-        types: pokemon.tempType ?? pokemon.base.types // 타입 사라진 상태였으면 리셋.
+        types: pokemon.tempType && pokemon.tempType.length > 0 ? pokemon.tempType : pokemon.base.types // 타입 사라진 상태였으면 리셋.
       },
       usedMove: undefined,
       isCharging: false,

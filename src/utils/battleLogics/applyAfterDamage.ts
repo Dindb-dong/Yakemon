@@ -6,7 +6,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
-import { addStatus, changeHp, changeRank } from "./updateBattlePokemon";
+import { addStatus, changeHp, changeRank, setTypes } from "./updateBattlePokemon";
 import { RankState } from "../../models/RankState";
 import { switchPokemon } from "./switchPokemon";
 import { calculateTypeEffectiveness } from "../typeRalation";
@@ -378,7 +378,6 @@ export async function applyDefensiveAbilityEffectAfterMultiDamage(side: "my" | "
 
 
 async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {
-  console.log('applyDefensiveAbilityEffectAfterDamage')
   const { updatePokemon, addLog, activeEnemy, activeMy, myTeam, enemyTeam } = useBattleStore.getState();
   const effect = usedMove.effects;
   const demeritEffect = usedMove.demeritEffects;
@@ -630,7 +629,6 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           );
           addLog(`🪞 ${mirrorTargetTeam[mirrorTargetIndex].base.name}은/는 ${effect.status} 상태가 되었다!`);
         }
-
         if (effect.statChange) {
           effect.statChange.forEach((sc) => {
             updatePokemon(mirrorTargetSide, mirrorTargetIndex, (target) =>
@@ -642,6 +640,9 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
       }
       else if (effect && roll < effect.chance) {
         console.log(`${usedMove.name}의 부가효과 발동!`)
+        if (effect.typeChange) {
+          updatePokemon(opponentSide, activeOpponent, (prev) => setTypes(prev, [effect.typeChange ?? '']));
+        }
         if (effect.heal && !appliedDameage) {
           const healRate = effect.heal;
           if (healRate < 1) {
@@ -680,7 +681,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             const finalActiveIndex = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredIndex : activeIndex;
             const finalActiveTeam = (activeTeam[activeIndex].base.ability?.name === '미러아머' && statChange.target === 'opponent') ? mirroredTeam : activeTeam;
             updatePokemon(finalTarget, finalActiveIndex, (target) => changeRank(target, stat as keyof RankState, change));
-            if (finalActiveIndex === mirroredIndex) {
+            if (finalActiveTeam === mirroredTeam) {
               console.log(`미러아머 발동!`);
               addLog(`미러아머 발동!`);
             }

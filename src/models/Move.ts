@@ -24,6 +24,7 @@ type MoveEffect = {
   tripleHit?: boolean; // 3회타격, 트리플악셀이나 트리플킥..
   breakScreen?: boolean; // 빛의장막, 리플렉터 부수는 기술 (사이코팽, 깨트리기)
   rank_nullification?: boolean; // DD래리어트, 성스러운칼, 야금야금 같이 상대 능력변화 무시하고 데미지 주는 기술.
+  typeChange?: string; // 물붓기, 마법가루같이 타입 바꿔버리는 기술
 }
 
 export type MoveInfo = {

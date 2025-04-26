@@ -1171,6 +1171,20 @@ const moveDatas: MoveInfo[] = [
     target: 'opponent',
   },
   {
+    name: '블로킹',
+    type: '악',
+    category: '변화',
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    protect: true,
+    priority: 4,
+    target: 'self'
+  },
+  {
     name: '니들가드',
     type: '풀',
     category: '변화',
@@ -2194,6 +2208,47 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         status: "마비"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "마법가루",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: '가루',
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1, typeChange: '에스퍼'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "소울크래시",
+    type: "페어리",
+    category: "물리",
+    power: 75,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "spAttack",
+            change: -1
+          }
+        ]
       }
     ],
     target: "opponent"
@@ -3328,6 +3383,18 @@ const moveDatas: MoveInfo[] = [
     pp: 5,
     isTouch: true,
     accuracy: 90,
+    criticalRate: 0,
+    cannotMove: true,
+    target: "opponent"
+  },
+  {
+    name: "스타어설트",
+    type: "격투",
+    category: "물리",
+    power: 150,
+    pp: 5,
+    isTouch: false,
+    accuracy: 100,
     criticalRate: 0,
     cannotMove: true,
     target: "opponent"

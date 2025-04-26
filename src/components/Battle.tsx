@@ -89,8 +89,8 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       // TODO: 여기마저도 calculateOrder 써야 함 
       const whoIsFirst = await calculateOrder();
       console.log(whoIsFirst);
-      const applyFirstAppear = (team: BattlePokemon[], activeIndex: number) => {
-        applyAppearance(team[activeIndex], "my");
+      const applyFirstAppear = (team: BattlePokemon[], activeIndex: number, side: 'my' | 'enemy') => {
+        applyAppearance(team[activeIndex], side);
         updatePokemon('my', activeIndex, (prev) => ({
           ...prev, isFirstTurn: true
         }));
@@ -99,11 +99,11 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       }
       if (myTeam[activeMy] && enemyTeam[activeEnemy]) {
         if (whoIsFirst === 'my') {
-          applyFirstAppear(myTeam, activeMy);
-          applyFirstAppear(enemyTeam, activeEnemy);
+          applyFirstAppear(myTeam, activeMy, 'my');
+          applyFirstAppear(enemyTeam, activeEnemy, 'enemy');
         } else {
-          applyFirstAppear(enemyTeam, activeEnemy);
-          applyFirstAppear(myTeam, activeMy);
+          applyFirstAppear(enemyTeam, activeEnemy, 'enemy');
+          applyFirstAppear(myTeam, activeMy, 'my');
         }
       }
     };
