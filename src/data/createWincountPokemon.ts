@@ -1833,7 +1833,97 @@ export function createGen8Pokemon(): PokemonInfo[] {
       hp: 72, attack: 107, defense: 125, spAttack: 65, spDefense: 70, speed: 71,
       sex: 'male',
       level: 50
-    }
+    },
+    {
+      id: 847,
+      name: '꼬치조',
+      types: ['물'],
+      moves: moveData(['아쿠아제트', '아쿠아브레이크', '깨물어부수기', '깨트리기', '사이코팽', '독찌르기', '드릴라이너', '인파이트', '스케일샷'], ['물']),
+      ability: abilityData(['쓱쓱']),
+      hp: 61, attack: 123, defense: 60, spAttack: 60, spDefense: 50, speed: 136,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 849,
+      name: '스트린더',
+      types: ['전기', '독'],
+      moves: moveData(['오물웨이브', '일렉트릭네트', '볼트체인지', '폭음파', '오버드라이브', '개척하기', '애시드봄', '볼부비부비'], ['전기', '독']),
+      ability: abilityData(['펑크록', '테크니션']),
+      hp: 75, attack: 98, defense: 70, spAttack: 114, spDefense: 70, speed: 75,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 851,
+      name: '다태우지네',
+      types: ['벌레', '불꽃'],
+      moves: moveData(['흡혈', '불사르기', '오버히트', '덤벼들기', '열탕', '불꽃채찍', '파워휩', '깨물어부수기'], ['벌레', '불꽃']),
+      ability: abilityData(['하얀연기', '불꽃몸', '타오르는불꽃']),
+      hp: 100, attack: 115, defense: 65, spAttack: 90, spDefense: 90, speed: 65,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 855,
+      name: '포트데스',
+      types: ['고스트'],
+      moves: moveData(['섀도볼', '껍질깨기', '힘흡수', '나쁜음모', '기가드레인', '기습', '사이코키네시스', '배턴터치'], ['고스트']),
+      ability: abilityData(['깨어진갑옷', '저주받은바디']),
+      hp: 60, attack: 65, defense: 65, spAttack: 134, spDefense: 114, speed: 70,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 858,
+      name: '브리무음',
+      types: ['에스퍼', '페어리'],
+      moves: moveData(['사이코키네시스', '매지컬샤인', '트릭룸', '명상', '마법가루', '드레인키스', '볼부비부비', '기가드레인', '매지컬플레임', '악의파동'], ['에스퍼', '페어리']),
+      ability: abilityData(['매직미러']),
+      hp: 57, attack: 90, defense: 95, spAttack: 136, spDefense: 103, speed: 29,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 861,
+      name: '오롱털',
+      types: ['악', '페어리'],
+      moves: moveData(['속임수', '기습', '소울크래시', '부추기기', '드레인펀치', '전기자석파', '막말내뱉기', '리플렉터', '빛의장막', '로킥'], ['악', '페어리']),
+      ability: abilityData(['짓궂은마음']),
+      hp: 95, attack: 120, defense: 65, spAttack: 95, spDefense: 75, speed: 60,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 862,
+      name: '가로막구리',
+      types: ['악', '노말'],
+      moves: moveData(['블로킹', '기습', '인파이트', '전기자석파', '깨물어부수기', '씨폭탄', '더스트슈트', '누르기'], ['악', '노말']),
+      ability: abilityData(['이판사판', '오기']),
+      hp: 93, attack: 90, defense: 101, spAttack: 60, spDefense: 81, speed: 95,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 864,
+      name: '산호르곤',
+      types: ['고스트'],
+      moves: moveData(['파워젬', '미러코트', '얼어붙은바람', '섀도볼', '기가드레인', '힘흡수', '파도타기', '길동무'], ['고스트']),
+      ability: abilityData(['깨어진갑옷']),
+      hp: 60, attack: 95, defense: 50, spAttack: 145, spDefense: 130, speed: 30,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 865,
+      name: '창파나이트',
+      types: ['격투'],
+      moves: moveData(['인파이트', '리프블레이드', '만나자마자', '스타어설트', '칼춤', '브레이브버드', '깜짝베기'], ['격투']),
+      ability: abilityData(['배짱']),
+      hp: 62, attack: 135, defense: 95, spAttack: 68, spDefense: 82, speed: 65,
+      sex: 'male',
+      level: 50
+    },
   ]
 
   return pokemons;

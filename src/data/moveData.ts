@@ -28,6 +28,18 @@ const moveDatas: MoveInfo[] = [
     affiliation: '폭탄',
     accuracy: 100,
     criticalRate: 0,
+    effects: [{ chance: 0.3, status: '독' }],
+    target: 'opponent',
+  },
+  {
+    name: '오물웨이브',
+    type: '독',
+    category: '특수',
+    power: 95,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
     effects: [{ chance: 0.1, status: '독' }],
     target: 'opponent',
   },
@@ -167,6 +179,18 @@ const moveDatas: MoveInfo[] = [
     target: 'opponent',
   },
   {
+    name: '불사르기',
+    type: '불',
+    category: '특수',
+    power: 130,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    target: 'opponent',
+  },
+  {
     name: '화염방사',
     type: '불',
     category: '특수',
@@ -179,6 +203,22 @@ const moveDatas: MoveInfo[] = [
     effects: [{
       chance: 0.1, // 10% 확률
       status: '화상'
+    }],
+    target: 'opponent',
+  },
+  {
+    name: '불꽃채찍',
+    type: '불',
+    category: '물리',
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 1,
+      statChange: [{ target: 'opponent', stat: 'defense', change: -1 }]
     }],
     target: 'opponent',
   },
@@ -1188,6 +1228,22 @@ const moveDatas: MoveInfo[] = [
     target: 'opponent',
   },
   {
+    name: '길동무',
+    type: '고스트',
+    category: '변화',
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 1,
+      status: '길동무'
+    }],
+    target: 'self',
+  },
+  {
     name: 'DD래리어트',
     type: '악',
     category: '물리',
@@ -1382,6 +1438,19 @@ const moveDatas: MoveInfo[] = [
     uTurn: true,
     target: 'opponent',
   }, // 에이스번 
+  {
+    name: '배턴터치',
+    type: '노말',
+    category: '변화',
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    uTurn: true,
+    target: 'self',
+  },
   {
     name: '그래스슬라이더',
     type: '풀',
@@ -3534,7 +3603,20 @@ const moveDatas: MoveInfo[] = [
     accuracy: 100,
     criticalRate: 0,
     affiliation: "소리",
-    passScreen: true,
+    passSubstitute: true,
+    target: "opponent"
+  },
+  {
+    name: "오버드라이브",
+    type: "전기",
+    category: "특수",
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    affiliation: "소리",
+    passSubstitute: true,
     target: "opponent"
   },
   {

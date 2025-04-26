@@ -6,19 +6,13 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectivenessWithAbility, isTypeImmune } from "./calculateTypeEffectiveness";
 import { hasAbility } from "./helpers";
 import { applyDefensiveAbilityEffectBeforeDamage, applyOffensiveAbilityEffectBeforeDamage } from "./applyBeforeDamage";
-import { addStatus, changeHp, changePosition, changeRank, setAbility, setCharging, setHadMissed, setLockedMove, setProtecting, setReceivedDamage, setTypes, setUsedMove, useMovePP } from "./updateBattlePokemon";
+import { addStatus, changeHp, changePosition, changeRank, removeStatus, setAbility, setCharging, setHadMissed, setLockedMove, setProtecting, setReceivedDamage, setTypes, setUsedMove, useMovePP } from "./updateBattlePokemon";
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { addTrap, setField, setRoom, setScreen, setWeather } from "./updateEnvironment";
 import { WeatherType } from "../../models/Weather";
 import { applyThornDamage } from "./applyNoneMoveDamage";
 import { useDurationStore } from "../../Context/useDurationContext";
 import { applySkinTypeEffect } from "../applySkinTypeEffect";
-import { applyStatusWithDuration } from "./applyStatusWithDuration";
-
-type ItemInfo = {
-  id: number;
-  name: string;
-};
 
 // 메인 데미지 계산 함수
 export async function calculateMoveDamage({
@@ -157,6 +151,9 @@ export async function calculateMoveDamage({
   }
 
   // 0-2. 자신에게 거는 기술이나 필드 등에 적용하는 기술 효과 처리 
+  if (attacker.status.includes('길동무')) { // 행동 시작하면 길동무 삭제 
+    updatePokemon(side, activeMine, (prev) => removeStatus(prev, '길동무'));
+  }
   if (moveInfo.target === 'self' || moveInfo.target === 'none') {
     console.log('자신에게 거는 기술')
     applyChangeEffect(moveInfo, side)
@@ -463,7 +460,7 @@ export async function calculateMoveDamage({
       }
     });
   }
-  if (!(moveInfo.passScreen || myPokemon.ability?.name === '틈새포착')) { // 벽 통과하는 기술이나 틈새포착이 아닐 경우 
+  if (!(myPokemon.ability?.name === '틈새포착')) { // 벽 통과하는 기술이나 틈새포착이 아닐 경우 
     // 물리 기술이면 리플렉터나 오로라베일 적용
     if (moveInfo.category === "물리" && (hasActiveScreen("리플렉터") || hasActiveScreen("오로라베일"))) {
       rate *= 0.5;
@@ -611,6 +608,11 @@ export async function calculateMoveDamage({
       } else if (attacker.base.ability?.name === '흑의울음') {
         updatePokemon(side, activeMine, (attacker) => changeRank(attacker, 'spAttack', 1));
       }
+      if (defender.status.includes('길동무')) {
+        console.log(`${side} 포켓몬은 상대에게 길동무로 끌려갔다...!`)
+        addLog(`👻 ${side} 포켓몬은 상대에게 길동무로 끌려갔다...!`)
+        updatePokemon(side, activeMine, (attacker) => changeHp(attacker, -attacker.base.hp));
+      }
     }
     updatePokemon(opponentSide, activeOpponent, (defender) => changeHp(defender, -damage));
     updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, damage));
@@ -638,6 +640,19 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
     if (moveInfo.target === 'self') { // 자신에게 거는 기술일 경우 
       addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
       console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+      if (moveInfo.name === '길동무') {
+        if (activeTeam[activeMine].usedMove?.name === '길동무') {
+          console.log('연속으로 발동 실패...!');
+          addLog('연속으로 발동 실패...!');
+          // updatePokemon(side, activeMine, (prev) => setUsedMove(prev, null)); 다음턴에 다시 길동무 사용 가능하도록.
+          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔')); // pp 깎기 
+          return;
+        } else {
+          addLog(`👻 ${side}는 ${moveInfo.name}을/를 사용했다!`);
+          console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
+          updatePokemon(side, activeMine, (attacker) => addStatus(attacker, '길동무', side));
+        }
+      }
       if (moveInfo.protect) {
         if (activeTeam[activeMine].usedMove?.protect) { // 직전에 방어계열 기술 사용했을 경우 
           console.log('연속으로 방어 시도!');
@@ -673,7 +688,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
           if (effect.status === '잠듦' && !(activeTeam[activeMine].base.ability?.name === '불면' ||
             activeTeam[activeMine].base.ability?.name === '의기양양'
           )) {
-            applyStatusWithDuration(side, activeMine, effect.status); // 스스로 잠듦처리 
+            addStatus(activeTeam[activeMine], effect.status, side); // 스스로 잠듦처리 
           }
         }
       })

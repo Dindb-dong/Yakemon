@@ -278,7 +278,7 @@ export function createMockPokemon(): PokemonInfo[] {
       id: 818,
       name: '인텔리레온',
       types: ['물'],
-      moves: moveData(['기충전', '노려맞히기', '냉동빔', '섀도볼', '에어커터', '하이드로펌프', '아쿠아제트', '악의파동'],
+      moves: moveData(['기충전', '열탕', '냉동빔', '섀도볼', '에어커터', '하이드로펌프', '아쿠아제트', '악의파동'],
         ['물']
       ),
       sex: 'male',

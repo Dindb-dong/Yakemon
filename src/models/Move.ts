@@ -16,6 +16,7 @@ type MoveEffect = {
   status?: StatusState;
   recoil?: number; // 반동, 0.1 ~ 1
   fail?: number; // 공격 빗나갔을 때 데미지 비율, 0.1 ~ 1
+  lostType?: string; // 불사르기, 전광쌍격 등 타입이 일시적으로 사라지는 기술.
   heal?: number; // 흡혈 또는 자힐, 0.1 ~ 1 
   statChange?: StatChange[];
   multiHit?: boolean; // 2~5회 타격 여부 (isAlwaysHit), 명중 여부는 초기에 계산 
@@ -56,7 +57,7 @@ export type MoveInfo = {
   getAccuracy?: (env: any, side: 'my' | 'enemy', baseAccuracy?: number) => number;
   selfKill?: boolean; // 목숨걸기, 추억의선물, 자폭, 대폭발 등
   screen?: ScreenType;
-  passScreen?: boolean;  // 하이퍼보이스처럼 상대 벽 뚫고 공격하는 기술 
+  passSubstitute?: boolean;  // 하이퍼보이스처럼 상대 대타 뚫고 공격하는 기술 
   cannotMove?: boolean;  // 파괴광선 등
   lockedMove?: boolean;  // 역린, 대격분같이 쓰면 일정 턴 고정되는 기술 
   target: 'self' | 'opponent' | 'none'; // 상대를 때리는 기술인지, 나에게 거는 기술인지, 대상이 없는 기술 (독압정, 쾌청, 씨뿌리기 등 )

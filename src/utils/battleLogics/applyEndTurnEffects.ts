@@ -2,9 +2,7 @@ import { useBattleStore } from "../../Context/useBattleStore";
 import { decrementYawnTurn, useDurationStore } from "../../Context/useDurationContext";
 import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
-import { applyConfusionStatus } from "./applyConfusionStatus";
 import { applyStatusConditionDamage } from "./applyNoneMoveDamage";
-import { applyStatusWithDuration } from "./applyStatusWithDuration";
 import { mainStatusCondition } from "./switchPokemon";
 import { addStatus, changeHp, changeRank, removeStatus, resetState, setLockedMove } from "./updateBattlePokemon";
 import { setField, setScreen, setWeather } from "./updateEnvironment";
@@ -54,10 +52,6 @@ export function applyEndTurnEffects() {
           console.log('하품으로 인해 잠듦 처리');
           addLog(`😴 ${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
         }
-        // applyStatusWithDuration(side, i === 0 ? activeMy : activeEnemy, "잠듦");
-        // updatePokemon(side, i === 0 ? activeMy : activeEnemy, (pokemon) => removeStatus(pokemon, "하품"));
-        // addLog(`➕ ${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
-        // console.log(`${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
       }
     }
   });
@@ -203,7 +197,7 @@ export function applyEndTurnEffects() {
     if (team[actives[i]].lockedMove && team[actives[i]].lockedMoveTurn === 0) {
       // 이제 고정 기술 다 썼으니 고정해제하고 혼란처리
       updatePokemon(side as "my" | "enemy", actives[i], (prev) => setLockedMove(prev, null));
-      applyConfusionStatus(side as "my" | "enemy", actives[i]);
+      addStatus(team[actives[i]], '혼란', side as ('my' | 'enemy'));
     }
   });
 

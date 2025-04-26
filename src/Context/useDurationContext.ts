@@ -177,3 +177,22 @@ export function decrementConfusionTurn(side: "my" | "enemy", index: number): boo
     return false;
   }
 }
+
+export function transferDurationEffects(side: "my" | "enemy", fromIndex: number, toIndex: number) {
+  const { myEffects, enemyEffects, addEffect, removeEffect } = useDurationStore.getState();
+
+  const effectList = side === "my" ? myEffects : enemyEffects;
+
+  const effectsToTransfer = effectList.filter((effect) => effect.ownerIndex === fromIndex);
+
+  for (const effect of effectsToTransfer) {
+    // 1. 기존 효과 제거
+    removeEffect(side, effect.name);
+
+    // 2. 새 포켓몬에게 동일한 이름, 남은 턴, ownerIndex만 toIndex로 바꿔서 재등록
+    addEffect(side, {
+      ...effect,
+      ownerIndex: toIndex,
+    });
+  }
+}

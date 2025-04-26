@@ -8,8 +8,6 @@ import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
 import { addStatus, changeHp, changeRank } from "./updateBattlePokemon";
 import { RankState } from "../../models/RankState";
-import { applyStatusWithDuration } from "./applyStatusWithDuration";
-import { applyConfusionStatus } from "./applyConfusionStatus";
 import { switchPokemon } from "./switchPokemon";
 import { calculateTypeEffectiveness } from "../typeRalation";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
@@ -101,6 +99,8 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const enemyPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const batonTouch = usedMove.name === '배턴터치' ? true : false;
+  const nullification = attacker.base.ability?.name === '부식' ? true : false;
   if (usedMove.cannotMove) {
     updatePokemon(side, activeMine, (prev) => ({
       ...prev,
@@ -138,7 +138,7 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
         const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
         // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
         switchPromise = new Promise<void>(async (resolve) => {
-          await switchPokemon(side, switchIndex);
+          await switchPokemon(side, switchIndex, batonTouch);
           resolve();
         });
 
@@ -149,7 +149,7 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
             side,
             reason: "uTurn",
             onSwitch: async (index: number) => {
-              await switchPokemon(side, index);
+              await switchPokemon(side, index, batonTouch);
               setSwitchRequest(null);
               clearSwitchRequest();
               resolve();
@@ -164,7 +164,7 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
         await delay(1500);
         const switchIndex = getBestSwitchIndex(side);
         switchPromise = new Promise<void>(async (resolve) => {
-          await switchPokemon(side, switchIndex);
+          await switchPokemon(side, switchIndex, batonTouch);
           resolve();
         });
       }
@@ -287,14 +287,10 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
           // 상태이상 적용
           const status = effect.status;
           let noStatusCondition = false;
-          let nullification = false;
-          if (attacker.base.ability?.name === '부식') {
-            nullification = true;
-          }
           if (usedMove.name === '매혹의보이스') {
             if (defender.hadRankUp) {
               if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
-                applyConfusionStatus(opponentSide, activeOpponent);
+                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
             } else {
               noStatusCondition = true;
@@ -309,22 +305,19 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
               if (defender.base.ability?.name === '정신력') {
                 noStatusCondition = true;
               } else {
-                applyStatusWithDuration(opponentSide, activeOpponent, status);
+                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
             }
             if (status === '잠듦') {
               if (defender.base.ability?.name === '불면' || defender.base.ability?.name === '의기양양' || defender.base.ability?.name === '스위트베일') {
                 noStatusCondition = true;
               } else {
-                applyStatusWithDuration(opponentSide, activeOpponent, status);
+                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
-            }
-            if (status === '앵콜' || status === '잠듦' || status === '소리기술사용불가') {
-              applyStatusWithDuration(opponentSide, activeOpponent, status);
             } else if (status === '도발' || status === '헤롱헤롱' && !(defender.base.ability?.name === '둔감')) {
-              applyConfusionStatus(opponentSide, activeOpponent);
+              addStatus(enemyPokemon, status, opponentSide, nullification);
             } else if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
-              applyConfusionStatus(opponentSide, activeOpponent);
+              addStatus(enemyPokemon, status, opponentSide, nullification);
             } else {
               updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
             }
@@ -357,7 +350,7 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
     }
 
     const random = available[Math.floor(Math.random() * available.length)];
-    await switchPokemon(opponentSide, random.index);
+    await switchPokemon(opponentSide, random.index, batonTouch);
     addLog(`💨 ${mirroredTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
   }
   return;
@@ -510,6 +503,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const mirroredTeam = side === 'my' ? enemyTeam : myTeam;
   const enemyPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const batonTouch = usedMove.name === '배턴터치' ? true : false;
   defender = mirroredTeam[activeOpponent];
   attacker = mineTeam[activeMine];
   if (usedMove.cannotMove) {
@@ -549,7 +543,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         const switchIndex = getBestSwitchIndex(side); // 상성 기반 추천 교체
         // Promise 사용해서 교체 끝날 때까지 넘어가지 않기
         switchPromise = new Promise<void>(async (resolve) => {
-          await switchPokemon(side, switchIndex);
+          await switchPokemon(side, switchIndex, batonTouch);
           resolve();
         });
 
@@ -560,7 +554,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             side,
             reason: "uTurn",
             onSwitch: async (index: number) => {
-              await switchPokemon(side, index);
+              await switchPokemon(side, index, batonTouch);
               setSwitchRequest(null);
               clearSwitchRequest();
               resolve();
@@ -575,7 +569,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
         await delay(1500);
         const switchIndex = getBestSwitchIndex(side);
         switchPromise = new Promise<void>(async (resolve) => {
-          await switchPokemon(side, switchIndex);
+          await switchPokemon(side, switchIndex, batonTouch);
           resolve();
         });
       }
@@ -705,7 +699,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           if (usedMove.name === '매혹의보이스') {
             if (defender.hadRankUp) {
               if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
-                applyConfusionStatus(opponentSide, activeOpponent);
+                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
             } else {
               noStatusCondition = true;
@@ -720,22 +714,19 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
               if (defender.base.ability?.name === '정신력') {
                 noStatusCondition = true;
               } else {
-                applyStatusWithDuration(opponentSide, activeOpponent, status);
+                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
             }
             if (status === '잠듦') {
               if (defender.base.ability?.name === '불면' || defender.base.ability?.name === '의기양양' || defender.base.ability?.name === '스위트베일') {
                 noStatusCondition = true;
               } else {
-                applyStatusWithDuration(opponentSide, activeOpponent, status);
+                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
-            }
-            if (status === '앵콜' || status === '잠듦' || status === '소리기술사용불가') {
-              applyStatusWithDuration(opponentSide, activeOpponent, status);
             } else if (status === '도발' || status === '헤롱헤롱' && !(defender.base.ability?.name === '둔감')) {
-              applyConfusionStatus(opponentSide, activeOpponent);
+              addStatus(enemyPokemon, status, opponentSide, nullification);
             } else if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
-              applyConfusionStatus(opponentSide, activeOpponent);
+              addStatus(enemyPokemon, status, opponentSide, nullification);
             } else {
               updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
             }
@@ -768,7 +759,7 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
     }
 
     const random = available[Math.floor(Math.random() * available.length)];
-    await switchPokemon(opponentSide, random.index);
+    await switchPokemon(opponentSide, random.index, batonTouch);
     addLog(`💨 ${mirroredTeam[activeOpponent].base.name}은/는 강제 교체되었다!`);
   }
   return;
