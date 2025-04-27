@@ -76,6 +76,7 @@ export function applyStatusEffectBefore(
         break;
       case '얼음':
         const roll3 = Math.random();
+        console.log('얼음 상태에 빠져있다!', roll3)
         if (roll3 < 0.2 || move.type === '불') {
           updatePokemon(side, activeIndex, (prev) => removeStatus(prev, '얼음'));
           addLog(`🏋️‍♂️ ${activeTeam[activeIndex].base.name}의 얼음이 녹았다!`);
@@ -86,6 +87,7 @@ export function applyStatusEffectBefore(
           console.log(`${activeTeam[activeIndex].base.name}은/는 얼어있다!`);
           canAct = false;
         }
+        break;
       case "혼란":
         const roll4 = Math.random();
         console.log('혼란 상태에 빠져있다!', roll4)

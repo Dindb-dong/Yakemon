@@ -304,8 +304,6 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
             if (status === '풀죽음') {
               if (defender.base.ability?.name === '정신력') {
                 noStatusCondition = true;
-              } else {
-                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
             }
             if (status === '잠듦') {
@@ -631,14 +629,16 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
           const healRate = effect.heal;
           if (healRate < 1) {
             // 반피 회복 로직 
-            updatePokemon(side, activeMine, (attacker) => changeHp(attacker, attacker.base.hp * healRate));
+            updatePokemon(side, activeMine, (prev) => changeHp(prev, attacker.base.hp * healRate));
             addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
           } else {
-            // 힘흡수
             let healAmount: number;
             healAmount = calculateRankEffect(defender.rank.attack) * defender.base.attack;
-            updatePokemon(side, activeMine, (attacker) => changeHp(attacker, healAmount));
+            updatePokemon(side, activeMine, (prev) => changeHp(prev, healAmount));
             addLog(`➕ ${attacker.base.name}은/는 체력을 회복했다!`)
+            if (usedMove.name === '힘흡수') {
+              updatePokemon(opponentSide, activeOpponent, (prev) => changeRank(prev, 'attack', -1));
+            }
           }
 
         }
@@ -698,8 +698,6 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             if (status === '풀죽음') {
               if (defender.base.ability?.name === '정신력') {
                 noStatusCondition = true;
-              } else {
-                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
             }
             if (status === '잠듦') {
