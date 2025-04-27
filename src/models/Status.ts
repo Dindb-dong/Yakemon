@@ -15,7 +15,10 @@ export class StatusManager {
 
     const exclusive = ['마비', '독', '맹독', '얼음', '잠듦', '화상'];
     // 중복 있으면 바로 함수 종료 
-    if (exclusive.some(s => this.status.includes(s as StatusState)) && exclusive.includes(status)) return;
+    if (exclusive.some(s => this.status.includes(s as StatusState)) && exclusive.includes(status)) {
+      console.log('중복 상태이상!')
+      return
+    };
     this.status.push(status);
   }
 

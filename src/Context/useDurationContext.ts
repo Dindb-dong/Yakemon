@@ -25,11 +25,12 @@ type DurationState = {
     my: string[], enemy: string[], public: string[], myEnv: string[], enemyEnv: string[]
   };
 };
-export const specialStatus = ["하품", "혼란", "멸망의노래"] as const; // TODO: 추가 가능 
+export const specialStatus = ["하품", "멸망의노래", '사슬묶기'] as const; // TODO: 추가 가능 
+// 혼란, 잠듦은 여기서 처리 안함
 
 const specialStatusDecrementer = {
   "하품": decrementYawnTurn,
-  "혼란": decrementConfusionTurn,
+  "사슬묶기": decrementDisableTun,
 } as const;
 
 export const useDurationStore = create<DurationState>((set, get) => ({
@@ -93,9 +94,10 @@ export const useDurationStore = create<DurationState>((set, get) => ({
             return e; // special은 리스트 유지 (addEffect로 별도로 관리됨)
           }
 
-          if (e.name === "잠듦" && e.ownerIndex !== activeIndex) {
-            return e; // 잠듦은 active 포켓몬일 때만 턴 감소
+          if (e.name === "잠듦") {
+            return e; // 잠듦은 행동시에 턴 줄어듦. (풀죽음으로 행동 실패해도 턴은 줄어드는데, 하여튼 다른데에서 해야함)
           }
+          if (e.name === '혼란') return e;
 
           const newTurn = e.remainingTurn - 1;
           if (newTurn <= 0) {
@@ -151,9 +153,17 @@ export function decrementConfusionTurn(side: "my" | "enemy", index: number): boo
   return decrementSpecialEffect(side, index, "혼란");
 }
 
+export function decrementSleepTurn(side: "my" | "enemy", index: number): boolean {
+  return decrementSpecialEffect(side, index, "잠듦");
+}
+
+export function decrementDisableTun(side: "my" | "enemy", index: number): boolean {
+  return decrementSpecialEffect(side, index, "사슬묶기");
+}
 
 
-type SpecialStatus = "하품" | "혼란" | '멸망의노래'; // TODO: 추가 가능 
+
+type SpecialStatus = "하품" | "혼란" | '멸망의노래' | '사슬묶기' | '잠듦'; // TODO: 추가 가능 
 
 /**
  * 하품, 혼란 등 특수 상태의 지속 턴 감소를 관리
@@ -175,7 +185,7 @@ export function decrementSpecialEffect(
   const effectList = side === "my" ? myEffects : enemyEffects;
   const effect = effectList.find((e) => e.name === status);
   if (!effect) return false;
-
+  console.log('useDurationStore, 줄어들기 전에 남은 턴: ', effect.remainingTurn);
   const nextTurn = effect.remainingTurn - 1;
   const shouldExpire = nextTurn <= 0;
 
@@ -183,6 +193,7 @@ export function decrementSpecialEffect(
     removeEffect(side, status);
     updatePokemon(side, index, (prev) => removeStatus(prev, status));
     if (onExpire) onExpire(); // 추가 행동
+
     return true;
   } else {
     addEffect(side, {
@@ -190,6 +201,7 @@ export function decrementSpecialEffect(
       remainingTurn: nextTurn,
       ownerIndex: index,
     });
+    console.log('useDurationStore, 남은 턴: ', nextTurn);
     return false;
   }
 }

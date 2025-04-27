@@ -97,14 +97,16 @@ const durationMap: Record<DurationStatus, number> = {
 export function addStatus(
   pokemon: BattlePokemon,
   status: StatusState,
-  side: 'my' | 'enemy',
+  side: 'my' | 'enemy', // 상태이상 걸리는 쪽의 side임. 
   nullification?: boolean
 ): BattlePokemon {
-  const { publicEnv, addLog } = useBattleStore.getState();
+  const { myTeam, enemyTeam, activeMy, activeEnemy, updatePokemon, publicEnv, addLog } = useBattleStore.getState();
+  const opponentSide = side === 'my' ? 'enemy' : 'my';
+  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
+  const opponentPokemon = opponentSide === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const { addEffect } = useDurationStore.getState();
 
   const mentalStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜'];
-
   // 면역 특성, 타입, 날씨 등에 따른 무효화 체크
   if (
     (status === '독' || status === '맹독') &&
@@ -120,15 +122,14 @@ export function addStatus(
   if (mentalStatusCondition.includes(status) && pokemon.base.ability?.name === '아로마베일') return { ...pokemon };
   if (publicEnv.weather === '쾌청' && pokemon.base.ability?.name === '리프가드' && mainStatusCondition.includes(status)) return { ...pokemon };
   if (pokemon.base.ability?.name === '플라워베일' && pokemon.base.types.includes('풀') && mainStatusCondition.includes(status)) return { ...pokemon };
-
-  // ✅ 정상적으로 상태이상 부여
-  const manager = new StatusManager(pokemon.status);
-  manager.addStatus(status);
-  console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
-  addLog(`🍄 ${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
-
+  console.log(`상태이상에 걸릴 포켓몬: ${pokemon.base.name}`)
   // ✅ duration이 필요한 상태라면 지속 효과도 추가
   if (isDurationStatus(status)) {
+    if (pokemon.status.includes(status)) {
+      console.log('중복 상태이상!');
+      addLog('기술은 실패했다...')
+      return { ...pokemon };
+    }
     const activeIndex = side === 'my' ? useBattleStore.getState().activeMy : useBattleStore.getState().activeEnemy;
     addEffect(side, {
       name: status as DurationStatus,
@@ -137,15 +138,25 @@ export function addStatus(
     });
   }
 
+  // ✅ 정상적으로 상태이상 부여
+  const manager = new StatusManager(pokemon.status);
+  manager.addStatus(status);
+  updatePokemon(side, activeOpponent, (prev) => ({ ...prev, status: manager.getStatus() }))
+  if (manager.getStatus().includes(status)) {
+    console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
+    addLog(` ${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
+  } else {
+    console.log(`효과가 없었다...`);
+    addLog(`효과가 없었다...`);
+  }
+
   // ✅ 싱크로 특성 발동
   if (pokemon.base.ability?.name === '싱크로') {
-    const { myTeam, enemyTeam, activeMy, activeEnemy, updatePokemon } = useBattleStore.getState();
-    const opponentSide = side === 'my' ? 'enemy' : 'my';
-    const activeOpponent = side === 'my' ? activeEnemy : activeMy;
-    const opponentPokemon = opponentSide === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
     if (opponentPokemon.base.ability?.name !== '싱크로') {
       console.log(`${pokemon.base.name}의 싱크로 발동!`);
       addLog(`${pokemon.base.name}의 싱크로 발동!`);
+      console.log(`${opponentPokemon.base.name}에게 상태를 복사한다!!`);
+      addLog(`${opponentPokemon.base.name}에게 상태를 복사한다!`);
       updatePokemon(opponentSide, activeOpponent, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
     }
   }

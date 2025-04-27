@@ -1,5 +1,5 @@
 import { useBattleStore } from "../../Context/useBattleStore";
-import { transferDurationEffects } from "../../Context/useDurationContext";
+import { transferDurationEffects, useDurationStore } from "../../Context/useDurationContext";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
@@ -23,6 +23,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number, bato
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
+  const { removeEffect } = useDurationStore.getState();
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
   const env = side === "my" ? myEnv : enemyEnv;
@@ -65,8 +66,18 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number, bato
       updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
   }
+  for (const status of unMainStatusConditionWithDuration) {
+    if (team[currentIndex].status.includes(status as StatusState)) {
+      removeEffect(side, status as StatusState);
+    }
+  }
   if (switchingPokemon.base.ability?.name === '자연회복') {
     for (const status of unMainStatusCondition) {
+      if (team[currentIndex].status.includes(status as StatusState)) {
+        updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
+      }
+    }
+    for (const status of unMainStatusConditionWithDuration) {
       if (team[currentIndex].status.includes(status as StatusState)) {
         updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
       }

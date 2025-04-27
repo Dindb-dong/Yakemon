@@ -311,20 +311,18 @@ export async function applyMoveEffectAfterMultiDamage(side: "my" | "enemy", atta
             if (status === '잠듦') {
               if (defender.base.ability?.name === '불면' || defender.base.ability?.name === '의기양양' || defender.base.ability?.name === '스위트베일') {
                 noStatusCondition = true;
-              } else {
-                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
-            } else if (status === '도발' || status === '헤롱헤롱' && !(defender.base.ability?.name === '둔감')) {
-              addStatus(enemyPokemon, status, opponentSide, nullification);
-            } else if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
-              addStatus(enemyPokemon, status, opponentSide, nullification);
-            } else {
-              updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
+            }
+            if (status === '도발' || status === '헤롱헤롱' && (defender.base.ability?.name === '둔감')) {
+              noStatusCondition = true
+            }
+            if (status === '혼란' && (defender.base.ability?.name === '마이페이스')) {
+              noStatusCondition = true;
             }
           }
           if (!noStatusCondition) {
-            addLog(`🍄 ${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
-            console.log(`${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
+            updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
+            console.log(`🏜️ ${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
           }
         }
         if (effect.heal && appliedDameage && appliedDameage > 0) {
@@ -426,37 +424,25 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
         if (ability.name === '불꽃몸' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '화상', side));
-            addLog(`🥵 ${mineTeam[activeMine].base.name}은/는 화상상태가 되었다!`);
-            console.log(`${mineTeam[activeMine].base.name}은/는 화상상태가 되었다!`);
           }
         }
         if (ability.name === '정전기' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '마비', side));
-            addLog(`⚡️ ${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
-            console.log(`${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
           }
         }
         if (ability.name === '독가시' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '독', side));
-            addLog(`🤢 ${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
-            console.log(`${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
           }
         }
         if (ability.name === '포자' && usedMove.isTouch) {
           if (Math.random() < 0.1) {
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '독', side));
-            addLog(`🤢 ${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
-            console.log(`${mineTeam[activeMine].base.name}은/는 독상태가 되었다!`);
           } else if (Math.random() < 0.2) {
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '마비', side));
-            addLog(`😥 ${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
-            console.log(`${mineTeam[activeMine].base.name}은/는 마비상태가 되었다!`);
           } else if (Math.random() < 0.3) {
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '잠듦', side));
-            addLog(`🥵 ${mineTeam[activeMine].base.name}은/는 잠듦상태가 되었다!`);
-            console.log(`${mineTeam[activeMine].base.name}은/는 잠듦상태가 되었다!`);
           }
         }
       default:
@@ -482,8 +468,6 @@ async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", atta
         if (ability.name === '독수' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
             updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, '독', opponentSide));
-            addLog(`🤢 ${mirroredTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
-            console.log(`${mirroredTeam[activeOpponent].base.name}은/는 독상태가 되었다!`);
           }
         }
       default:
@@ -721,20 +705,17 @@ async function applyMoveEffectAfterDamage(side: "my" | "enemy", attacker: Battle
             if (status === '잠듦') {
               if (defender.base.ability?.name === '불면' || defender.base.ability?.name === '의기양양' || defender.base.ability?.name === '스위트베일') {
                 noStatusCondition = true;
-              } else {
-                addStatus(enemyPokemon, status, opponentSide, nullification);
               }
-            } else if (status === '도발' || status === '헤롱헤롱' && !(defender.base.ability?.name === '둔감')) {
-              addStatus(enemyPokemon, status, opponentSide, nullification);
-            } else if (status === '혼란' && !(defender.base.ability?.name === '마이페이스')) {
-              addStatus(enemyPokemon, status, opponentSide, nullification);
-            } else {
-              updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
+            }
+            if (status === '도발' || status === '헤롱헤롱' && (defender.base.ability?.name === '둔감')) {
+              noStatusCondition = true
+            }
+            if (status === '혼란' && (defender.base.ability?.name === '마이페이스')) {
+              noStatusCondition = true;
             }
           }
           if (!noStatusCondition) {
-            addLog(`🍄 ${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
-            console.log(`${mirroredTeam[activeOpponent].base.name}은/는 ${status}상태가 되었다!`);
+            updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, status, opponentSide, nullification));
           }
         }
         if (effect.heal && appliedDameage && appliedDameage > 0) {
