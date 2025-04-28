@@ -1567,16 +1567,16 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hp: 68, attack: 64, defense: 60, spAttack: 111, spDefense: 60, speed: 117,
       level: 50
     },
-    // {
-    //   id: 752,
-    //   name: '깨비물거미',
-    //   types: ['물', '벌레'],
-    //   moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
-    //   sex: 'male',
-    //   ability: abilityData(['수포', '저수']),
-    //   hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
-    //   level: 50
-    // },
+    {
+      id: 752,
+      name: '깨비물거미',
+      types: ['물', '벌레'],
+      moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
+      sex: 'male',
+      ability: abilityData(['수포', '저수']),
+      hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
+      level: 50
+    },
     {
       id: 763,
       name: '달코퀸',
@@ -1686,8 +1686,8 @@ export function createGen7Pokemon(): PokemonInfo[] {
       id: 781,
       name: '타타륜',
       types: ['풀', '고스트'],
-      moves: moveData([ // , '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인', '스톤에지'
-        '앵커샷', '지진', '고스트다이브', '파워휩'
+      moves: moveData([
+        '앵커샷', '지진', '고스트다이브', '파워휩', '아이언헤드', '폴터가이스트', '아쿠아브레이크', '깨트리기', '기가드레인', '스톤에지'
       ], ['풀', '고스트']),
       ability: abilityData(['강철술사']),
       hp: 70, attack: 131, defense: 100, spAttack: 86, spDefense: 90, speed: 40,
@@ -1782,6 +1782,146 @@ export function createGen8Pokemon(): PokemonInfo[] {
         defensive: ['rank_change']
       },
       hp: 110, attack: 80, defense: 120, spAttack: 80, spDefense: 90, speed: 30,
+      level: 50
+    },
+    {
+      id: 823,
+      name: '아머까오',
+      types: ['비행', '강철'],
+      moves: moveData(['아이언헤드', '공중날기', '벌크업', '날개쉬기', '바디프레스', '제비반환'], ['강철', '비행']),
+      ability: abilityData(['프레셔', '미러아머']),
+      hp: 98, attack: 87, defense: 105, spAttack: 53, spDefense: 85, speed: 67,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 826,
+      name: '이올브',
+      types: ['벌레', '에스퍼'],
+      moves: moveData(['사이코키네시스', '벌레의야단법석', '이상한빛', '미러코트', '에너지볼', '바디프레스', '끈적끈적네트'], ['에스퍼', '벌레']),
+      ability: abilityData(['벌레의알림']),
+      hp: 60, attack: 45, defense: 110, spAttack: 80, spDefense: 120, speed: 90,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 834,
+      name: '갈가부기',
+      types: ['물', '바위'],
+      moves: moveData(['비바라기', '깨물어부수기', '양날박치기', '아쿠아브레이크', '얼음엄니', '독찌르기', '껍질깨기', '지진', '스톤에지'], ['물', '바위']),
+      ability: abilityData(['옹골찬턱', '쓱쓱']),
+      hp: 90, attack: 115, defense: 90, spAttack: 48, spDefense: 68, speed: 74,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 836,
+      name: '펄스멍',
+      types: ['전기'],
+      moves: moveData(['10만볼트', '사이코팽', '불꽃엄니', '볼부비부비', '볼트체인지', '치근거리기', '깨물어부수기'], ['전기']),
+      ability: abilityData(['옹골찬턱', '승기']),
+      hp: 69, attack: 90, defense: 60, spAttack: 90, spDefense: 60, speed: 121,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 844,
+      name: '사다이사',
+      types: ['땅'],
+      moves: moveData(['모래지옥', '지진', '스톤샤워', '뱀눈초리', '똬리틀기', '바디프레스', '번개엄니', '스텔스록'], ['땅']),
+      ability: abilityData(['모래뿜기', '탈피']),
+      hp: 72, attack: 107, defense: 125, spAttack: 65, spDefense: 70, speed: 71,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 847,
+      name: '꼬치조',
+      types: ['물'],
+      moves: moveData(['아쿠아제트', '아쿠아브레이크', '깨물어부수기', '깨트리기', '사이코팽', '독찌르기', '드릴라이너', '인파이트', '스케일샷'], ['물']),
+      ability: abilityData(['쓱쓱']),
+      hp: 61, attack: 123, defense: 60, spAttack: 60, spDefense: 50, speed: 136,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 849,
+      name: '스트린더',
+      types: ['전기', '독'],
+      moves: moveData(['오물웨이브', '일렉트릭네트', '볼트체인지', '폭음파', '오버드라이브', '개척하기', '애시드봄', '볼부비부비'], ['전기', '독']),
+      ability: abilityData(['펑크록', '테크니션']),
+      hp: 75, attack: 98, defense: 70, spAttack: 114, spDefense: 70, speed: 75,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 851,
+      name: '다태우지네',
+      types: ['벌레', '불꽃'],
+      moves: moveData(['흡혈', '불사르기', '오버히트', '덤벼들기', '열탕', '불꽃채찍', '파워휩', '깨물어부수기'], ['벌레', '불꽃']),
+      ability: abilityData(['하얀연기', '불꽃몸', '타오르는불꽃']),
+      hp: 100, attack: 115, defense: 65, spAttack: 90, spDefense: 90, speed: 65,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 855,
+      name: '포트데스',
+      types: ['고스트'],
+      moves: moveData(['섀도볼', '껍질깨기', '힘흡수', '나쁜음모', '기가드레인', '기습', '사이코키네시스', '배턴터치'], ['고스트']),
+      ability: abilityData(['깨어진갑옷', '저주받은바디']),
+      hp: 60, attack: 65, defense: 65, spAttack: 134, spDefense: 114, speed: 70,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 858,
+      name: '브리무음',
+      types: ['에스퍼', '페어리'],
+      moves: moveData(['사이코키네시스', '매지컬샤인', '트릭룸', '명상', '마법가루', '드레인키스', '볼부비부비', '기가드레인', '매지컬플레임', '악의파동'], ['에스퍼', '페어리']),
+      ability: abilityData(['매직미러']),
+      hp: 57, attack: 90, defense: 95, spAttack: 136, spDefense: 103, speed: 29,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 861,
+      name: '오롱털',
+      types: ['악', '페어리'],
+      moves: moveData(['속임수', '기습', '소울크래시', '부추기기', '드레인펀치', '전기자석파', '막말내뱉기', '리플렉터', '빛의장막', '로킥'], ['악', '페어리']),
+      ability: abilityData(['짓궂은마음']),
+      hp: 95, attack: 120, defense: 65, spAttack: 95, spDefense: 75, speed: 60,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 862,
+      name: '가로막구리',
+      types: ['악', '노말'],
+      moves: moveData(['블로킹', '기습', '인파이트', '전기자석파', '깨물어부수기', '씨폭탄', '더스트슈트', '누르기'], ['악', '노말']),
+      ability: abilityData(['이판사판', '오기']),
+      hp: 93, attack: 90, defense: 101, spAttack: 60, spDefense: 81, speed: 95,
+      sex: 'male',
+      level: 50
+    },
+    {
+      id: 864,
+      name: '산호르곤',
+      types: ['고스트'],
+      moves: moveData(['파워젬', '미러코트', '얼어붙은바람', '섀도볼', '기가드레인', '힘흡수', '파도타기', '길동무'], ['고스트']),
+      ability: abilityData(['깨어진갑옷']),
+      hp: 60, attack: 95, defense: 50, spAttack: 145, spDefense: 130, speed: 30,
+      sex: 'female',
+      level: 50
+    },
+    {
+      id: 865,
+      name: '창파나이트',
+      types: ['격투'],
+      moves: moveData(['인파이트', '리프블레이드', '만나자마자', '스타어설트', '칼춤', '브레이브버드', '깜짝베기'], ['격투']),
+      ability: abilityData(['배짱']),
+      hp: 62, attack: 135, defense: 95, spAttack: 68, spDefense: 82, speed: 65,
+      sex: 'male',
       level: 50
     },
   ]

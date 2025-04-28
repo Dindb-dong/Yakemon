@@ -2,7 +2,7 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { RankState } from "../../models/RankState";
-import { changeRank } from "./updateBattlePokemon";
+import { addStatus, changeRank } from "./updateBattlePokemon";
 import {
   setAura,
   setWeather,
@@ -29,7 +29,7 @@ export function applyAppearance(
     addLog
   } = useBattleStore.getState();
   const myPokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-  const enemyPokemon = side === 'enemy' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+  const enemyPokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const opponentSide = side === 'my' ? 'enemy' : 'my';
   const activeOpponent = side === 'my' ? activeEnemy : activeMy;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
@@ -141,19 +141,24 @@ export function applyAppearance(
 
       case "rank_change":
         if (ability.name === '위협' && !enemyPokemon.base.ability?.util?.includes('intimidate_nullification')) {
-          const updatedOpponent = (enemyPokemon) => changeRank(enemyPokemon, "attack", -1);
-          updatePokemon(opponentSide, activeOpponent, updatedOpponent);
-          addLog(`🔃 ${pokemon.base.name}의 등장으로 상대의 공격력이 떨어졌다!`);
+          const updatedOpponent = (enemyPokemon: BattlePokemon) => changeRank(enemyPokemon, "attack", -1);
+          updatePokemon(opponentSide, activeOpponent, (enemyPokemon) => updatedOpponent(enemyPokemon));
+          addLog(`🔃 ${pokemon.base.name}의 등장으로 ${enemyPokemon.base.name}의 공격력이 떨어졌다!`);
         }
         else if (ability.name === '다운로드') {
-          if (enemyPokemon.base.defense >= enemyPokemon.base.spDefense) {
+          console.log(`상대 방어: ${enemyPokemon.base.defense}, 상대 특수방어: ${enemyPokemon.base.spDefense}`);
+          if (enemyPokemon.base.defense > enemyPokemon.base.spDefense) {
             const updatedMy = (myPokemon) => changeRank(myPokemon, 'spAttack', 1);
             updatePokemon(side, activeMine, updatedMy);
             addLog(`🔃 상대의 특수방어가 낮아서 ${pokemon.base.name}의 특수공격이 상승했다!`);
-          } else {
+          } else if (enemyPokemon.base.defense < enemyPokemon.base.spDefense) {
             const updatedMy = (myPokemon) => changeRank(myPokemon, 'attack', 1);
             updatePokemon(side, activeMine, updatedMy);
             addLog(`🔃 상대의 방어가 낮아서 ${pokemon.base.name}의 공격이 상승했다!`);
+          } else {
+            const updatedMy = (myPokemon) => changeRank(myPokemon, 'spAttack', 1);
+            updatePokemon(side, activeMine, updatedMy);
+            addLog(`🔃 상대의 방어와 특수방어가 같아서 ${pokemon.base.name}의 특수공격이 상승했다!`);
           }
         }
         else if (ability.name === "고대활성" && publicEnv.weather === "쾌청") {
@@ -212,6 +217,9 @@ export function applyAppearance(
           }
         }));
         addLog(`➕ ${pokemon.base.name}의 특성이 ${enemyPokemon.base.ability?.name}으로 변화했다!`);
+        if (enemyPokemon.base.ability?.appear) {
+          applyAppearance(myPokemon, side)
+        }
         break;
     }
   }

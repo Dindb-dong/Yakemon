@@ -28,6 +28,18 @@ const moveDatas: MoveInfo[] = [
     affiliation: '폭탄',
     accuracy: 100,
     criticalRate: 0,
+    effects: [{ chance: 0.3, status: '독' }],
+    target: 'opponent',
+  },
+  {
+    name: '오물웨이브',
+    type: '독',
+    category: '특수',
+    power: 95,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
     effects: [{ chance: 0.1, status: '독' }],
     target: 'opponent',
   },
@@ -167,6 +179,18 @@ const moveDatas: MoveInfo[] = [
     target: 'opponent',
   },
   {
+    name: '불사르기',
+    type: '불',
+    category: '특수',
+    power: 130,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    target: 'opponent',
+  },
+  {
     name: '화염방사',
     type: '불',
     category: '특수',
@@ -179,6 +203,22 @@ const moveDatas: MoveInfo[] = [
     effects: [{
       chance: 0.1, // 10% 확률
       status: '화상'
+    }],
+    target: 'opponent',
+  },
+  {
+    name: '불꽃채찍',
+    type: '불',
+    category: '물리',
+    power: 80,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 1,
+      statChange: [{ target: 'opponent', stat: 'defense', change: -1 }]
     }],
     target: 'opponent',
   },
@@ -704,6 +744,26 @@ const moveDatas: MoveInfo[] = [
     target: 'self',
   },
   {
+    name: '똬리틀기',
+    type: '독',
+    category: '변화',
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 1,
+      statChange: [
+        { target: 'self', stat: 'attack', change: 1 },
+        { target: 'self', stat: 'defense', change: 1 },
+        { target: 'self', stat: 'accuracy', change: 1 }
+      ],
+    }],
+    target: 'self',
+  },
+  {
     name: '스텔스록',
     type: '바위',
     category: '변화',
@@ -881,6 +941,19 @@ const moveDatas: MoveInfo[] = [
     accuracy: 100,
     criticalRate: 0,
     effects: [{ chance: 1, status: "마비" }],
+    target: "opponent",
+  },
+  {
+    name: "사슬묶기",
+    type: "노말",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{ chance: 1, status: "사슬묶기" }],
     target: "opponent",
   },
   {
@@ -1111,6 +1184,20 @@ const moveDatas: MoveInfo[] = [
     target: 'opponent',
   },
   {
+    name: '블로킹',
+    type: '악',
+    category: '변화',
+    power: 0,
+    pp: 10,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    protect: true,
+    priority: 4,
+    target: 'self'
+  },
+  {
     name: '니들가드',
     type: '풀',
     category: '변화',
@@ -1166,6 +1253,22 @@ const moveDatas: MoveInfo[] = [
       status: '화상'
     }],
     target: 'opponent',
+  },
+  {
+    name: '길동무',
+    type: '고스트',
+    category: '변화',
+    power: 0,
+    pp: 5,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [{
+      chance: 1,
+      status: '길동무'
+    }],
+    target: 'self',
   },
   {
     name: 'DD래리어트',
@@ -1362,6 +1465,19 @@ const moveDatas: MoveInfo[] = [
     uTurn: true,
     target: 'opponent',
   }, // 에이스번 
+  {
+    name: '배턴터치',
+    type: '노말',
+    category: '변화',
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    uTurn: true,
+    target: 'self',
+  },
   {
     name: '그래스슬라이더',
     type: '풀',
@@ -2105,6 +2221,47 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         status: "마비"
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "마법가루",
+    type: "에스퍼",
+    category: "변화",
+    power: 0,
+    pp: 20,
+    isTouch: false,
+    affiliation: '가루',
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1, typeChange: '에스퍼'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "소울크래시",
+    type: "페어리",
+    category: "물리",
+    power: 75,
+    pp: 15,
+    isTouch: true,
+    affiliation: null,
+    accuracy: 100,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        statChange: [
+          {
+            target: "opponent",
+            stat: "spAttack",
+            change: -1
+          }
+        ]
       }
     ],
     target: "opponent"
@@ -3244,6 +3401,18 @@ const moveDatas: MoveInfo[] = [
     target: "opponent"
   },
   {
+    name: "스타어설트",
+    type: "격투",
+    category: "물리",
+    power: 150,
+    pp: 5,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    cannotMove: true,
+    target: "opponent"
+  },
+  {
     name: "모래바람",
     type: "바위",
     category: "변화",
@@ -3514,7 +3683,20 @@ const moveDatas: MoveInfo[] = [
     accuracy: 100,
     criticalRate: 0,
     affiliation: "소리",
-    passScreen: true,
+    passSubstitute: true,
+    target: "opponent"
+  },
+  {
+    name: "오버드라이브",
+    type: "전기",
+    category: "특수",
+    power: 80,
+    pp: 10,
+    isTouch: false,
+    accuracy: 100,
+    criticalRate: 0,
+    affiliation: "소리",
+    passSubstitute: true,
     target: "opponent"
   },
   {
@@ -3610,6 +3792,69 @@ const moveDatas: MoveInfo[] = [
       {
         chance: 1,
         status: '교체불가'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "모래지옥",
+    type: "땅",
+    category: "물리",
+    power: 35,
+    pp: 20,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      },
+      {
+        chance: 1,
+        status: '조이기'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "회오리불꽃",
+    type: "불",
+    category: "특수",
+    power: 35,
+    pp: 20,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      },
+      {
+        chance: 1,
+        status: '조이기'
+      }
+    ],
+    target: "opponent"
+  },
+  {
+    name: "바다회오리",
+    type: "물",
+    category: "특수",
+    power: 35,
+    pp: 20,
+    isTouch: false,
+    accuracy: 85,
+    criticalRate: 0,
+    effects: [
+      {
+        chance: 1,
+        status: '교체불가'
+      },
+      {
+        chance: 1,
+        status: '조이기'
       }
     ],
     target: "opponent"

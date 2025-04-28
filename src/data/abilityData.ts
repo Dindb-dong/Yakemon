@@ -197,6 +197,11 @@ const availableAbilities: AbilityInfo[] = [
   { id: 113, name: '위기회피', util: ['etc'] },
   { id: 114, name: 'AR시스템', appear: ['form_change'] },
   { id: 115, name: '강철술사', offensive: ['damage_buff'] },
+  { id: 116, name: '미러아머', util: ['etc'] },
+  { id: 117, name: '모래뿜기', defensive: ['weather_change'] },
+  { id: 118, name: '탈피', util: ['etc'] },
+  { id: 119, name: '펑크록', offensive: ['damage_buff'], defensive: ['damage_reduction'] },
+  { id: 120, name: '저주받은바디', defensive: ['status_change'] },
 ]
 
 export function abilityData(abilities: string[]) {

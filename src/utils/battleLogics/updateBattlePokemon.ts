@@ -4,6 +4,8 @@ import { RankManager, RankState } from "../../models/RankState";
 import { StatusManager, StatusState } from "../../models/Status";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
+import { mainStatusCondition, unMainStatusConditionWithDuration } from "./switchPokemon";
+import { useDurationStore } from "../../Context/useDurationContext";
 
 // 체력 변화
 export function changeHp(pokemon: BattlePokemon, amount: number): BattlePokemon {
@@ -72,64 +74,107 @@ export function resetRank(pokemon: BattlePokemon): BattlePokemon {
 }
 
 // 상태이상 추가
-export function addStatus(pokemon: BattlePokemon, status: StatusState, side: 'my' | 'enemy', nullification?: boolean): BattlePokemon {
-  // 부식때문에 nullification 추가
-  const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
-  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜']
-  const { publicEnv, addLog } = useBattleStore.getState();
-  if (status === '독' || status === '맹독') {
-    if (!nullification && pokemon.base.ability?.name === '면역' || pokemon.base.types.includes('독') || pokemon.base.types.includes('강철')) {
+type UnMainStatus = typeof unMainStatusConditionWithDuration[number];
+type DurationStatus = UnMainStatus | '잠듦';
+
+// 지속 시간 맵
+const durationMap: Record<DurationStatus, number> = {
+  도발: 3,
+  트집: 3,
+  풀죽음: 1,
+  사슬묶기: 4,
+  회복봉인: 5,
+  앵콜: 3,
+  소리기술사용불가: 2,
+  하품: 2,
+  혼란: Math.floor((Math.random() * 3) + 2), // 2~4턴
+  교체불가: 4,
+  조이기: 4,
+  멸망의노래: 3,
+  잠듦: 3,
+};
+
+export function addStatus(
+  pokemon: BattlePokemon,
+  status: StatusState,
+  side: 'my' | 'enemy', // 상태이상 걸리는 쪽의 side임. 
+  nullification?: boolean
+): BattlePokemon {
+  const { myTeam, enemyTeam, activeMy, activeEnemy, updatePokemon, publicEnv, addLog } = useBattleStore.getState();
+  const opponentSide = side === 'my' ? 'enemy' : 'my'; // 걸리는 쪽의 상대편.
+  const activeIndex = side === 'my' ? activeMy : activeEnemy; // 상태이상 걸리는 포켓몬 
+  const activePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const opponentPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const { addEffect } = useDurationStore.getState();
+
+  const mentalStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜'];
+  // 면역 특성, 타입, 날씨 등에 따른 무효화 체크
+  if (
+    (status === '독' || status === '맹독') &&
+    (!nullification && (pokemon.base.ability?.name === '면역' || pokemon.base.types.includes('독') || pokemon.base.types.includes('강철')))
+  ) return { ...pokemon };
+
+  if (status === '교체불가' && pokemon.base.types.includes('고스트')) return { ...pokemon };
+  if ((status === '도발' || status === '헤롱헤롱') && pokemon.base.ability?.name === '둔감') return { ...pokemon };
+  if (status === '마비' && (pokemon.base.ability?.name === '유연' || pokemon.base.types.includes('전기'))) return { ...pokemon };
+  if (status === '화상' && (pokemon.base.ability?.name === '수의베일' || pokemon.base.ability?.name === '수포' || pokemon.base.types.includes('불'))) return { ...pokemon };
+  if (status === '잠듦' && (pokemon.base.ability?.name === '불면' || pokemon.base.ability?.name === '의기양양' || pokemon.base.ability?.name === '스위트베일')) return { ...pokemon };
+  if (status === '얼음' && (pokemon.base.ability?.name === '마그마의무장' || pokemon.base.types.includes('얼음'))) return { ...pokemon };
+  if (mentalStatusCondition.includes(status) && pokemon.base.ability?.name === '아로마베일') return { ...pokemon };
+  if (publicEnv.weather === '쾌청' && pokemon.base.ability?.name === '리프가드' && mainStatusCondition.includes(status)) return { ...pokemon };
+  if (pokemon.base.ability?.name === '플라워베일' && pokemon.base.types.includes('풀') && mainStatusCondition.includes(status)) return { ...pokemon };
+  console.log(`상태이상에 걸릴 포켓몬: ${pokemon.base.name}`)
+  // ✅ duration이 필요한 상태라면 지속 효과도 추가
+  if (isDurationStatus(status)) {
+    if (pokemon.status.includes(status)) {
+      console.log('중복 상태이상!');
+      addLog('기술은 실패했다...')
       return { ...pokemon };
     }
-  }
-  if (status === '교체불가' && pokemon.base.types.includes('고스트')) {
-    return { ...pokemon };
-  }
-  if ((status === '도발' || status === '헤롱헤롱') &&
-    pokemon.base.ability?.name === '둔감') {
-    return { ...pokemon };
-  }
-  if (status === '마비' && (pokemon.base.ability?.name === '유연' || pokemon.base.types.includes('전기'))) {
-    return { ...pokemon };
-  }
-  if (status === '화상') {
-    if (pokemon.base.ability?.name === '수의베일' || pokemon.base.ability?.name === '수포' || pokemon.base.types.includes('불')) {
-      { return { ...pokemon }; }
+    const activeIndex = side === 'my' ? useBattleStore.getState().activeMy : useBattleStore.getState().activeEnemy;
+    addEffect(side, {
+      name: status as DurationStatus,
+      remainingTurn: durationMap[status as DurationStatus],
+      ownerIndex: activeIndex,
+    });
+    if (status === '사슬묶기') {
+      console.log(`상대가 마지막에 사용한 기술: ${activePokemon.usedMove?.name}`);
+      if (activePokemon.usedMove) {
+        pokemon = { ...pokemon, unUsableMove: activePokemon.usedMove };
+        console.log('봉인당한 기술:', activePokemon.usedMove.name);
+      }
     }
-  }
-  if (status === '잠듦') {
-    if (pokemon.base.ability?.name === '불면' || pokemon.base.ability?.name === '의기양양' || pokemon.base.ability?.name === '스위트베일') {
-      { return { ...pokemon }; }
-    }
-  }
-  if (status === '얼음' && (pokemon.base.ability?.name === '마그마의무장' || pokemon.base.types.includes('얼음'))) {
-    { return { ...pokemon }; }
-  }
-  if (unMainStatusCondition.some((s) => s === status) && pokemon.base.ability?.name === '아로마베일') {
-    { return { ...pokemon }; }
-  }
-  if (publicEnv.weather === '쾌청' && pokemon.base.ability?.name === '리프가드') {
-    if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
-  }
-  if (pokemon.base.ability?.name === '플라워베일' && pokemon.base.types.includes('풀')) {
-    if (mainStatusCondition.some((s) => s === status)) { return { ...pokemon }; }
   }
 
+  // ✅ 정상적으로 상태이상 부여
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);
-  console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
-  addLog(`🍄 ${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
-  // 싱크로 특성 처리
+  updatePokemon(side, activeIndex, (prev) => ({ ...prev, status: manager.getStatus() }))
+  if (manager.getStatus().includes(status)) {
+    console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
+    addLog(` ${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
+  } else {
+    console.log(`효과가 없었다...`);
+    addLog(`효과가 없었다...`);
+  }
+
+  // ✅ 싱크로 특성 발동
   if (pokemon.base.ability?.name === '싱크로') {
-    const { myTeam, enemyTeam, activeMy, activeEnemy, updatePokemon } = useBattleStore.getState();
-    const opponentSide = side === 'my' ? 'enemy' : 'my';
-    const activeOpponent = side === 'my' ? activeEnemy : activeMy;
-    const opponentPokemon = opponentSide === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
     if (opponentPokemon.base.ability?.name !== '싱크로') {
-      updatePokemon(opponentSide, activeOpponent, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
+      console.log(`${pokemon.base.name}의 싱크로 발동!`);
+      addLog(`${pokemon.base.name}의 싱크로 발동!`);
+      console.log(`${opponentPokemon.base.name}에게 상태를 복사한다!!`);
+      addLog(`${opponentPokemon.base.name}에게 상태를 복사한다!`);
+      updatePokemon(opponentSide, activeIndex, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
     }
   }
+
   return { ...pokemon, status: manager.getStatus() };
+}
+
+// 🔥 추가: 어떤 상태가 지속 상태인지 체크하는 헬퍼 함수
+function isDurationStatus(status: StatusState): status is DurationStatus {
+  return (unMainStatusConditionWithDuration as readonly string[]).includes(status) || status === '잠듦';
 }
 
 // 상태이상 제거
@@ -236,6 +281,7 @@ export function setAbility(pokemon: BattlePokemon, ability: AbilityInfo | null):
 export function setTypes(pokemon: BattlePokemon, types: string[]): BattlePokemon {
   return {
     ...pokemon,
+    tempType: pokemon.base.types, // 임시 타입 저장
     base: {
       ...pokemon.base,
       types: types, // 빈 배열 넣으면 사실상 타입 사라지게 함.
@@ -243,9 +289,22 @@ export function setTypes(pokemon: BattlePokemon, types: string[]): BattlePokemon
   };
 }
 
+// 타입 강제 삭제 함수 
+export function removeTypes(pokemon: BattlePokemon, type: string, isNormal?: boolean): BattlePokemon {
+  // 날개쉬기는 isNormal이 true여야 함.
+  return {
+    ...pokemon,
+    tempType: pokemon.base.types, // 임시 타입 저장
+    base: {
+      ...pokemon.base,
+      types: isNormal ? (['노말', ...pokemon.base.types.filter((t) => t != type)]) : (pokemon.base.types.filter((t) => t != type) ?? [])
+    }
+  }
+}
+
 // 전투 관련 일시적 상태값 리셋
 export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePokemon {
-  const baseReset = {
+  const baseReset = { // 매 턴 끝날 때마다 리셋되는 것 
     ...pokemon,
     isProtecting: false,
     hadRankUp: false,
@@ -256,12 +315,18 @@ export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePo
   if (isSwitch) {
     return {
       ...baseReset,
+      base: {
+        ...pokemon.base,
+        types: pokemon.tempType && pokemon.tempType.length > 0 ? pokemon.tempType : pokemon.base.types // 타입 사라진 상태였으면 리셋.
+      },
       usedMove: undefined,
+      unUsableMove: undefined,
       isCharging: false,
       chargingMove: undefined,
       lockedMove: undefined,
       hadMissed: false,
       lockedMoveTurn: 0,
+      tempType: [],
     };
   }
 

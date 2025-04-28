@@ -1,10 +1,9 @@
 import { useBattleStore } from "../../Context/useBattleStore";
-import { decrementYawnTurn, useDurationStore } from "../../Context/useDurationContext";
+import { decrementDisableTun, decrementYawnTurn, useDurationStore } from "../../Context/useDurationContext";
 import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
-import { applyConfusionStatus } from "./applyConfusionStatus";
 import { applyStatusConditionDamage } from "./applyNoneMoveDamage";
-import { applyStatusWithDuration } from "./applyStatusWithDuration";
+import { mainStatusCondition } from "./switchPokemon";
 import { addStatus, changeHp, changeRank, removeStatus, resetState, setLockedMove } from "./updateBattlePokemon";
 import { setField, setScreen, setWeather } from "./updateEnvironment";
 
@@ -42,26 +41,7 @@ export function applyEndTurnEffects() {
     }
   });
 
-  // === 하품 처리 === 
-  [myActive, enemyActive].forEach((pokemon, i) => {
-    const side = i === 0 ? "my" : "enemy";
-    if (pokemon.status.includes("하품")) {
-      if (!(pokemon.base.ability?.name === '불면' || pokemon.base.ability?.name === '의기양양' ||
-        pokemon.base.ability?.name === '스위트베일' || pokemon.status.includes('잠듦'))) { // 잚들 수 있으면 
-        const shouldBeSleep = decrementYawnTurn(side, i === 0 ? activeMy : activeEnemy);
-        if (shouldBeSleep) {
-          console.log('하품으로 인해 잠듦 처리');
-          addLog(`😴 ${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
-        }
-        // applyStatusWithDuration(side, i === 0 ? activeMy : activeEnemy, "잠듦");
-        // updatePokemon(side, i === 0 ? activeMy : activeEnemy, (pokemon) => removeStatus(pokemon, "하품"));
-        // addLog(`➕ ${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
-        // console.log(`${pokemon.base.name}은/는 하품으로 인해 잠들었다!`);
-      }
-    }
-  });
-
-  // === 상태이상 효과 처리 ===
+  // === 상태이상, 날씨데미지 효과 처리 ===
   [myActive, enemyActive].forEach(async (pokemon, i) => {
     const side = i === 0 ? "my" : "enemy";
     const opponentSide = i === 0 ? "enemy" : "my";
@@ -70,17 +50,11 @@ export function applyEndTurnEffects() {
     const opponentTeam = i === 0 ? enemyTeam : myTeam;
     const activeOpponent = i === 0 ? activeEnemy : activeMy;
     // 이렇게 효율적으로 처리할 수도 있구만! 
-    if (pokemon.status.includes("화상")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "화상")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
-    }
-    if (pokemon.status.includes("맹독")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "맹독")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
-    }
-    if (pokemon.status.includes("독")) {
-      const { updated: UpdatedPokemon } = await applyStatusConditionDamage(pokemon, "독")
-      updatePokemon(side, activeIndex, (prev) => UpdatedPokemon)
+    for (const status of ["화상", "맹독", "독", "조이기"] as const) {
+      if (pokemon.status.includes(status)) {
+        const { updated } = await applyStatusConditionDamage(pokemon, status);
+        updatePokemon(side, activeIndex, (prev) => updated);
+      }
     }
     if (pokemon.status.includes("씨뿌리기")) {
       if (!(pokemon.base.ability?.name === '매직가드')) {
@@ -96,20 +70,30 @@ export function applyEndTurnEffects() {
         console.log(`${pokemon.base.name}은 씨뿌리기의 피해를 입었다!`);
       }
     }
+    if (publicEnv.weather === '모래바람') {
+      const immuneAbilities = ['모래숨기', '모래의힘'];
+      const immuneTypes = ['바위', '땅', '강철'];
+      const hasImmunity =
+        (pokemon.base.ability && immuneAbilities.includes(pokemon.base.ability.name)) ||
+        pokemon.base.types.some((type) => immuneTypes.includes(type));
+
+      if (!hasImmunity) {
+        const damage = Math.floor(pokemon.base.hp / 16);
+        updatePokemon(side, activeIndex, (prev) => changeHp(prev, -damage));
+        addLog(`🌪️ ${pokemon.base.name}은 모래바람에 의해 피해를 입었다!`);
+      }
+    }
   });
 
   // === 지속형 효과 턴 감소 처리 ===
   const expired = decrementTurns();
 
-  // ✅ [NEW] '풀죽음', '앵콜', '도발' 등 my/enemy 쪽 효과 만료 처리
-  expired.my.forEach((effectName) => {
-    updatePokemon("my", activeMy, (p) => removeStatus(p, effectName as StatusState));
-    addLog(`🏋️‍♂️ 내 포켓몬의 ${effectName} 상태가 해제되었다!`);
-  });
-
-  expired.enemy.forEach((effectName) => {
-    updatePokemon("enemy", activeEnemy, (p) => removeStatus(p, effectName as StatusState));
-    addLog(`🏋️‍♂️ 상대 포켓몬의 ${effectName} 상태가 해제되었다!`);
+  ["my", "enemy"].forEach((side, i) => {
+    const active = i === 0 ? activeMy : activeEnemy;
+    expired[side as "my" | "enemy"].forEach((effectName) => {
+      updatePokemon(side as "my" | "enemy", active, (p) => removeStatus(p, effectName as StatusState));
+      addLog(`🏋️‍♂️ ${side === "my" ? "내" : "상대"} 포켓몬의 ${effectName} 상태가 해제되었다!`);
+    });
   });
 
   if (publicEnv.weather && expired.public.includes(publicEnv.weather)) {
@@ -133,9 +117,7 @@ export function applyEndTurnEffects() {
     console.log(`상대 필드의 ${myEnv.screen}이/가 사라졌다!`);
   }
 
-  // ⏳ TODO:
-  // - 날씨 데미지 (모래바람 등)
-  // - 유틸 특성 효과 (포이즌힐 등)
+  // 포켓몬 특성 효과 처리 
   [myActive, enemyActive].forEach((pokemon, i) => {
     const side = i === 0 ? "my" : "enemy";
     const opponentSide = i === 0 ? "enemy" : "my";
@@ -171,18 +153,11 @@ export function applyEndTurnEffects() {
       updatePokemon(side, activeIndex, (prev) => changeHp(prev, -damage));
       addLog(`🦅 ${pokemon.base.name}의 선파워 특성 발동!`);
     }
-    if (publicEnv.weather === '모래바람') {
-      const immuneAbilities = ['모래숨기', '모래의힘'];
-      const immuneTypes = ['바위', '땅', '강철'];
-      const hasImmunity =
-        (pokemon.base.ability && immuneAbilities.includes(pokemon.base.ability.name)) ||
-        pokemon.base.types.some((type) => immuneTypes.includes(type));
-
-      if (!hasImmunity) {
-        const damage = Math.floor(pokemon.base.hp / 16);
-        updatePokemon(side, activeIndex, (prev) => changeHp(prev, -damage));
-        addLog(`🌪️ ${pokemon.base.name}은 모래바람에 의해 피해를 입었다!`);
-      }
+    if (pokemon.base.ability?.name === '탈피' && pokemon.status.some((s) => mainStatusCondition.includes(s))) {
+      pokemon.status.forEach((s) => mainStatusCondition.includes(s) ?
+        updatePokemon(side, activeIndex, (prev) => removeStatus(prev, s)) : {}
+      )
+      addLog(`🦅 ${pokemon.base.name}의 탈피 특성 발동!`);
     }
   })
 
@@ -194,7 +169,7 @@ export function applyEndTurnEffects() {
     if (team[actives[i]].lockedMove && team[actives[i]].lockedMoveTurn === 0) {
       // 이제 고정 기술 다 썼으니 고정해제하고 혼란처리
       updatePokemon(side as "my" | "enemy", actives[i], (prev) => setLockedMove(prev, null));
-      applyConfusionStatus(side as "my" | "enemy", actives[i]);
+      addStatus(team[actives[i]], '혼란', side as ('my' | 'enemy'));
     }
   });
 

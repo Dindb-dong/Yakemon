@@ -25,6 +25,13 @@ type DurationState = {
     my: string[], enemy: string[], public: string[], myEnv: string[], enemyEnv: string[]
   };
 };
+export const specialStatus = ["하품", "멸망의노래", '사슬묶기'] as const; // TODO: 추가 가능 
+// 혼란, 잠듦은 여기서 처리 안함
+
+const specialStatusDecrementer = {
+  "하품": decrementYawnTurn,
+  "사슬묶기": decrementDisableTun,
+} as const;
 
 export const useDurationStore = create<DurationState>((set, get) => ({
   myEffects: [],
@@ -68,8 +75,9 @@ export const useDurationStore = create<DurationState>((set, get) => ({
     });
   },
 
+
   decrementTurns: () => {
-    const expired: { my: string[]; enemy: string[]; public: string[], myEnv: string[], enemyEnv: string[] } = { my: [], enemy: [], public: [], myEnv: [], enemyEnv: [] };
+    const expired: { my: string[], enemy: string[], public: string[], myEnv: string[], enemyEnv: string[] } = { my: [], enemy: [], public: [], myEnv: [], enemyEnv: [] };
     const battleStore = useBattleStore.getState();
 
     const dec = (list: TimedEffect[], side: "my" | "enemy" | "public") => {
@@ -77,10 +85,19 @@ export const useDurationStore = create<DurationState>((set, get) => ({
 
       return list
         .map((e) => {
-          // 💤 잠듦은 active 포켓몬일 때만 턴 감소
-          if ((e.name === "잠듦" || e.name === "혼란") && e.ownerIndex !== activeIndex) {
-            return e; // 턴 유지
+          if (specialStatus.includes(e.name as any)) {
+            // 💤 특수 상태라면 여기서 바로 전용 처리
+            const shouldExpire = specialStatusDecrementer[e.name as keyof typeof specialStatusDecrementer](side as 'my' | 'enemy', activeIndex!);
+            if (shouldExpire) {
+              expired[side].push(e.name);
+            }
+            return e; // special은 리스트 유지 (addEffect로 별도로 관리됨)
           }
+
+          if (e.name === "잠듦") {
+            return e; // 잠듦은 행동시에 턴 줄어듦. (풀죽음으로 행동 실패해도 턴은 줄어드는데, 하여튼 다른데에서 해야함)
+          }
+          if (e.name === '혼란') return e;
 
           const newTurn = e.remainingTurn - 1;
           if (newTurn <= 0) {
@@ -111,7 +128,7 @@ export const useDurationStore = create<DurationState>((set, get) => ({
       enemyEnvEffects: decEnv(state.enemyEnvEffects, "enemyEnv"),
     }));
 
-    // 날씨 또는 필드 효과 만료 시 BattleStore 상태에서 제거
+    // 날씨, 필드 만료 처리
     expired.public.forEach((effect) => {
       if (["쾌청", "비", "모래바람", "싸라기눈"].includes(effect)) {
         battleStore.setPublicEnv({ weather: null });
@@ -127,53 +144,87 @@ export const useDurationStore = create<DurationState>((set, get) => ({
 }));
 
 export function decrementYawnTurn(side: "my" | "enemy", index: number): boolean {
-  const { myEffects, enemyEffects, removeEffect } = useDurationStore.getState();
+  return decrementSpecialEffect(side, index, "하품", () => {
+    useBattleStore.getState().updatePokemon(side, index, (prev) => addStatus(prev, "잠듦", side));
+  });
+}
+
+export function decrementConfusionTurn(side: "my" | "enemy", index: number): boolean {
+  return decrementSpecialEffect(side, index, "혼란");
+}
+
+export function decrementSleepTurn(side: "my" | "enemy", index: number): boolean {
+  return decrementSpecialEffect(side, index, "잠듦");
+}
+
+export function decrementDisableTun(side: "my" | "enemy", index: number): boolean {
+  return decrementSpecialEffect(side, index, "사슬묶기", () => {
+    useBattleStore.getState().updatePokemon(side, index, (prev) => ({ ...prev, unUsableMove: undefined }));
+    useBattleStore.getState().addLog('사슬묶기 상태가 풀렸다!');
+    console.log('사슬묶기 상태가 풀렸다!');
+  });
+}
+
+
+
+type SpecialStatus = "하품" | "혼란" | '멸망의노래' | '사슬묶기' | '잠듦'; // TODO: 추가 가능 
+
+/**
+ * 하품, 혼란 등 특수 상태의 지속 턴 감소를 관리
+ * @param side - "my" | "enemy"
+ * @param index - 포켓몬 인덱스
+ * @param status - "하품" or "혼란"
+ * @param onExpire - 만료 시 추가로 수행할 행동
+ * @returns true면 상태 만료됨, false면 지속
+ */
+export function decrementSpecialEffect(
+  side: "my" | "enemy",
+  index: number,
+  status: SpecialStatus,
+  onExpire?: () => void
+): boolean {
+  const { myEffects, enemyEffects, removeEffect, addEffect } = useDurationStore.getState();
   const { updatePokemon } = useBattleStore.getState();
+
   const effectList = side === "my" ? myEffects : enemyEffects;
-  const yawn = effectList.find((e) => e.name === "잠듦");
-  if (!yawn) return false;
-  const nextTurn = yawn.remainingTurn - 1;
-  const shouldBeSleep = nextTurn <= 0;
-  if (shouldBeSleep) {
-    // 잠듦 상태 추가 
-    updatePokemon(side, index, (prev) => addStatus(prev, "잠듦", side));
-    // 하품 상태 제거 
-    removeEffect(side, "하품");
-    updatePokemon(side, index, (prev) => removeStatus(prev, "하품"));
+  const effect = effectList.find((e) => e.name === status);
+  if (!effect) return false;
+  console.log('useDurationStore, 줄어들기 전에 남은 턴: ', effect.remainingTurn);
+  const nextTurn = effect.remainingTurn - 1;
+  const shouldExpire = nextTurn <= 0;
+
+  if (shouldExpire) {
+    removeEffect(side, status);
+    updatePokemon(side, index, (prev) => removeStatus(prev, status));
+    if (onExpire) onExpire(); // 추가 행동
+
     return true;
   } else {
-    // 아직 잠듦 상태 유지 (지속 턴 -1)
-    useDurationStore.getState().addEffect(side, {
-      name: "하품",
+    addEffect(side, {
+      name: status,
       remainingTurn: nextTurn,
+      ownerIndex: index,
     });
+    console.log('useDurationStore, 남은 턴: ', nextTurn);
     return false;
   }
 }
 
-export function decrementConfusionTurn(side: "my" | "enemy", index: number): boolean {
-  const { myEffects, enemyEffects, removeEffect } = useDurationStore.getState();
-  const { updatePokemon } = useBattleStore.getState();
+export function transferDurationEffects(side: "my" | "enemy", fromIndex: number, toIndex: number) {
+  const { myEffects, enemyEffects, addEffect, removeEffect } = useDurationStore.getState();
 
   const effectList = side === "my" ? myEffects : enemyEffects;
-  const confusion = effectList.find((e) => e.name === "혼란");
 
-  if (!confusion) return false;
+  const effectsToTransfer = effectList.filter((effect) => effect.ownerIndex === fromIndex);
 
-  const nextTurn = confusion.remainingTurn - 1;
-  const shouldRecover = nextTurn <= 0;
+  for (const effect of effectsToTransfer) {
+    // 1. 기존 효과 제거
+    removeEffect(side, effect.name);
 
-  if (shouldRecover) {
-    // 상태 제거
-    removeEffect(side, "혼란");
-    updatePokemon(side, index, (prev) => removeStatus(prev, "혼란"));
-    return true;
-  } else {
-    // 아직 혼란 상태 유지 (지속 턴 -1)
-    useDurationStore.getState().addEffect(side, {
-      name: "혼란",
-      remainingTurn: nextTurn,
+    // 2. 새 포켓몬에게 동일한 이름, 남은 턴, ownerIndex만 toIndex로 바꿔서 재등록
+    addEffect(side, {
+      ...effect,
+      ownerIndex: toIndex,
     });
-    return false;
   }
 }

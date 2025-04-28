@@ -1,11 +1,16 @@
 import { useBattleStore } from "../../Context/useBattleStore";
+import { transferDurationEffects, useDurationStore } from "../../Context/useDurationContext";
 import { StatusState } from "../../models/Status";
 import { applyAppearance } from "./applyAppearance";
 import { applyTrapDamage } from "./applyNoneMoveDamage";
+import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { addStatus, changeHp, changeRank, removeStatus, resetRank, resetState, setActive } from "./updateBattlePokemon";
 import { removeAura, removeDisaster, removeTrap } from "./updateEnvironment";
 
-export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
+export const unMainStatusCondition = ['헤롱헤롱', '씨뿌리기']; // 비주요 상태이상
+export const unMainStatusConditionWithDuration = ['도발', '트집', '사슬묶기', '회복봉인', '앵콜', '소리기술사용불가', '하품', '혼란', '교체불가', '조이기', '멸망의노래', '풀죽음'] as const; // 비주요 상태이상
+export const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
+export async function switchPokemon(side: "my" | "enemy", newIndex: number, batonTouch?: boolean) {
   const {
     myTeam,
     enemyTeam,
@@ -18,8 +23,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     enemyEnv,
     addLog,
   } = useBattleStore.getState();
-  const unMainStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜', '씨뿌리기', '소리기술사용불가', '하품', '혼란']; // 비주요 상태이상
-  const mainStatusCondition = ['화상', '마비', '잠듦', '얼음', '독', '맹독']; // 주요 상태이상
+  const { removeEffect } = useDurationStore.getState();
   const team = side === "my" ? myTeam : enemyTeam;
   const currentIndex = side === "my" ? activeMy : activeEnemy;
   const env = side === "my" ? myEnv : enemyEnv;
@@ -36,6 +40,17 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     console.log('재생력 발동!');
     updatePokemon(side, currentIndex, (switchingPokemon) => changeHp(switchingPokemon, switchingPokemon.base.hp / 3));
   }
+  // 0. 배턴터치 처리
+  if (batonTouch) {
+    updatePokemon(side, newIndex, (switchingPokemon) => ({ ...switchingPokemon, rank: team[currentIndex].rank }));
+    updatePokemon(side, newIndex, (switchingPokemon) => ({ ...switchingPokemon, substitute: team[currentIndex].substitute }));
+    updatePokemon(side, newIndex, (switchingPokemon) => ({
+      ...switchingPokemon, status:
+        team[currentIndex].status.filter((s) => unMainStatusCondition.includes(s)).concat(
+          team[currentIndex].status.filter((s): s is typeof unMainStatusConditionWithDuration[number] => unMainStatusConditionWithDuration.includes(s as typeof unMainStatusConditionWithDuration[number])))
+    }));
+    transferDurationEffects(side, currentIndex, newIndex);
+  }
 
   // 1. 랭크업 초기화, 상태이상 제거 
   console.log('1. 랭크업 초기화 ')
@@ -51,9 +66,21 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
       updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
   }
+  for (const status of unMainStatusConditionWithDuration) {
+    if (team[currentIndex].status.includes(status as StatusState)) {
+      removeEffect(side, status as StatusState);
+      updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
+    }
+  }
   if (switchingPokemon.base.ability?.name === '자연회복') {
     for (const status of unMainStatusCondition) {
       if (team[currentIndex].status.includes(status as StatusState)) {
+        updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
+      }
+    }
+    for (const status of unMainStatusConditionWithDuration) {
+      if (team[currentIndex].status.includes(status as StatusState)) {
+        removeEffect(side, status as StatusState);
         updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
       }
     }
@@ -110,12 +137,18 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number) {
     if (trapLog) addLog(trapLog); console.log(trapLog);
     next = trapped;
   }
-
-  // 5. 등장 특성 적용
-  console.log('5. 등장 특성 적용')
-  const wncp = side === 'my' ? '나' : '상대';
-  console.log(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
-  addLog(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
-  applyAppearance(next, side);
+  if (next.currentHp <= 0 && side === 'enemy') {
+    // 관전모드 아니고 ai 포켓몬이 쓰러졌을 경우 (스텔스록 밟고 기절 등)
+    console.log('ai 포켓몬이 등장하자마자 쓰러져서 교체')
+    const switchIndex = getBestSwitchIndex(side);
+    await switchPokemon(side, switchIndex);
+  } else {
+    // 5. 등장 특성 적용
+    console.log('5. 등장 특성 적용')
+    const wncp = side === 'my' ? '나' : '상대';
+    console.log(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
+    addLog(wncp + '는 ' + team[newIndex].base.name + '을/를 내보냈다!');
+    applyAppearance(next, side);
+  }
   return;
 }

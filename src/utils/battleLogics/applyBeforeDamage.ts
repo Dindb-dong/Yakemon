@@ -7,6 +7,7 @@ import { MoveInfo } from "../../models/Move";
 import { PokemonInfo } from "../../models/Pokemon";
 import { StatusState } from "../../models/Status";
 import { changeHp, changeRank, setTypes } from "./updateBattlePokemon";
+import { RankState } from "../../models/RankState";
 
 // 내 포켓몬, 상대 포켓몬, 기술, 받은 데미지, 날씨, 필드
 export function applyDefensiveAbilityEffectBeforeDamage(
@@ -49,7 +50,11 @@ export function applyDefensiveAbilityEffectBeforeDamage(
           } else if (ability.name === '타오르는불꽃' && usedMove.type === '불') {
             rate = 0;
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
-            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, 'spAttack', 1));
+            let stat: keyof RankState;
+            if (deffender.base.attack > deffender.base.spAttack) {
+              stat = 'attack';
+            } else stat = 'spAttack';
+            updatePokemon(opponentSide, activeOpponent, (deffender) => changeRank(deffender, stat, 1));
           } else if (ability.name === '피뢰침' && usedMove.type === '전기') {
             rate = 0;
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
@@ -101,6 +106,9 @@ export function applyDefensiveAbilityEffectBeforeDamage(
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           } else if ((ability.name === '하드록' || ability.name === '필터') && (wasEffective ?? 0) > 0) {
             rate = 3 / 4;
+            console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
+          } else if (ability.name === '펑크록' && usedMove.affiliation === '소리') {
+            rate = 1 / 2;
             console.log(`${deffender.base.name}의 ${ability?.name} 발동!`);
           }
           // TODO: 퍼코트, 복슬복슬, 필터, 하드록, 내열, 수포, 멀티스케일, 스펙터가드 등 추가하기 
@@ -195,6 +203,10 @@ export function applyOffensiveAbilityEffectBeforeDamage(
           }
           if (ability.name === '강철술사' && usedMove.type === '강철') {
             rate *= 1.5;
+            console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
+          }
+          if (ability.name === '펑크록' && usedMove.affiliation === '소리') {
+            rate *= 1.3;
             console.log(`${attacker.base.name}의 ${ability?.name} 발동!`);
           }
           break;

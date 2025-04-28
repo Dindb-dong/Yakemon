@@ -40,8 +40,9 @@ export function setScreen(side: 'my' | 'enemy', screen: ScreenType, remove?: boo
 // 📍 날씨 설정 (공유)
 export function setWeather(weather: WeatherType) {
   const { addEffect } = useDurationStore.getState()
+  const { publicEnv } = useBattleStore.getState(); // 이미 있는 날씨면 스킵
   if (weather !== null) {
-    addEffect("public", { name: weather, remainingTurn: 5 });
+    if (publicEnv.weather !== weather) addEffect("public", { name: weather, remainingTurn: 5 });
   }
   useBattleStore.getState().setPublicEnv({ weather });
 }

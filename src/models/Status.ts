@@ -1,6 +1,6 @@
 export type StatusState = '화상' | '마비' | '독' | '맹독' | '얼음' | '잠듦' |
   '혼란' | '풀죽음' | '앵콜' | '트집' | '도발' | '헤롱헤롱' | '사슬묶기' | '회복봉인' | '씨뿌리기' | '길동무' | '소리기술사용불가'
-  | '하품' | '교체불가';
+  | '하품' | '교체불가' | '조이기' | '멸망의노래';
 
 
 export class StatusManager {
@@ -15,7 +15,10 @@ export class StatusManager {
 
     const exclusive = ['마비', '독', '맹독', '얼음', '잠듦', '화상'];
     // 중복 있으면 바로 함수 종료 
-    if (exclusive.some(s => this.status.includes(s as StatusState)) && exclusive.includes(status)) return;
+    if (exclusive.some(s => this.status.includes(s as StatusState)) && exclusive.includes(status)) {
+      console.log('중복 상태이상!')
+      return
+    };
     this.status.push(status);
   }
 
