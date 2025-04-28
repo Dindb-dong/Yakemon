@@ -117,8 +117,8 @@ export function createGen1Pokemon(): PokemonInfo[] {
     {
       id: 103,
       name: '나시',
-      types: ['풀', '에스퍼'], // , '씨뿌리기', '사이코키네시스', '오물폭탄', '쾌청', '기가드레인', '땅고르기', '리프스톰', '광합성'
-      moves: moveData(['사슬묶기'], ['풀', '에스퍼']),
+      types: ['풀', '에스퍼'],
+      moves: moveData(['에너지볼', '씨뿌리기', '사이코키네시스', '오물폭탄', '쾌청', '기가드레인', '땅고르기', '리프스톰', '광합성'], ['풀', '에스퍼']),
       sex: 'male',
       ability: abilityData(['엽록소']),
       hp: 95, attack: 95, defense: 85, spAttack: 125, spDefense: 65, speed: 55,
@@ -1567,16 +1567,16 @@ export function createGen7Pokemon(): PokemonInfo[] {
       hp: 68, attack: 64, defense: 60, spAttack: 111, spDefense: 60, speed: 117,
       level: 50
     },
-    // {
-    //   id: 752,
-    //   name: '깨비물거미',
-    //   types: ['물', '벌레'],
-    //   moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
-    //   sex: 'male',
-    //   ability: abilityData(['수포', '저수']),
-    //   hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
-    //   level: 50
-    // },
+    {
+      id: 752,
+      name: '깨비물거미',
+      types: ['물', '벌레'],
+      moves: moveData(['아쿠아브레이크', '흡혈', '덤벼들기', '독찌르기', '개척하기', '기가드레인', '폭포오르기'], ['물', '벌레']),
+      sex: 'male',
+      ability: abilityData(['수포', '저수']),
+      hp: 68, attack: 70, defense: 92, spAttack: 50, spDefense: 132, speed: 42,
+      level: 50
+    },
     {
       id: 763,
       name: '달코퀸',

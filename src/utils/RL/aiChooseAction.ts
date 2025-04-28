@@ -6,7 +6,7 @@ import { calculateRankEffect } from "../battleLogics/rankEffect";
 import { calculateTypeEffectiveness } from "../typeRalation";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
-  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv, updatePokemon } = useBattleStore.getState();
+  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv, updatePokemon, enemyEnv } = useBattleStore.getState();
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
@@ -19,7 +19,17 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const roll = Math.random();
   const aiHpRation = myPokemon.currentHp / myPokemon.base.hp; // ai 포켓몬의 체력 비율 
   const userHpRation = enemyPokemon.currentHp / enemyPokemon.base.hp; // 유저 포켓몬의 체력 비율 
-  const usableMoves = myPokemon.base.moves.filter((m) => myPokemon.pp[m.name] > 0);
+  // myPokemon.unUsableMove?.name !== m.name
+  const usableMoves = myPokemon.base.moves.filter((m) => {
+    if (myPokemon.pp[m.name] <= 0) return false;
+    if (myPokemon.unUsableMove?.name !== m.name) return false;
+    // 상태이상 기술이고, 이미 걸려있는 상태라면 제외
+    if (m.effects?.some(e => e.status && myPokemon.status.includes(e.status))) {
+      return false;
+    }
+    if (m.screen === enemyEnv.screen) return false;
+    return true;
+  });
 
   const typeEffectiveness = (attackerTypes: string[], defenderTypes: string[]) => {
     return attackerTypes.reduce((maxEff, atk) => {
@@ -159,8 +169,9 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   const attackUpMove = getAttackUpMove();
   const priorityMove = getPriorityMove();
   const healMove = getHealMove();
+  const screenMoves = usableMoves.find((m) => m.screen)
   const supportMove = usableMoves.find((m) => m.category === "변화" && m !== rankUpMove);
-
+  const counterMove = usableMoves.find(m => ['카운터', '미러코트', '메탈버스트'].includes(m.name));
   const hasSwitchOption = mineTeam.some((p, i) => i !== activeEnemy && p.currentHp > 0) && !myPokemon.status.includes('교체불가');
   const isAi_lowHp = aiHpRation < 0.35;
   const isAi_highHp = aiHpRation > 0.8;
@@ -212,6 +223,17 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
         addLog(`🦅 ${side}는 상대 포켓몬의 빈틈을 포착하여 선공기 사용!`);
         return bestMove;
       }
+      if (roll < 0.3 && counterMove && isAi_highHp) {
+        const enemyAtk = enemyPokemon.base.attack * calculateRankEffect(enemyPokemon.rank.attack);
+        const enemySpAtk = enemyPokemon.base.spAttack * calculateRankEffect(enemyPokemon.rank.spAttack);
+
+        if ((counterMove.name === '카운터' && enemyAtk >= enemySpAtk) ||
+          (counterMove.name === '미러코트' && enemySpAtk > enemyAtk) ||
+          (counterMove.name === '메탈버스트')) {
+          addLog(`🛡️ ${side}는 반사 기술 ${counterMove.name} 사용 시도!`);
+          return counterMove;
+        }
+      }
       if (roll < 0.4 && speedUpMove && aiHpRation > 0.5) {
         addLog(`🦅 ${side}는 상대의 맞교체 또는 랭크업을 예측하고 스피드 상승을 시도!`);
         return speedUpMove;
@@ -234,6 +256,11 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       ///////////////////////////////////////////////////////
     } else if (aiTouser > 1 && !(userToai > 1)) {
       // ai가 느리지만 상성 확실히 유리 
+
+      if (screenMoves && (isAiFaster || isAi_highHp)) {
+        addLog(`🛡️ ${side}는 방어용 스크린을 설치한다!`);
+        return screenMoves;
+      }
       if (roll < 0.4 && isAi_lowHp && hasSwitchOption) {
         if (switchIndex !== -1) {
           addLog(`🐢 ${side}는 느리고 상성은 유리하지만 체력이 낮아 교체를 시도한다!`);
@@ -271,6 +298,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       addLog(`🥊 ${side}는 예측샷으로 최고 위력기를 사용한다!`);
       return bestMove;
     } else { // 느리고 상성 같은 경우 
+      if (screenMoves && (isAiFaster || isAi_highHp)) {
+        addLog(`🛡️ ${side}는 방어용 스크린을 설치한다!`);
+        return screenMoves;
+      }
       if (isAi_highHp && speedUpMove) {
         addLog(`🦅 ${side}는 스피드 상승을 시도한다!`);
         return speedUpMove;
@@ -278,6 +309,17 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
       if (isAi_highHp && userHpRation < 0.5) {
         addLog(`🥊 ${side}는 상대의 체력이 적고 상성이 같아서 가장 강한 기술로 공격한다!`);
         return bestMove;
+      }
+      if (roll < 0.2 && counterMove && isAi_highHp) {
+        const enemyAtk = enemyPokemon.base.attack * calculateRankEffect(enemyPokemon.rank.attack);
+        const enemySpAtk = enemyPokemon.base.spAttack * calculateRankEffect(enemyPokemon.rank.spAttack);
+
+        if ((counterMove.name === '카운터' && enemyAtk >= enemySpAtk) ||
+          (counterMove.name === '미러코트' && enemySpAtk > enemyAtk) ||
+          (counterMove.name === '메탈버스트')) {
+          addLog(`🛡️ ${side}는 반사 기술 ${counterMove.name} 사용 시도!`);
+          return counterMove;
+        }
       }
       if (roll < 0.2 && hasSwitchOption) {
         if (switchIndex !== -1) {
@@ -292,6 +334,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
 
   // === 3. AI가 더 빠를 경우 ===
   if (aiTouser > 1 && !(userToai > 1)) { // ai가 상성상 확실히 유리 
+    if (screenMoves && (isAiFaster || isAi_highHp)) {
+      addLog(`🛡️ ${side}는 방어용 스크린을 설치한다!`);
+      return screenMoves;
+    }
     if (roll < 0.5 && isAi_highHp && attackUpMove) {
       addLog(`🦅 ${side}는 빠르므로 공격 상승 기술 사용!`);
       return attackUpMove;
@@ -322,9 +368,23 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     return bestMove;
 
   } else if (!(aiTouser > 1) && userToai > 1) { // ai가 빠르고 상성은 확실히 불리 
+    if (screenMoves && (isAiFaster || isAi_highHp)) {
+      addLog(`🛡️ ${side}는 방어용 스크린을 설치한다!`);
+      return screenMoves;
+    }
     if (isUser_lowHp) {
       addLog(`🦅 ${side}는 상대 포켓몬의 빈틈을 포착!`);
       return bestMove;
+    }
+    if (roll < 0.2 && counterMove && isAi_highHp) {
+      const enemyAtk = enemyPokemon.base.attack * calculateRankEffect(enemyPokemon.rank.attack);
+      const enemySpAtk = enemyPokemon.base.spAttack * calculateRankEffect(enemyPokemon.rank.spAttack);
+      if ((counterMove.name === '카운터' && enemyAtk >= enemySpAtk) ||
+        (counterMove.name === '미러코트' && enemySpAtk > enemyAtk) ||
+        (counterMove.name === '메탈버스트')) {
+        addLog(`🛡️ ${side}는 반사 기술 ${counterMove.name} 사용 시도!`);
+        return counterMove;
+      }
     }
     if (uturnMove && hasSwitchOption) {
       addLog(`🛼 ${side}는 빠르지만 불리하므로 유턴으로 교체!`);
@@ -347,6 +407,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     addLog(`🥊 ${side}는 가장 강한 공격 시도`);
     return bestMove;
   } else if (aiTouser > 1 && userToai > 1) { // 서로가 약점을 찌르는 경우 
+    if (screenMoves && (isAiFaster || isAi_highHp)) {
+      addLog(`🛡️ ${side}는 방어용 스크린을 설치한다!`);
+      return screenMoves;
+    }
     if (roll < 0.1 && isAi_highHp && attackUpMove) {
       addLog(`🏋️‍♂️ ${side}는 빠르므로 공격 상승 기술 사용!`);
       return attackUpMove;
@@ -373,6 +437,10 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     return bestMove;
   }
   else { // 특별한 상성 없을 때 
+    if (screenMoves && (isAiFaster || isAi_highHp)) {
+      addLog(`🛡️ ${side}는 방어용 스크린을 설치한다!`);
+      return screenMoves;
+    }
     if (isUser_lowHp) {
       addLog(`🦅 ${side}는 상대 포켓몬의 빈틈을 포착!`);
       return bestMove;
