@@ -101,9 +101,10 @@ export function addStatus(
   nullification?: boolean
 ): BattlePokemon {
   const { myTeam, enemyTeam, activeMy, activeEnemy, updatePokemon, publicEnv, addLog } = useBattleStore.getState();
-  const opponentSide = side === 'my' ? 'enemy' : 'my';
-  const activeOpponent = side === 'my' ? activeEnemy : activeMy;
-  const opponentPokemon = opponentSide === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const opponentSide = side === 'my' ? 'enemy' : 'my'; // 걸리는 쪽의 상대편.
+  const activeIndex = side === 'my' ? activeMy : activeEnemy; // 상태이상 걸리는 포켓몬 
+  const activePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
+  const opponentPokemon = side === 'enemy' ? myTeam[activeMy] : enemyTeam[activeEnemy];
   const { addEffect } = useDurationStore.getState();
 
   const mentalStatusCondition = ['도발', '트집', '사슬묶기', '회복봉인', '헤롱헤롱', '앵콜'];
@@ -136,12 +137,19 @@ export function addStatus(
       remainingTurn: durationMap[status as DurationStatus],
       ownerIndex: activeIndex,
     });
+    if (status === '사슬묶기') {
+      console.log(`상대가 마지막에 사용한 기술: ${activePokemon.usedMove?.name}`);
+      if (activePokemon.usedMove) {
+        pokemon = { ...pokemon, unUsableMove: activePokemon.usedMove };
+        console.log('봉인당한 기술:', activePokemon.usedMove.name);
+      }
+    }
   }
 
   // ✅ 정상적으로 상태이상 부여
   const manager = new StatusManager(pokemon.status);
   manager.addStatus(status);
-  updatePokemon(side, activeOpponent, (prev) => ({ ...prev, status: manager.getStatus() }))
+  updatePokemon(side, activeIndex, (prev) => ({ ...prev, status: manager.getStatus() }))
   if (manager.getStatus().includes(status)) {
     console.log(`${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
     addLog(` ${pokemon.base.name}은 ${status} 상태에 빠졌다!`);
@@ -157,7 +165,7 @@ export function addStatus(
       addLog(`${pokemon.base.name}의 싱크로 발동!`);
       console.log(`${opponentPokemon.base.name}에게 상태를 복사한다!!`);
       addLog(`${opponentPokemon.base.name}에게 상태를 복사한다!`);
-      updatePokemon(opponentSide, activeOpponent, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
+      updatePokemon(opponentSide, activeIndex, (opponentPokemon) => addStatus(opponentPokemon, status, opponentSide));
     }
   }
 
@@ -312,6 +320,7 @@ export function resetState(pokemon: BattlePokemon, isSwitch?: boolean): BattlePo
         types: pokemon.tempType && pokemon.tempType.length > 0 ? pokemon.tempType : pokemon.base.types // 타입 사라진 상태였으면 리셋.
       },
       usedMove: undefined,
+      unUsableMove: undefined,
       isCharging: false,
       chargingMove: undefined,
       lockedMove: undefined,

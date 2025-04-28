@@ -69,6 +69,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number, bato
   for (const status of unMainStatusConditionWithDuration) {
     if (team[currentIndex].status.includes(status as StatusState)) {
       removeEffect(side, status as StatusState);
+      updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
     }
   }
   if (switchingPokemon.base.ability?.name === '자연회복') {
@@ -79,6 +80,7 @@ export async function switchPokemon(side: "my" | "enemy", newIndex: number, bato
     }
     for (const status of unMainStatusConditionWithDuration) {
       if (team[currentIndex].status.includes(status as StatusState)) {
+        removeEffect(side, status as StatusState);
         updatePokemon(side, currentIndex, (switchingPokemon) => removeStatus(switchingPokemon, status as StatusState));
       }
     }

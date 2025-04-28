@@ -431,6 +431,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
+      <button onClick={() => { console.log(myTeam[activeMy]) }}>
+        포켓몬 정보 디버깅용
+      </button>
       {
         (isSwitchModalOpen && !watchMode) && (
           <div style={{

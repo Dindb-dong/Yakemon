@@ -443,6 +443,11 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '잠듦', side));
           }
         }
+        if (ability.name === '저주받은바디' && usedMove.isTouch) {
+          if (Math.random() < 0.3) {
+            updatePokemon(side, activeMine, (prev) => addStatus(prev, '사슬묶기', side));
+          }
+        }
       default:
         return;
     }

@@ -158,7 +158,11 @@ export function decrementSleepTurn(side: "my" | "enemy", index: number): boolean
 }
 
 export function decrementDisableTun(side: "my" | "enemy", index: number): boolean {
-  return decrementSpecialEffect(side, index, "사슬묶기");
+  return decrementSpecialEffect(side, index, "사슬묶기", () => {
+    useBattleStore.getState().updatePokemon(side, index, (prev) => ({ ...prev, unUsableMove: undefined }));
+    useBattleStore.getState().addLog('사슬묶기 상태가 풀렸다!');
+    console.log('사슬묶기 상태가 풀렸다!');
+  });
 }
 
 

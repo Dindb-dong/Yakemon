@@ -61,6 +61,7 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
     position: null,
     lockedMove: undefined,
     isActive: false,
+    unUsableMove: undefined,
     formCondition: formConditionMap[base.id] ?? undefined,
   };
 }

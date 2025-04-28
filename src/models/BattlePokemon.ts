@@ -25,7 +25,7 @@ export type BattlePokemon = {
   formNum?: number;       // 폼체인지 번호. 폼 1개만 있는 경우 1, 2개 있으면 순서대로. 약어리는 1, 루가루암은 1|2 이런식
   // 원래는 없는 프로퍼티인데, 폼체인지 할때마다 동적으로 부여해주면 될듯
   formCondition?: (self: BattlePokemon) => boolean; // 폼체인지 조건 (자기 자신 객체를(BattlePokemon타입) 인자로 넣어서, true/false 반환하는 함수)
-  unUsableMoves?: MoveInfo[]; // 사슬묶기, 저주받은바디 등... 사용 못하는 기술들 목록
+  unUsableMove: MoveInfo | undefined; // 사슬묶기, 저주받은바디 등... 사용 못하는 기술들 목록
   lostType?: boolean; // 타입이 사라진 상태인지 
   tempType?: string[]; // 임시로 저장해두는 현재의 타입 (불사르기, 전광쌍격, 날개쉬기 등)
   substitute?: BattlePokemon;

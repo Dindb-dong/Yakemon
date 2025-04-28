@@ -117,8 +117,8 @@ export function createGen1Pokemon(): PokemonInfo[] {
     {
       id: 103,
       name: '나시',
-      types: ['풀', '에스퍼'],
-      moves: moveData(['에너지볼', '씨뿌리기', '사이코키네시스', '오물폭탄', '쾌청', '기가드레인', '땅고르기', '리프스톰', '광합성'], ['풀', '에스퍼']),
+      types: ['풀', '에스퍼'], // , '씨뿌리기', '사이코키네시스', '오물폭탄', '쾌청', '기가드레인', '땅고르기', '리프스톰', '광합성'
+      moves: moveData(['사슬묶기'], ['풀', '에스퍼']),
       sex: 'male',
       ability: abilityData(['엽록소']),
       hp: 95, attack: 95, defense: 85, spAttack: 125, spDefense: 65, speed: 55,

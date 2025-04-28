@@ -62,7 +62,7 @@ export function PokemonDetailModal({
 
 function PokemonSelect({ onSelect }: Props) {
 
-  const [mockPokemon] = useState(() => createMockPokemon());
+  const [mockPokemon] = useState(() => createGen3Pokemon());
   const [musicOn, setMusicOn] = useState(true);
   useEffect(() => {
     if (musicOn) AudioManager.getInstance().play("main");

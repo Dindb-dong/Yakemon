@@ -201,6 +201,7 @@ const availableAbilities: AbilityInfo[] = [
   { id: 117, name: '모래뿜기', defensive: ['weather_change'] },
   { id: 118, name: '탈피', util: ['etc'] },
   { id: 119, name: '펑크록', offensive: ['damage_buff'], defensive: ['damage_reduction'] },
+  { id: 120, name: '저주받은바디', defensive: ['status_change'] },
 ]
 
 export function abilityData(abilities: string[]) {
