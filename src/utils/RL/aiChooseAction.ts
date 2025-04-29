@@ -6,7 +6,7 @@ import { calculateRankEffect } from "../battleLogics/rankEffect";
 import { calculateTypeEffectiveness } from "../typeRalation";
 
 export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
-  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv, updatePokemon, enemyEnv } = useBattleStore.getState();
+  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv, updatePokemon, enemyEnv, myEnv } = useBattleStore.getState();
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   const opponentTeam = side === 'my' ? enemyTeam : myTeam;
@@ -22,14 +22,17 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
   // myPokemon.unUsableMove?.name !== m.name
   const usableMoves = myPokemon.base.moves.filter((m) => {
     if (myPokemon.pp[m.name] <= 0) return false;
-    if (myPokemon.unUsableMove?.name !== m.name) return false;
+    if (myPokemon.unUsableMove?.name == m.name) return false;
     // 상태이상 기술이고, 이미 걸려있는 상태라면 제외
-    if (m.effects?.some(e => e.status && myPokemon.status.includes(e.status))) {
-      return false;
-    }
-    if (m.screen === enemyEnv.screen) return false;
+    if (
+      m.target === "opponent" &&
+      m.effects?.some(e => e.status && enemyPokemon.status.includes(e.status))
+    ) return false;
+    const activeEnv = side === 'my' ? myEnv : enemyEnv;
+    if (m.screen && m.screen === activeEnv.screen) return false;
     return true;
   });
+  console.log('사용가능한기술: ', usableMoves)
 
   const typeEffectiveness = (attackerTypes: string[], defenderTypes: string[]) => {
     return attackerTypes.reduce((maxEff, atk) => {

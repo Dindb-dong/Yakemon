@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { useBattleStore } from "./useBattleStore";
-import { StatusState } from "../models/Status";
 import { addStatus, removeStatus } from "../utils/battleLogics/updateBattlePokemon";
 
 export type TimedEffect = {

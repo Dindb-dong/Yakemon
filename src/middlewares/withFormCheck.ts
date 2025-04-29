@@ -1,6 +1,5 @@
 import { StateCreator } from 'zustand';
 import { BattlePokemon } from '../models/BattlePokemon';
-import { useBattleStore } from '../Context/useBattleStore';
 
 export function withFormCheck<T extends { myTeam: BattlePokemon[], enemyTeam: BattlePokemon[] }>(
   config: StateCreator<T>
