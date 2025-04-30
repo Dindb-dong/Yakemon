@@ -175,7 +175,7 @@ export function createGen1Pokemon(): PokemonInfo[] {
       types: ['고스트', '독'],
       moves: moveData(['오물폭탄', '섀도볼', '기합구슬', '사이코키네시스', '매지컬샤인', '전기자석파', '이상한빛', '얼어붙은바람', '나쁜음모', '기가드레인', '10만볼트'], ['고스트', '독']),
       sex: 'male',
-      ability: abilityData(['부유']),
+      ability: abilityData(['저주받은바디']),
       hp: 60,
       attack: 65,
       defense: 60,

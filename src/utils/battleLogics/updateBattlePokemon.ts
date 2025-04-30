@@ -198,8 +198,9 @@ export function hasStatus(pokemon: BattlePokemon, status: StatusState): boolean 
 }
 
 // 기술 사용 시 PP 차감
-export function useMovePP(pokemon: BattlePokemon, moveName: string, pressure?: boolean): BattlePokemon {
+export function useMovePP(pokemon: BattlePokemon, moveName: string, pressure?: boolean, isMultiHit?: boolean): BattlePokemon {
   let newPP = { ...pokemon.pp };
+  if (isMultiHit) return { ...pokemon, pp: newPP }; // 연속기면 바로 종료 -> pp 안깎음.
   if (newPP[moveName] > 0) {
     if (!pressure) {
       newPP[moveName] -= 1;

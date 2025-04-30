@@ -19,7 +19,7 @@ import { calculateMoveDamage } from "./damageCalculator";
 import { calculateRankEffect } from "./rankEffect";
 import { switchPokemon } from "./switchPokemon";
 import { hasAbility } from "./helpers";
-import { setAbility, setTypes } from "./updateBattlePokemon";
+import { setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { useEffect } from "react";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { delay } from "../delay";
@@ -210,11 +210,11 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
   const isDoubleHit = move.effects?.some((effect) => effect.doubleHit === true)
   const isTripleHit = ["트리플킥", "트리플악셀"].includes(move.name);
   const attacker: BattlePokemon = side === 'my' ? myTeam[activeMy] : enemyTeam[activeEnemy];
-  const deffender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
+  const defender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   if (currentIndex != activeIndex) return;
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
-  if (isTripleHit) {
+  if (isTripleHit) { // 트리플악셀, 트리플킥
     const hitCount = getHitCount(move);
 
     // 리베로, 변환자재
@@ -225,18 +225,19 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
       console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
     }
     for (let i = 0; i < hitCount; i++) {
-      // 매 턴마다 최신 deffender 상태 확인
+      // 매 턴마다 최신 defender 상태 확인
       const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
         side === "my" ? activeEnemy : activeMy
       ];
 
       if (currentDefender.currentHp <= 0) break;
       const currentPower = move.power + (move.name === "트리플킥" ? 10 * i : 20 * i); // 0→1→2단계 누적
-      const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate });
+      const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate, isMultiHit: isTripleHit });
+      updatePokemon(side, activeIndex, (attacker) => useMovePP(attacker, move.name, defender.base.ability?.name === '프레셔'));
       if (result?.success) {
         await delay(1000);
         await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
-        await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
+        await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
       } else {
         break; // 빗나가면 중단
       }
@@ -257,7 +258,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
       const hitCount = getHitCount(move);
       console.log(hitCount)
       for (let i = 0; i < hitCount - 1; i++) {
-        // 매 턴마다 최신 deffender 상태 확인
+        // 매 턴마다 최신 defender 상태 확인
         const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
           side === "my" ? activeEnemy : activeMy
         ];
@@ -265,13 +266,13 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
         if (currentDefender.currentHp <= 0) break;
         await delay(1000);
         console.log(`${i + 2}번째 타격!`)
-        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate });
+        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate, isMultiHit: true });
         if (result?.success) {
-          await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode, true);
-          await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
+          await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode, true);
+          await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
         }
       }
-      await applyMoveEffectAfterMultiDamage(side, attacker, deffender, move, result?.damage, watchMode);
+      await applyMoveEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
       addLog("📊 총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");
     }
@@ -287,13 +288,13 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
     }
     const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
     if (result?.success) {
-      if (deffender.base.ability?.name === '매직가드' && move.category === '변화') {
-        addLog(`${deffender.base.name}은 매직가드로 피해를 입지 않았다!`);
-        console.log(`${deffender.base.name}은 매직가드로 피해를 입지 않았다!`);
-        await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+      if (defender.base.ability?.name === '매직가드' && move.category === '변화') {
+        addLog(`${defender.base.name}은 매직가드로 피해를 입지 않았다!`);
+        console.log(`${defender.base.name}은 매직가드로 피해를 입지 않았다!`);
+        await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
         return;
       }
-      await applyAfterDamage(side, attacker, deffender, move, result?.damage, watchMode);
+      await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
     }
     return;
   }
