@@ -36,13 +36,14 @@ function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
 
             {isSelected && (
               <div style={{ marginTop: "0.5rem" }}>
-                <button onClick={() => toggleView(i)}>
-                  {isViewing ? "닫기" : "상세보기"}
-                </button>
-                <button disabled={isCurrent} onClick={() => onSwitch(i)} style={{ marginLeft: "0.5rem" }}>
-                  교체하기
-                </button>
-
+                <div style={{ flexDirection: 'column', justifyContent: 'center', alignContent: 'center' }}>
+                  <button onClick={() => toggleView(i)}>
+                    {isViewing ? "닫기" : "상세보기"}
+                  </button>
+                  <button disabled={isCurrent} onClick={() => onSwitch(i)} style={{ marginLeft: "0.5rem" }}>
+                    교체하기
+                  </button>
+                </div>
                 {isViewing && (
                   <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
                     <p>타입: {poke.base.types.join(", ")}</p>

@@ -111,10 +111,16 @@
 
 .swap-slot {
   margin-bottom: 0.75rem;
+  flex-direction: column;
+  justify-content: center;
+  align-self: center;
+  align-content: center;
+  align-items: center;
 }
 
 .swap-slot button {
-  margin-right: 0.5rem;
+  margin: 0.3rem;
+  margin-left: 0;
   padding: 0.4rem 0.8rem;
   font-size: 0.95rem;
   border: none;

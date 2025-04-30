@@ -461,17 +461,18 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
                     {isSelected && (
                       <div style={{ marginTop: "0.5rem" }}>
-                        <button onClick={() => toggleView(i)}>
-                          {isViewing ? "닫기" : "상세보기"}
-                        </button>
-                        <button disabled={isCurrent} onClick={() => {
-                          if (pendingSwitch) {
-                            pendingSwitch(i); // index 넘겨주기
-                          }
-                        }} style={{ marginLeft: "0.5rem" }}>
-                          교체하기
-                        </button>
-
+                        <div style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                          <button onClick={() => toggleView(i)}>
+                            {isViewing ? "닫기" : "상세보기"}
+                          </button>
+                          <button disabled={isCurrent} onClick={() => {
+                            if (pendingSwitch) {
+                              pendingSwitch(i); // index 넘겨주기
+                            }
+                          }} style={{ marginLeft: "0.5rem" }}>
+                            교체하기
+                          </button>
+                        </div>
                         {isViewing && (
                           <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
                             <p>타입: {poke.base.types.join(", ")}</p>

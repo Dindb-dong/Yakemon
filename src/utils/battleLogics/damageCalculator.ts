@@ -21,7 +21,8 @@ export async function calculateMoveDamage({
   isAlwaysHit,
   additionalDamage,
   overridePower,
-  wasLate
+  wasLate,
+  isMultiHit
 }: {
   moveName: string;
   side: 'my' | 'enemy';
@@ -29,6 +30,7 @@ export async function calculateMoveDamage({
   additionalDamage?: number;
   overridePower?: number;
   wasLate?: boolean;
+  isMultiHit?: boolean;
 }) {
   // 데이터 가져오기
   const {
@@ -161,7 +163,7 @@ export async function calculateMoveDamage({
   }
   if (moveInfo.target === 'self' || moveInfo.target === 'none') {
     console.log('자신에게 거는 기술')
-    applyChangeEffect(moveInfo, side)
+    applyChangeEffect(moveInfo, side, defender.base, isMultiHit)
     isHit = true; // 무조건 적중 처리
     return { success: true }; // 바로 함수 종료
   }
@@ -236,7 +238,7 @@ export async function calculateMoveDamage({
         }
       })
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
@@ -258,7 +260,7 @@ export async function calculateMoveDamage({
           addLog(`🚫 ${attacker.base.name}의 공격은 효과가 없었다...`);
           console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
           updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')) // pp 깎기
+          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)) // pp 깎기
           updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'dodge', 2));
           return;
         }
@@ -312,7 +314,7 @@ export async function calculateMoveDamage({
         addLog(`🚫 ${attacker.base.name}의 공격은 효과가 없었다...`);
         console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
         updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-        updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')) // pp 깎기
+        updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)) // pp 깎기
         return;
       }
       if (moveInfo.name === '아픔나누기') {
@@ -327,7 +329,7 @@ export async function calculateMoveDamage({
       addLog(`🥊 ${side}는 ${moveInfo.name}을/를 사용했다!`);
       console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
       return { success: true }; // 변화기술은 성공으로 처리
     }
 
@@ -343,7 +345,7 @@ export async function calculateMoveDamage({
       addLog(`🚫 ${attacker.base.name}의 공격은 효과가 없었다...`);
       console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')) // pp 깎기
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)) // pp 깎기
       // 무릎차기, 점프킥 등 빗나가면 반동.
       let dmg: number;
       moveInfo.demeritEffects?.forEach((d_effect) => {
@@ -361,13 +363,13 @@ export async function calculateMoveDamage({
   if (moveInfo.oneHitKO) {
     if (defender.base.ability?.name === '옹골참') {
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
       addLog(`🚫 ${attacker.base.name}의 공격은 상대의 옹골참으로 인해 통하지 않았다!`)
       return; // 일격필살기 무효화
     }
     updatePokemon(opponentSide, activeOpponent, (prev) => changeHp(prev, -prev.base.hp));
     updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, damage));
-    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
     updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
     updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
     updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
@@ -592,7 +594,7 @@ export async function calculateMoveDamage({
       addLog(`🔃 ${defender.base.name}의 옹골참 발동!`);
       updatePokemon(opponentSide, activeOpponent, (defender) => changeHp(defender, 1 - defender.currentHp));
       updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, defender.base.hp - 1));
-      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+      updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
       updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
       updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
@@ -621,7 +623,7 @@ export async function calculateMoveDamage({
     }
     updatePokemon(opponentSide, activeOpponent, (defender) => changeHp(defender, -damage));
     updatePokemon(opponentSide, activeOpponent, (defender) => setReceivedDamage(defender, damage));
-    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔')); // pp 깎기 
+    updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
     updatePokemon(side, activeMine, (prev) => setHadMissed(prev, false));
     updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
     updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
@@ -635,7 +637,7 @@ export async function calculateMoveDamage({
 }
 
 // 자신에게 거는 기술이나 필드에 거는 기술 등의 변화 기술 효과 처리 함수 
-function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: PokemonInfo) {
+function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: PokemonInfo, isMultiHit?: boolean) {
   const { updatePokemon, activeMy, activeEnemy, addLog, myTeam, enemyTeam } = useBattleStore.getState();
   const activeTeam = side === 'my' ? myTeam : enemyTeam;
   const activeMine = side === 'my' ? activeMy : activeEnemy;
@@ -650,7 +652,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
           console.log('연속으로 발동 실패...!');
           addLog('연속으로 발동 실패...!');
           // updatePokemon(side, activeMine, (prev) => setUsedMove(prev, null)); 다음턴에 다시 길동무 사용 가능하도록.
-          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔')); // pp 깎기 
+          updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
           return;
         } else {
           addLog(`👻 ${side}는 ${moveInfo.name}을/를 사용했다!`);
@@ -670,7 +672,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
             console.log('연속으로 방어 실패...!');
             addLog('연속으로 방어 실패...!');
             updatePokemon(side, activeMine, (prev) => setUsedMove(prev, null));
-            updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔')); // pp 깎기 
+            updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
             return;
           }
         } else {
@@ -722,7 +724,7 @@ function applyChangeEffect(moveInfo: MoveInfo, side: 'my' | 'enemy', defender?: 
   }
   addLog(`${side}는 ${moveInfo.name}을/를 사용했다!`)
   updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
-  updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔')); // pp 깎기 
+  updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveInfo.name, defender?.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
 }
 
 function getMoveInfo(myPokemon: PokemonInfo, moveName: string): MoveInfo {
