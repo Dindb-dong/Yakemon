@@ -181,7 +181,7 @@ function isDurationStatus(status: StatusState): status is DurationStatus {
 export function removeStatus(pokemon: BattlePokemon, status: StatusState): BattlePokemon {
   const manager = new StatusManager(pokemon.status);
   manager.removeStatus(status);
-  return { ...pokemon, status: manager.getStatus() };
+  return { ...pokemon, status: [...manager.getStatus()] };
 }
 
 // 전체 상태이상 제거

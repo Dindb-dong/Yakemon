@@ -26,6 +26,7 @@ export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣�
     // 상태이상 기술이고, 이미 걸려있는 상태라면 제외
     if (
       m.target === "opponent" &&
+      m.power === 0 && // 위력 0인 상태이상 기술만 제외.
       m.effects?.some(e => e.status && enemyPokemon.status.includes(e.status))
     ) return false;
     const activeEnv = side === 'my' ? myEnv : enemyEnv;

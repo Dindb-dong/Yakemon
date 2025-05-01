@@ -24,7 +24,8 @@ export class StatusManager {
   }
 
   removeStatus(status: StatusState): void {
-    this.status = this.status.filter(s => s !== status);
+    const newList = this.status.filter(s => s !== status);
+    this.status = [...newList];
   }
 
   clearStatus(): void { // 상태이상 전체 삭제 (리프레쉬 등)

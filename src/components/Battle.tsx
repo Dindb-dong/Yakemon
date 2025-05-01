@@ -393,7 +393,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
   if (isGameOver) {
     let winner: string = '승리';
-    if (myTeam.some((p) => p.currentHp > 0)) {
+    if (myTeam.some((p) => p.currentHp > 0 || !enemyTeam.some((p) => p.currentHp > 0))) {
       winner = 'AI에게 승리!';
     } else if (enemyTeam.some((p) => p.currentHp > 0)) {
       winner = 'AI에게 패배...';

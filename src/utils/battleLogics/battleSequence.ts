@@ -235,8 +235,11 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
       const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate, isMultiHit: isTripleHit });
       updatePokemon(side, activeIndex, (attacker) => useMovePP(attacker, move.name, defender.base.ability?.name === '프레셔'));
       if (result?.success) {
+        const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
+          side === "my" ? activeEnemy : activeMy
+        ];
         await delay(1000);
-        await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
+        await applyAfterDamage(side, attacker, currentDefender1, move, result.damage, watchMode, true);
         await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
       } else {
         break; // 빗나가면 중단
@@ -254,7 +257,10 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
     const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
     console.log('1번째 타격!')
     if (result?.success) {
-
+      const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+        side === "my" ? activeEnemy : activeMy
+      ];
+      await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
       const hitCount = getHitCount(move);
       console.log(hitCount)
       for (let i = 0; i < hitCount - 1; i++) {
@@ -268,11 +274,17 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
         console.log(`${i + 2}번째 타격!`)
         const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate, isMultiHit: true });
         if (result?.success) {
-          await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode, true);
+          const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+            side === "my" ? activeEnemy : activeMy
+          ];
+          await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
           await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
         }
       }
-      await applyMoveEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
+      const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
+        side === "my" ? activeEnemy : activeMy
+      ];
+      await applyMoveEffectAfterMultiDamage(side, attacker, currentDefender1, move, result?.damage, watchMode);
       addLog("📊 총 " + hitCount + "번 맞았다!");
       console.log("총 " + hitCount + "번 맞았다!");
     }
@@ -294,7 +306,10 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
         await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
         return;
       }
-      await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
+      const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+        side === "my" ? activeEnemy : activeMy
+      ];
+      await applyAfterDamage(side, attacker, currentDefender, move, result?.damage, watchMode);
     }
     return;
   }
