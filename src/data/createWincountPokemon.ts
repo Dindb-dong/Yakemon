@@ -1219,8 +1219,8 @@ export function createGen5Pokemon(): PokemonInfo[] {
     {
       id: 565,
       name: '늑골라',
-      types: ['땅', '악'],
-      moves: moveData(['지진', '깨물어부수기', '스톤에지', '아쿠아제트', '껍질깨기', '암석봉인', '아쿠아브레이크', '엄청난힘', '얼어붙은바람'], ['땅', '악']),
+      types: ['물', '바위'],
+      moves: moveData(['지진', '깨물어부수기', '스톤에지', '아쿠아제트', '껍질깨기', '암석봉인', '아쿠아브레이크', '엄청난힘', '얼어붙은바람'], ['물', '바위']),
       ability: abilityData(['하드록', '옹골참']),
       hp: 74, attack: 108, defense: 133, spAttack: 83, spDefense: 65, speed: 32,
       sex: 'male',

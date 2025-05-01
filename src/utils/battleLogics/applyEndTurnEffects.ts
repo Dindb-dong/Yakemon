@@ -169,6 +169,8 @@ export function applyEndTurnEffects() {
     if (team[actives[i]].lockedMove && team[actives[i]].lockedMoveTurn === 0) {
       // 이제 고정 기술 다 썼으니 고정해제하고 혼란처리
       updatePokemon(side as "my" | "enemy", actives[i], (prev) => setLockedMove(prev, null));
+      console.log(`${team[actives[i]].base.name}은 지쳐서 혼란에 빠졌다..!`);
+      addLog(`${team[actives[i]].base.name}은 지쳐서 혼란에 빠졌다..!`);
       addStatus(team[actives[i]], '혼란', side as ('my' | 'enemy'));
     }
   });

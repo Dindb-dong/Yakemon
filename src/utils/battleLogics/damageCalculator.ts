@@ -113,9 +113,9 @@ export async function calculateMoveDamage({
   if (attacker.base.ability?.name === '노가드' || defender.base.ability?.name === '노가드') {
     isAlwaysHit = true; // 필중처리
   }
-  // 0-0. 고정기술 고정 처리 
+  // 0-0. 고정기술 고정 처리 (역린 등)
   if (moveInfo.lockedMove) {
-    updatePokemon(side, activeMine, (prev) => ({ ...prev, lockedMoveTurn: Math.random() < 0.5 ? 3 : 2 }))
+    updatePokemon(side, activeMine, (prev) => ({ ...prev, lockedMoveTurn: Math.random() < 0.5 ? 2 : 1 }))
     updatePokemon(side, activeMine, (prev) => setLockedMove(prev, moveInfo))
   }
 
@@ -210,8 +210,9 @@ export async function calculateMoveDamage({
   }
 
   // 3. 특성 무시 특성 처리
-  if (myPokemon.ability && hasAbility(myPokemon.ability, ['틀깨기', '터보블레이즈', '테라볼티지'])) {
+  if (myPokemon.ability && hasAbility(myPokemon.ability, ['틀깨기', '터보블레이즈', '테라볼티지', '균사의힘'])) {
     opponentPokemon.ability = null; // 상대 특성 무효 처리. 실제 특성 메모리엔 영향 x.
+    console.log('틀깨기 발동!')
   }
 
   // 4. 명중률 계산
@@ -239,6 +240,8 @@ export async function calculateMoveDamage({
       })
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
       updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
+      updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
+      updatePokemon(side, activeMine, (prev) => changePosition(prev, null)); // 위치 초기화
       return; // 행동을 하긴 했으니까, success:false 로 하지는 않음. 
     } else {
       isHit = true;
@@ -330,6 +333,8 @@ export async function calculateMoveDamage({
       console.log(`${side}는 ${moveInfo.name}을/를 사용했다!`);
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
       updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)); // pp 깎기 
+      updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
+      updatePokemon(side, activeMine, (prev) => changePosition(prev, null)); // 위치 초기화
       return { success: true }; // 변화기술은 성공으로 처리
     }
 
@@ -346,6 +351,8 @@ export async function calculateMoveDamage({
       console.log(`${attacker.base.name}의 공격은 효과가 없었다...`);
       updatePokemon(side, activeMine, (prev) => setUsedMove(prev, moveInfo));
       updatePokemon(side, activeMine, (attacker) => useMovePP(attacker, moveName, defender.base.ability?.name === '프레셔', isMultiHit)) // pp 깎기
+      updatePokemon(side, activeMine, (prev) => setCharging(prev, false, undefined));
+      updatePokemon(side, activeMine, (prev) => changePosition(prev, null)); // 위치 초기화
       // 무릎차기, 점프킥 등 빗나가면 반동.
       let dmg: number;
       moveInfo.demeritEffects?.forEach((d_effect) => {

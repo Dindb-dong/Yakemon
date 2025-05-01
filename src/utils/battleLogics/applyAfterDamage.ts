@@ -4,16 +4,13 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
-import { PokemonInfo } from "../../models/Pokemon";
-import { StatusState } from "../../models/Status";
 import { addStatus, changeHp, changeRank, setTypes } from "./updateBattlePokemon";
 import { RankState } from "../../models/RankState";
 import { switchPokemon } from "./switchPokemon";
-import { calculateTypeEffectiveness } from "../typeRalation";
 import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { calculateRankEffect } from "./rankEffect";
 import { applyRecoilDamage } from "./applyNoneMoveDamage";
-import { delay } from "../delay";
+import { delay } from "../delay"; // await delay(1500) -> 1.5초 기다리게 해주는 유틸함수
 import { setWeather } from "./updateEnvironment";
 
 async function applyPanicUturn(side: "my" | "enemy", attacker: BattlePokemon, defender: BattlePokemon, usedMove: MoveInfo, appliedDameage?: number, watchMode?: boolean, multiHit?: boolean) {

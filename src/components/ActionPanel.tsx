@@ -68,7 +68,7 @@ function ActionPanel({ myPokemon, myTeam, activeMy, isTurnProcessing, onAction, 
                       key={move.name}
                       className={`move-button ${effectivenessClass}`}
                       onClick={() => onAction(move)}
-                      disabled={isTurnProcessing || isFainted || watchMode || myPokemon.unUsableMove?.name === move.name}
+                      disabled={isTurnProcessing || isFainted || watchMode || myPokemon.unUsableMove?.name === move.name || myPokemon.pp[move.name] === 0}
                     >
                       <span className="move-name">{move.name}</span>
                       <span className="move-power">{move.category}</span>

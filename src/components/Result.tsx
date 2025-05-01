@@ -14,6 +14,7 @@ import { shuffleArray } from "../utils/shuffle";
 import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "../data/createWincountPokemon";
 import RealignModal from "./RealignModal";
 import { BattlePokemon } from "../models/BattlePokemon";
+import { delay } from "../utils/delay";
 
 function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
   const {
@@ -47,18 +48,21 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   const [showRealignModal, setShowRealignModal] = useState(false);   // 순서 정렬 모달
   const memorizedEnemyRef = useRef<BattlePokemon[] | null>(null);
   useEffect(() => {
-    if (isVictory) {
-      memorizedEnemyRef.current = enemyTeam.map((p) => ({
-        ...p,
-        base: { ...p.base },
-        pp: { ...p.pp },
-        rank: { ...p.rank },
-        status: [...p.status],
-      }));
-      generateNewRandomPokemon(); // 미리 다음 상대팀 구성
-      setShowHintModal(true);     // 힌트 모달부터 시작
+    async function initialize() {
+      if (isVictory) {
+        memorizedEnemyRef.current = enemyTeam.map((p) => ({
+          ...p,
+          base: { ...p.base },
+          pp: { ...p.pp },
+          rank: { ...p.rank },
+          status: [...p.status],
+        }));
+        await delay(1000);
+        generateNewRandomPokemon(); // 미리 다음 상대팀 구성
+        setShowHintModal(true);     // 힌트 모달부터 시작
+      }
     }
-
+    initialize();
     if (musicOn) {
       AudioManager.getInstance().play(isVictory ? "win" : "defeat");
     } else {
@@ -206,12 +210,12 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
-      {isVictory && randomMode && !showExchangeModal && !showHintModal && !showRealignModal && (
+      {/* {isVictory && randomMode && !showExchangeModal && !showHintModal && !showRealignModal && (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
           <button onClick={handleSkip}>다음 전투 시작</button>
         </div>
-      )}
+      )} */}
       {!isVictory && (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h1>{winner}</h1>
