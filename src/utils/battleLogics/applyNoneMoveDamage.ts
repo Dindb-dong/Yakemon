@@ -1,8 +1,6 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { calculateTypeEffectiveness } from "../typeRalation";
-import { removeTrap } from "./updateEnvironment";
-import { StatusState } from "../../models/Status";
 import { WeatherType } from "../../models/Weather";
 
 // 스텔스록 = 바위타입 기술과 동일하게 상성 적용

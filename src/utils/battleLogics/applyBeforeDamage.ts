@@ -4,9 +4,7 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { MoveInfo } from "../../models/Move";
-import { PokemonInfo } from "../../models/Pokemon";
-import { StatusState } from "../../models/Status";
-import { changeHp, changeRank, setTypes } from "./updateBattlePokemon";
+import { changeHp, changeRank } from "./updateBattlePokemon";
 import { RankState } from "../../models/RankState";
 
 // 내 포켓몬, 상대 포켓몬, 기술, 받은 데미지, 날씨, 필드

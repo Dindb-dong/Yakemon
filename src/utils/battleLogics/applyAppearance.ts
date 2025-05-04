@@ -1,15 +1,13 @@
-
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { RankState } from "../../models/RankState";
-import { addStatus, changeRank } from "./updateBattlePokemon";
+import { changeRank } from "./updateBattlePokemon";
 import {
   setAura,
   setWeather,
   setField,
   addDisaster,
 } from "./updateEnvironment";
-import { useDurationStore } from "../../Context/useDurationContext";
 
 export function applyAppearance(
   pokemon: BattlePokemon,
