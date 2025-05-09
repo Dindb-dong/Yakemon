@@ -5,7 +5,7 @@ import { getBestSwitchIndex } from "../battleLogics/getBestSwitchIndex";
 import { calculateRankEffect } from "../battleLogics/rankEffect";
 import { calculateTypeEffectiveness } from "../typeRalation";
 
-export const aiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
+export const baseAiChooseAction = (side: 'my' | 'enemy') => { // side에 enemy 넣으면 오른쪽 유저 기준 
   const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv, updatePokemon, enemyEnv, myEnv } = useBattleStore.getState();
   const mineTeam = side === 'my' ? myTeam : enemyTeam;
   const activeIndex = side === 'my' ? activeMy : activeEnemy;

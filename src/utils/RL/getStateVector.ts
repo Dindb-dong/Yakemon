@@ -1,4 +1,3 @@
-import { BattlePokemon } from "../../models/BattlePokemon";
 import { FieldType } from "../../models/Field";
 import { useBattleStore } from "../../Context/useBattleStore";
 import { StatusState } from "../../models/Status";

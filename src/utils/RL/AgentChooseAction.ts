@@ -28,9 +28,9 @@ export async function getActionFromState(state: number[]): Promise<number> {
   return action;
 }
 
-export async function RLChooseAction(side: 'my' | 'enemy') {
+export async function AgentChooseAction(side: 'my' | 'enemy') {
   // 유저가 사용할때에는 enemy가 side
-  const { myTeam, enemyTeam, activeMy, activeEnemy, addLog, publicEnv } = useBattleStore.getState();
+  const { myTeam, enemyTeam, activeMy, activeEnemy } = useBattleStore.getState();
   const stateVector = getState(side === 'enemy' ? true : false);
   const result = await getActionFromState(stateVector);
   const mineTeam = side === 'my' ? myTeam : enemyTeam;

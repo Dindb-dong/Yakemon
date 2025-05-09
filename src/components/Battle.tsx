@@ -16,10 +16,10 @@ import { getBestSwitchIndex } from "../utils/battleLogics/getBestSwitchIndex";
 import { switchPokemon } from "../utils/battleLogics/switchPokemon";
 import { applyAppearance } from "../utils/battleLogics/applyAppearance";
 import AudioManager from "../utils/AudioManager";
-import { RLChooseAction } from "../utils/RL/RLChooseAction";
+import { AgentChooseAction } from "../utils/RL/AgentChooseAction";
 import { delay } from "../utils/delay";
 import { useNavigate } from "react-router-dom";
-import { aiChooseAction } from "../utils/RL/aiChooseAction";
+import { baseAiChooseAction } from "../utils/RL/baseAiChooseAction";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { calculateOrder } from "../utils/battleLogics/calculateOrder";
 
@@ -315,9 +315,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
           }, 1000)
         })
         setIsTurnProcessing(true);
-        const leftAction = aiChooseAction("my");
+        const leftAction = baseAiChooseAction("my");
         console.log('왼쪽 플레이어 행동:', leftAction);
-        const rightAction = redMode ? await RLChooseAction('enemy') : aiChooseAction("enemy");
+        const rightAction = redMode ? await AgentChooseAction('enemy') : baseAiChooseAction("enemy");
         await delay(500)
         console.log('오른쪽 플레이어 행동:', rightAction);
         await delay(500)
@@ -361,7 +361,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     if (!watchMode) {
       setIsTurnProcessing(true);
       // const aiAction = aiChooseAction('enemy');
-      const aiAction = redMode ? await RLChooseAction('enemy') : aiChooseAction('enemy');
+      const aiAction = redMode ? await AgentChooseAction('enemy') : baseAiChooseAction('enemy');
       console.log('ai행동:' + aiAction)
       await battleSequence(playerAction, aiAction);
 
