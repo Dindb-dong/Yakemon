@@ -1,7 +1,6 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { PokemonInfo } from "../../models/Pokemon";
 import { RankState } from "../../models/RankState";
-import { StatusState } from "../../models/Status";
 
 // 기본 랭크 상태
 const defaultRank: RankState = {

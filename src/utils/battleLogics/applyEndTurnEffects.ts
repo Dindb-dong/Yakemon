@@ -1,5 +1,5 @@
 import { useBattleStore } from "../../Context/useBattleStore";
-import { decrementDisableTun, decrementYawnTurn, useDurationStore } from "../../Context/useDurationContext";
+import { useDurationStore } from "../../Context/useDurationContext";
 import { RankState } from "../../models/RankState";
 import { StatusState } from "../../models/Status";
 import { applyStatusConditionDamage } from "./applyNoneMoveDamage";

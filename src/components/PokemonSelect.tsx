@@ -4,7 +4,7 @@ import { PokemonInfo } from "../models/Pokemon";
 import TutorialModal from "./TutorialModal";
 import { getHpImagePath } from "./PokemonArea";
 import AudioManager from "../utils/AudioManager";
-import { loadRLModel } from "../utils/RL/RLChooseAction";
+import { loadRLModel } from "../utils/RL/AgentChooseAction";
 import { shuffleArray } from "../utils/shuffle";
 import { createGen3Pokemon, createGen7Pokemon } from "../data/createWincountPokemon";
 

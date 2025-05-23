@@ -16,19 +16,12 @@ import { applyAfterDamage, applyDefensiveAbilityEffectAfterMultiDamage, applyMov
 import { applyEndTurnEffects } from "./applyEndTurnEffects";
 import { calculateOrder } from "./calculateOrder";
 import { calculateMoveDamage } from "./damageCalculator";
-import { calculateRankEffect } from "./rankEffect";
 import { switchPokemon } from "./switchPokemon";
 import { hasAbility } from "./helpers";
 import { setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
-import { useEffect } from "react";
-import { getBestSwitchIndex } from "./getBestSwitchIndex";
 import { delay } from "../delay";
 
 export type BattleAction = MoveInfo | { type: "switch", index: number } | null;
-
-
-
-
 
 export async function battleSequence(
   myAction: BattleAction,
