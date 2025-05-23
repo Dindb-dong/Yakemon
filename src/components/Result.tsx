@@ -15,6 +15,7 @@ import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Poke
 import RealignModal from "./RealignModal";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { delay } from "../utils/delay";
+import { updateWinCount, updateWinStreak, addPlayHistory, GameError } from "../api/playhistory";
 
 function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
   const {
@@ -41,25 +42,50 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
   const [musicOn, setMusicOn] = useState(true);
   const navigate = useNavigate();
-
-  const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
   const [showHintModal, setShowHintModal] = useState(false);         // 힌트용 모달
   const [showExchangeModal, setShowExchangeModal] = useState(false); // 교체용 모달
   const [showRealignModal, setShowRealignModal] = useState(false);   // 순서 정렬 모달
   const memorizedEnemyRef = useRef<BattlePokemon[] | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
+
   useEffect(() => {
     async function initialize() {
       if (isVictory) {
-        memorizedEnemyRef.current = enemyTeam.map((p) => ({
-          ...p,
-          base: { ...p.base },
-          pp: { ...p.pp },
-          rank: { ...p.rank },
-          status: [...p.status],
-        }));
-        await delay(1000);
-        generateNewRandomPokemon(); // 미리 다음 상대팀 구성
-        setShowHintModal(true);     // 힌트 모달부터 시작
+        try {
+          // 게임 결과 업데이트
+          await updateWinStreak('win');
+          await addPlayHistory('win');
+          memorizedEnemyRef.current = enemyTeam.map((p) => ({
+            ...p,
+            base: { ...p.base },
+            pp: { ...p.pp },
+            rank: { ...p.rank },
+            status: [...p.status],
+          }));
+          await delay(1000);
+          generateNewRandomPokemon();
+          setShowHintModal(true);
+        } catch (error) {
+          if (error instanceof GameError) {
+            setApiError(error.message);
+          } else {
+            setApiError('게임 기록 업데이트에 실패했습니다.');
+          }
+        }
+      } else {
+        try {
+          // 패배 시에도 기록 업데이트
+          await updateWinCount('lose');
+          await addPlayHistory('lose');
+        } catch (error) {
+          if (error instanceof GameError) {
+            setApiError(error.message);
+          } else {
+            setApiError('게임 기록 업데이트에 실패했습니다.');
+          }
+        }
       }
     }
     initialize();
@@ -69,7 +95,7 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
       AudioManager.getInstance().mute(true);
     }
 
-    return () => AudioManager.getInstance().stop(); // cleanup
+    return () => AudioManager.getInstance().stop();
   }, [musicOn]);
 
   function generateNewRandomPokemon() {
@@ -164,6 +190,20 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
 
   return (
     <>
+      {apiError && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'rgba(255, 0, 0, 0.1)',
+          padding: '1rem',
+          borderRadius: '8px',
+          zIndex: 10000
+        }}>
+          {apiError}
+        </div>
+      )}
       {showHintModal && isVictory && randomMode && (
         <HintModal
           enemyTeam={enemyTeam}
