@@ -1,5 +1,3 @@
-import { AbilityInfo } from "../models/Ability";
-import { MoveInfo } from "../models/Move";
 import { PokemonInfo } from "../models/Pokemon";
 import { abilityData } from "./abilityData";
 import { moveData } from "./moveData";
@@ -1609,27 +1607,27 @@ export function createGen7Pokemon(): PokemonInfo[] {
       sex: 'male',
       level: 50,
     },
-    // {
-    //   id: 746,
-    //   name: '약어리',
-    //   types: ['물'],
-    //   moves: moveData(['아쿠아브레이크', '지진', '퀵턴', '잠자기', '스케일샷', '하이드로펌프', '냉동빔', '아이언테일'], ['물']),
-    //   ability: abilityData(['어군']),
-    //   hp: 45, attack: 140, defense: 130, spAttack: 140, spDefense: 135, speed: 30,
-    //   sex: 'male',
-    //   level: 50,
-    //   hasFormChange: true
-    // },
-    // {
-    //   id: 748,
-    //   name: '더시마사리',
-    //   types: ['물', '독'],
-    //   moves: moveData(['독압정', 'HP회복', '토치카', '찬물끼얹기', '얼어붙은바람', '머드샷', '아픔나누기', '독찌르기'], ['물', '독']),
-    //   ability: abilityData(['재생력']),
-    //   hp: 50, attack: 63, defense: 152, spAttack: 53, spDefense: 142, speed: 35,
-    //   sex: 'male',
-    //   level: 50
-    // },
+    {
+      id: 746,
+      name: '약어리',
+      types: ['물'],
+      moves: moveData(['아쿠아브레이크', '지진', '퀵턴', '잠자기', '스케일샷', '하이드로펌프', '냉동빔', '아이언테일'], ['물']),
+      ability: abilityData(['어군']),
+      hp: 45, attack: 140, defense: 130, spAttack: 140, spDefense: 135, speed: 30,
+      sex: 'male',
+      level: 50,
+      hasFormChange: true
+    },
+    {
+      id: 748,
+      name: '더시마사리',
+      types: ['물', '독'],
+      moves: moveData(['독압정', 'HP회복', '토치카', '찬물끼얹기', '얼어붙은바람', '머드샷', '아픔나누기', '독찌르기'], ['물', '독']),
+      ability: abilityData(['재생력']),
+      hp: 50, attack: 63, defense: 152, spAttack: 53, spDefense: 142, speed: 35,
+      sex: 'male',
+      level: 50
+    },
     {
       id: 750,
       name: '만마드',

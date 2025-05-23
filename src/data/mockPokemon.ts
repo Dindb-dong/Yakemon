@@ -297,8 +297,8 @@ export function createMockPokemon(): PokemonInfo[] {
     {
       id: 908,
       name: '마스카나',
-      types: ['풀', '악'],//'트릭플라워', '유턴', '깜짝베기', '치근거리기', '애크러뱃', 
-      moves: moveData(['개척하기', '로킥', '트리플악셀', '찬물끼얹기'],
+      types: ['풀', '악'],//
+      moves: moveData(['트릭플라워', '유턴', '깜짝베기', '치근거리기', '애크러뱃', '개척하기', '로킥', '트리플악셀', '찬물끼얹기'],
         ['풀', '악']
       ),
       sex: 'female',

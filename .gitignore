@@ -21,3 +21,5 @@ dist/model/*.h5
 dist/model/*.pb
 
 dist/sound/*.mp3
+
+.env
