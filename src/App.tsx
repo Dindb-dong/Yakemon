@@ -1,6 +1,9 @@
 import React, { useCallback, useState } from "react";
 import PokemonSelect from "./components/PokemonSelect";
 import Battle from "./components/Battle";
+import TopBar from "./components/TopBar";
+import MyPage from "./components/MyPage";
+import Leaderboard from "./components/Leaderboard";
 import "./index.css";
 import { createBattlePokemon } from "./utils/battleLogics/createBattlePokemon";
 import { useBattleStore } from "./Context/useBattleStore";
@@ -12,6 +15,7 @@ import BottomBar from "./components/BottomBar";
 import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
 import { shuffleArray } from "./utils/shuffle";
 import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "./data/createWincountPokemon";
+
 const gen1Pokemon = createGen1Pokemon();
 const gen2Pokemon = gen1Pokemon.concat(createGen2Pokemon());
 const gen3Pokemon = gen2Pokemon.concat(createGen3Pokemon());
@@ -21,6 +25,7 @@ const gen6Pokemon = gen5Pokemon.concat(createGen6Pokemon());
 const gen7Pokemon = gen6Pokemon.concat(createGen7Pokemon());
 const gen8Pokemon = gen7Pokemon.concat(createGen8Pokemon());
 const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
+
 function MainApp() {
   const mockPokemon = createGen1Pokemon();
   const [isSelected, setIsSelected] = useState(false);
@@ -45,9 +50,7 @@ function MainApp() {
         console.log('관전모드 시작');
       }
       if (redMode) {
-        console.log(
-          '레드모드 시작'
-        );
+        console.log('레드모드 시작');
       }
 
       const getRandomByType = (type: string, exclude: PokemonInfo[] = []) => {
@@ -98,6 +101,7 @@ function MainApp() {
 
   return (
     <>
+      <TopBar />
       <Routes>
         <Route path="/" element={<PokemonSelect onSelect={handleSelect} />} />
         <Route path="/battle" element={
@@ -111,6 +115,8 @@ function MainApp() {
             setBattleKey={setBattleKey}
           />
         } />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </>
   );
