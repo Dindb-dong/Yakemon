@@ -23,3 +23,4 @@
   - `/api/streak` -> `/.netlify/functions/streak`
   - `/api/history` -> `/.netlify/functions/history`
   - `/api/leaderboard` -> `/.netlify/functions/leaderboard`
+  - `/api/player` -> `/.netlify/functions/player`

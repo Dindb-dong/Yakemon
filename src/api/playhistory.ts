@@ -8,6 +8,10 @@ export interface GameResult {
   bestWinStreak: number;
 }
 
+export interface PlayerRecord extends GameResult {
+  username: string;
+}
+
 export class GameError extends Error {
   constructor(message: string, public status?: number) {
     super(message);
@@ -29,6 +33,19 @@ export function getOrCreateGuestPlayerId(): string {
   const generated = `guest_${crypto.randomUUID()}`;
   localStorage.setItem(GUEST_PLAYER_KEY, generated);
   return generated;
+}
+
+/**
+ * Persist a user-provided player id for record linking across sessions/devices.
+ */
+export function setGuestPlayerId(rawPlayerId: string): string {
+  const normalized = rawPlayerId.trim();
+  if (!normalized) {
+    throw new GameError("ID를 입력해주세요.");
+  }
+
+  localStorage.setItem(GUEST_PLAYER_KEY, normalized);
+  return normalized;
 }
 
 /**
@@ -79,5 +96,30 @@ export async function addPlayHistory(result: "win" | "lose", mode: "normal" | "r
     });
   } catch (error: any) {
     throw new GameError("게임 히스토리 저장에 실패했습니다.", error.response?.status);
+  }
+}
+
+/**
+ * Load one player's aggregate record by id.
+ */
+export async function loadPlayerRecord(playerId?: string): Promise<PlayerRecord> {
+  const targetId = (playerId ?? getOrCreateGuestPlayerId()).trim();
+  if (!targetId) {
+    throw new GameError("ID를 입력해주세요.");
+  }
+
+  try {
+    const response = await axios.get<PlayerRecord>("/api/player", {
+      params: { playerId: targetId },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      throw new GameError("해당 ID의 기록을 찾을 수 없습니다.", 404);
+    }
+    if (error.response?.status === 400) {
+      throw new GameError("ID 형식이 올바르지 않습니다.", 400);
+    }
+    throw new GameError("기록 조회에 실패했습니다.", error.response?.status);
   }
 }
