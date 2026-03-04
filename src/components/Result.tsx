@@ -64,6 +64,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   const memorizedEnemyRef = useRef<BattlePokemon[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [saveStatusText, setSaveStatusText] = useState<string>("");
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
   const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
   const guestPlayerId = getOrCreateGuestPlayerId();
@@ -71,6 +72,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   useEffect(() => {
     async function initializeResult() {
       const mode = randomMode ? "random" : "normal";
+      setLoadingMessage("전적 정보를 동기화하고 있습니다...");
 
       try {
         if (isVictory) {
@@ -91,6 +93,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
       }
 
       if (isVictory) {
+        setLoadingMessage("다음 전투를 준비하고 있습니다...");
         memorizedEnemyRef.current = enemyTeam.map((pokemon) => ({
           ...pokemon,
           base: { ...pokemon.base },
@@ -103,6 +106,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
         generateNewRandomPokemon();
         setShowHintModal(true);
       }
+      setLoadingMessage(null);
     }
 
     initializeResult();
@@ -173,7 +177,9 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   /**
    * Start the next random battle with refreshed state.
    */
-  const startNextBattle = () => {
+  const startNextBattle = async () => {
+    setLoadingMessage("전적 저장을 마무리하고 있습니다...");
+    await delay(300);
     enemyTeam.forEach((pokemon) => {
       pokemon.currentHp = pokemon.base.hp;
     });
@@ -247,19 +253,26 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
         <Modal
           myTeam={myTeam}
           enemyTeam={memorizedEnemyRef.current ?? []}
-          onExchange={(myIndex, enemyIndex) => handleExchange(myIndex, enemyIndex)}
-          onSkip={handleSkip}
+          onExchange={(myIndex, enemyIndex) => {
+            if (loadingMessage) return;
+            handleExchange(myIndex, enemyIndex);
+          }}
+          onSkip={() => {
+            if (loadingMessage) return;
+            handleSkip();
+          }}
         />
       )}
 
       {showRealignModal && (
         <RealignModal
           myTeam={myTeam}
-          onConfirm={(newOrder) => {
+          onConfirm={async (newOrder) => {
+            if (loadingMessage) return;
             const newTeam = newOrder.map((index) => myTeam[index]);
             setMyTeam(newTeam);
             setShowRealignModal(false);
-            startNextBattle();
+            await startNextBattle();
           }}
         />
       )}
@@ -293,6 +306,14 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
           <p className="result-flow-hint">상대 교체/정렬 단계를 완료하면 다음 전투가 시작됩니다.</p>
         )}
       </div>
+      {loadingMessage && (
+        <div className="global-loading-overlay" role="status" aria-live="polite" aria-busy="true">
+          <div className="global-loading-card">
+            <div className="global-loading-spinner" />
+            <p className="global-loading-text">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
