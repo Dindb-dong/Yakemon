@@ -367,6 +367,17 @@ function ActionPanel({
                               <p>특수방어력: {selectedPokemon.base.spDefense}</p>
                               <p>스피드: {selectedPokemon.base.speed}</p>
                               <p>상태이상: {selectedPokemon.status.join(", ") || "없음"}</p>
+                              <div>
+                                <strong>기술 정보</strong>
+                                <ul>
+                                  {selectedPokemon.base.moves.map((move) => (
+                                    <li key={`${selectedPokemon.base.id}-${move.name}`}>
+                                      {move.name}: {selectedPokemon.pp[move.name]} / {move.pp ?? "?"} (
+                                      {move.getPower ? move.getPower(myTeam, "my") : move.power}, {move.getAccuracy ? move.getAccuracy(useBattleStore.getState().publicEnv, "my") : move.accuracy}), {move.type}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
                             </>
                           );
                         })()}
