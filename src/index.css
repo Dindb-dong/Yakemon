@@ -900,23 +900,25 @@ button {
   z-index: 3500;
   width: min(680px, calc(100vw - 2rem));
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.32rem;
   pointer-events: none;
 }
 
 .battle-toast {
   width: 100%;
-  max-width: min(680px, calc(100vw - 2rem));
   border: 2px solid #2a2211;
   border-radius: 10px;
-  background: rgba(27, 42, 84, 0.95);
+  background: rgba(27, 42, 84, 0.72);
   color: #fff;
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.4;
   padding: 0.45rem 0.7rem;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.24);
-  animation: battleToastInOut 2s ease-in-out;
+  backdrop-filter: blur(1.5px);
+  animation: battleToastInOut 2.2s ease-in-out;
 }
 
 @keyframes battleToastInOut {

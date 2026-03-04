@@ -50,9 +50,8 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [musicOn, setMusicOn] = useState(true);
   const navigate = useNavigate();
   const [redirected, setRedirected] = useState(false);
-  const [toastQueue, setToastQueue] = useState<string[]>([]);
-  const [activeToast, setActiveToast] = useState<{ id: number; message: string } | null>(null);
-  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeToasts, setActiveToasts] = useState<Array<{ id: number; message: string }>>([]);
+  const toastTimersRef = useRef<number[]>([]);
   const toastIdRef = useRef(0);
   const lastToastLogIndexRef = useRef(logs.length);
   useEffect(() => {
@@ -97,34 +96,26 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       lastToastLogIndexRef.current = logs.length;
       return;
     }
-    const incomingLogs = logs.slice(previousIndex);
+    const incomingLogs = logs.slice(previousIndex).filter((message) => message.trim().length > 0);
     lastToastLogIndexRef.current = logs.length;
-    setToastQueue((prev) => [...prev, ...incomingLogs]);
+    const created = incomingLogs.map((message) => {
+      toastIdRef.current += 1;
+      return { id: toastIdRef.current, message };
+    });
+    setActiveToasts((prev) => [...prev, ...created].slice(-8));
+
+    created.forEach((toast) => {
+      const timer = window.setTimeout(() => {
+        setActiveToasts((prev) => prev.filter((item) => item.id !== toast.id));
+      }, 2200);
+      toastTimersRef.current.push(timer);
+    });
   }, [logs]);
 
   useEffect(() => {
-    if (activeToast || toastQueue.length === 0) {
-      return;
-    }
-    const [nextToast, ...restQueue] = toastQueue;
-    setToastQueue(restQueue);
-    toastIdRef.current += 1;
-    setActiveToast({ id: toastIdRef.current, message: nextToast });
-
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
-    }
-
-    toastTimerRef.current = setTimeout(() => {
-      setActiveToast(null);
-    }, 2000);
-  }, [activeToast, toastQueue]);
-
-  useEffect(() => {
     return () => {
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
-      }
+      toastTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+      toastTimersRef.current = [];
     };
   }, []);
 
@@ -489,7 +480,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
     <div className={`battle-layout ${watchMode ? "" : "battle-layout--with-pad"}`}>
       <div className="battle-toast-container">
-        {activeToast && <div key={activeToast.id} className="battle-toast">{activeToast.message}</div>}
+        {activeToasts.map((toast) => (
+          <div key={toast.id} className="battle-toast">{toast.message}</div>
+        ))}
       </div>
       <button
         onClick={() => {
