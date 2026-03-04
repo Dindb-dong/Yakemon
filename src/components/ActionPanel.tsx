@@ -29,6 +29,9 @@ function ActionPanel({
   const [hintMode, setHintMode] = useState<boolean>(true);
   const [fightCursor, setFightCursor] = useState(0);
   const [switchCursor, setSwitchCursor] = useState(0);
+  const [selectedSwitchIndex, setSelectedSwitchIndex] = useState<number | null>(null);
+  const [switchOption, setSwitchOption] = useState<"detail" | "switch">("detail");
+  const [showSwitchDetail, setShowSwitchDetail] = useState(false);
   const lastHandledPadCommandId = useRef(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
   const { turn, enemyTeam, activeEnemy } = useBattleStore.getState();
@@ -48,6 +51,9 @@ function ActionPanel({
     setCurrentTab("fight");
     setFightCursor(0);
     setSwitchCursor(0);
+    setSelectedSwitchIndex(null);
+    setSwitchOption("detail");
+    setShowSwitchDetail(false);
   }, [turn]);
 
   useEffect(() => {
@@ -87,6 +93,10 @@ function ActionPanel({
   }, []);
 
   const moveSwitchCursor = useCallback((direction: "up" | "down" | "left" | "right") => {
+    if (selectedSwitchIndex !== null) {
+      setSwitchOption((prev) => (prev === "detail" ? "switch" : "detail"));
+      return;
+    }
     if (switchTargets.length === 0) {
       return;
     }
@@ -96,7 +106,7 @@ function ActionPanel({
       }
       return (prev + 1) % switchTargets.length;
     });
-  }, [switchTargets.length]);
+  }, [selectedSwitchIndex, switchTargets.length]);
 
   const handlePadAction = useCallback(
     (action: BattlePadAction) => {
@@ -119,6 +129,12 @@ function ActionPanel({
       }
 
       if (action === "b") {
+        if (currentTab === "switch" && selectedSwitchIndex !== null) {
+          setSelectedSwitchIndex(null);
+          setShowSwitchDetail(false);
+          setSwitchOption("detail");
+          return;
+        }
         setCurrentTab(null);
         return;
       }
@@ -150,12 +166,26 @@ function ActionPanel({
           return;
         }
         const selectedSwitch = switchTargets[switchCursor];
-        if (selectedSwitch) {
-          onAction({ type: "switch", index: selectedSwitch.index });
+        if (!selectedSwitch) {
+          return;
         }
+        if (selectedSwitchIndex === null) {
+          setSelectedSwitchIndex(selectedSwitch.index);
+          setSwitchOption("detail");
+          setShowSwitchDetail(false);
+          return;
+        }
+        if (switchOption === "detail") {
+          setShowSwitchDetail((prev) => !prev);
+          return;
+        }
+        onAction({ type: "switch", index: selectedSwitchIndex });
+        setSelectedSwitchIndex(null);
+        setShowSwitchDetail(false);
+        setSwitchOption("detail");
       }
     },
-    [currentTab, fightCursor, getMoveDisabledState, isTurnProcessing, moveFightCursor, moveSwitchCursor, myPokemon.base.moves, myPokemon.status, onAction, switchCursor, switchTargets, watchMode]
+    [currentTab, fightCursor, getMoveDisabledState, isTurnProcessing, moveFightCursor, moveSwitchCursor, myPokemon.base.moves, myPokemon.status, onAction, selectedSwitchIndex, switchCursor, switchOption, switchTargets, watchMode]
   );
 
   useEffect(() => {
@@ -310,7 +340,35 @@ function ActionPanel({
             onSwitch={(index) => onAction({ type: "switch", index })}
             watchMode={watchMode}
             focusedSwitchIndex={currentTab === "switch" ? switchTargets[switchCursor]?.index ?? null : null}
+            selectedSwitchIndex={selectedSwitchIndex}
           />
+          {currentTab === "switch" && selectedSwitchIndex !== null && (
+            <div className="switch-option-panel">
+              <span className={`switch-option-item ${switchOption === "detail" ? "pad-focused" : ""}`}>상세 보기</span>
+              <span className={`switch-option-item ${switchOption === "switch" ? "pad-focused" : ""}`}>교체하기</span>
+              {showSwitchDetail && (
+                <div className="switch-option-detail">
+                  {(() => {
+                    const selectedPokemon = myTeam[selectedSwitchIndex];
+                    if (!selectedPokemon) return null;
+                    return (
+                      <>
+                        <p>타입: {selectedPokemon.base.types.join(", ")}</p>
+                        <p>특성: {typeof selectedPokemon.base.ability === "string" ? selectedPokemon.base.ability : selectedPokemon.base.ability?.name ?? "없음"}</p>
+                        <p>체력: {selectedPokemon.currentHp} / {selectedPokemon.base.hp}</p>
+                        <p>공격력: {selectedPokemon.base.attack}</p>
+                        <p>방어력: {selectedPokemon.base.defense}</p>
+                        <p>특수공격력: {selectedPokemon.base.spAttack}</p>
+                        <p>특수방어력: {selectedPokemon.base.spDefense}</p>
+                        <p>스피드: {selectedPokemon.base.speed}</p>
+                        <p>상태이상: {selectedPokemon.status.join(", ") || "없음"}</p>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
           {/* 모바일일 경우: 하단에 '싸운다' 버튼 보여줌 */}
           {isMobile && (
             <span className="action-toggle-btn">싸운다</span>

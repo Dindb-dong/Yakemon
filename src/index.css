@@ -1258,6 +1258,11 @@ button {
   border-color: #2d66bf;
 }
 
+.swap-slot-static.is-selected {
+  border-color: #2e7b3f;
+  background: linear-gradient(180deg, #eef9e8 0%, #d7efc8 100%);
+}
+
 .swap-slot-static.is-fainted {
   opacity: 0.55;
 }
@@ -1270,6 +1275,39 @@ button {
 .swap-meta {
   font-size: 0.74rem;
   color: #4c4025;
+}
+
+.switch-option-panel {
+  margin-top: 0.55rem;
+  border: 2px solid #6f5b2b;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.66);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.switch-option-item {
+  border: 2px solid #6f5b2b;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff8e4, #edddb0);
+  padding: 0.4rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.switch-option-detail {
+  margin-top: 0.2rem;
+  border: 1px solid #b7a571;
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: #fff4d6;
+  font-size: 0.78rem;
+}
+
+.switch-option-detail p {
+  margin: 0.2rem 0;
 }
 
 .global-loading-overlay {

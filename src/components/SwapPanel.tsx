@@ -7,9 +7,10 @@ type Props = {
   onSwitch: (index: number) => void;
   watchMode: boolean;
   focusedSwitchIndex?: number | null;
+  selectedSwitchIndex?: number | null;
 };
 
-function SwapPanel({ team, activeIndex, focusedSwitchIndex = null }: Props) {
+function SwapPanel({ team, activeIndex, focusedSwitchIndex = null, selectedSwitchIndex = null }: Props) {
   return (
     <div className="swap-panel">
       <h3>교체하기</h3>
@@ -17,11 +18,12 @@ function SwapPanel({ team, activeIndex, focusedSwitchIndex = null }: Props) {
         const isCurrent = index === activeIndex;
         const isFainted = pokemon.currentHp <= 0;
         const isFocused = focusedSwitchIndex === index;
+        const isSelected = selectedSwitchIndex === index;
 
         return (
           <div
             key={pokemon.base.name}
-            className={`swap-slot-static ${isFocused ? "pad-focused" : ""} ${isCurrent ? "is-current" : ""} ${isFainted ? "is-fainted" : ""}`}
+            className={`swap-slot-static ${isFocused ? "pad-focused" : ""} ${isSelected ? "is-selected" : ""} ${isCurrent ? "is-current" : ""} ${isFainted ? "is-fainted" : ""}`}
           >
             <span className="swap-name">{pokemon.base.name}</span>
             <span className="swap-meta">
