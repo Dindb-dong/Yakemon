@@ -1259,6 +1259,81 @@ button {
   cursor: pointer;
 }
 
+.guide-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4300;
+  background: rgba(0, 0, 0, 0.58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.guide-modal-card {
+  width: min(640px, 100%);
+  border: 4px solid #6f5824;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff9e8 0%, #ecd7a3 100%);
+  box-shadow: var(--ui-shadow);
+  padding: 1rem 1.1rem;
+}
+
+.guide-modal-card h2 {
+  margin: 0;
+  font-family: "VT323", monospace;
+  font-size: 2rem;
+}
+
+.guide-modal-card p {
+  margin: 0.55rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #4a3c20;
+}
+
+.guide-modal-progress {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: #5f4c24;
+  font-weight: 700;
+}
+
+.guide-modal-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.guide-btn {
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.48rem 0.8rem;
+  cursor: pointer;
+}
+
+.guide-btn:disabled {
+  background: #9c9a93;
+  border-color: #7f7c75;
+  cursor: not-allowed;
+}
+
+.guide-btn-primary {
+  background: linear-gradient(180deg, #4a8be8, #255fae);
+}
+
+.guide-btn-secondary {
+  background: linear-gradient(180deg, #8f9aa8, #657283);
+}
+
+.guide-btn-ghost {
+  background: linear-gradient(180deg, #bb7e2f, #8e5917);
+}
+
 .swap-slot-static {
   border: 2px solid #5a481f;
   border-radius: 10px;

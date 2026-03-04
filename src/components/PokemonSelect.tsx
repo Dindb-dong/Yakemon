@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createMockPokemon } from "../data/mockPokemon";
 import { PokemonInfo } from "../models/Pokemon";
-import TutorialModal from "./TutorialModal";
+import GuideModal from "./GuideModal";
 import { getHpImagePath } from "./PokemonArea";
 import AudioManager from "../utils/AudioManager";
 import { loadRLModel } from "../utils/RL/AgentChooseAction";
@@ -58,6 +58,7 @@ export function PokemonDetailModal({
 }
 
 function PokemonSelect({ onSelect }: Props) {
+  const GUIDE_SEEN_KEY = "hasSeenGuideTutorialV2";
 
   const [mockPokemon] = useState(() => createMockPokemon());
   const [musicOn, setMusicOn] = useState(true);
@@ -68,9 +69,9 @@ function PokemonSelect({ onSelect }: Props) {
   }, [musicOn]);
 
   useEffect(() => {
-    const hideTutorial = localStorage.getItem("hideTutorial");
-    if (hideTutorial !== "true") {
-      setShowTutorial(true);
+    const hasSeenGuide = localStorage.getItem(GUIDE_SEEN_KEY);
+    if (hasSeenGuide !== "true") {
+      setShowGuideModal(true);
     }
     loadRLModel()
   }, []);
@@ -91,7 +92,7 @@ function PokemonSelect({ onSelect }: Props) {
   const myRaw: PokemonInfo[] = [];
   const [watchCount, setWatchCount] = useState(1); // 관전 반복 횟수
   const [watchDelay, setWatchDelay] = useState(1.5);
-  const [showTutorial, setShowTutorial] = useState(true); // 모달 보일지 여부
+  const [showGuideModal, setShowGuideModal] = useState(false);
   const [thumbnails, setThumbnails] = useState<Record<number, string>>({});
   const [selectedPokemonInfo, setSelectedPokemonInfo] = useState<PokemonInfo | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -118,18 +119,6 @@ function PokemonSelect({ onSelect }: Props) {
     setSelected(myRaw);
   };
 
-  const tutorialPages = [
-    <div><h3>안녕하세요!</h3><p>본 웹페이지는 연세대학교 인공지능학회 YAI소속</p><p> 기초심화RL팀의 토이프로젝트에서 탄생했습니다.</p></div>,
-    <div><p>여러분께서는 Dueling-DDQN 방식으로 학습된 강화학습 AI, '레드'와 대전하실 수 있습니다!</p>
-      <p>또는 제가 손코딩한 모델과도 대전하실 수 있습니다 :D</p></div>,
-    <div><p>모델 학습에 시간이 걸리는 관계로</p><p>아직은 스타팅 포켓몬만 선택하실 수 있습니다...</p></div>,
-    <div><h3>그래도 재밌게 즐겨주세요!</h3></div>,
-    <div><h3>튜토리얼 1</h3><p>랜덤배틀을 시작하시면 배틀 프론티어를 즐길 수 있어요.</p>
-      <p>기술, 특성도 랜덤, 포켓몬도 랜덤! 재밌게 즐겨주세요.</p></div>,
-    <div><h3>튜토리얼 2</h3><p>포켓몬을 3마리 선택하고 1회만 배틀할 수도 있어요.</p></div>,
-    <div><h3>튜토리얼 3</h3><p>포켓몬 선택이 끝나면 ‘배틀 시작’을 누르세요!</p></div>,
-  ];
-
   const handleSelect = (pokemon: PokemonInfo) => {
     if (selected.includes(pokemon)) {
       setSelected(selected.filter((p) => p !== pokemon));
@@ -155,15 +144,16 @@ function PokemonSelect({ onSelect }: Props) {
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
-      {showTutorial && (
-        <TutorialModal pages={tutorialPages} onClose={() => {
-          setShowTutorial(false);
+      {showGuideModal && (
+        <GuideModal onClose={() => {
+          localStorage.setItem(GUIDE_SEEN_KEY, "true");
+          setShowGuideModal(false);
           if (musicOn) {
-            // 유저가 상호작용한 시점에서만 재생
             AudioManager.getInstance().play("main");
           }
         }} />
-      )}<div className="select-screen">
+      )}
+      <div className="select-screen">
         <h2 className="select-title">내 포켓몬 3마리 선택</h2>
         <div className="pokemon-grid">
           {sortedPokemon.map((p) => {
