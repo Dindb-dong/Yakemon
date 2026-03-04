@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GameError, getOrCreateGuestPlayerId, loadPlayerRecord, PlayerRecord, setGuestPlayerId } from "../api/playhistory";
+import { GameError, getOrCreateGuestPlayerId, loadPlayerRecord, PlayerRecord, setGuestPlayerId, updatePlayerNickname } from "../api/playhistory";
 import "./MyPage.css";
 
 function MyPage() {
@@ -10,6 +10,7 @@ function MyPage() {
   const [record, setRecord] = useState<PlayerRecord | null>(null);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
 
   useEffect(() => {
     const init = async () => {
@@ -20,6 +21,7 @@ function MyPage() {
       try {
         const data = await loadPlayerRecord(playerId);
         setRecord(data);
+        setNicknameInput(data.username || "");
       } catch (error) {
         setRecord(null);
       }
@@ -37,12 +39,37 @@ function MyPage() {
       const data = await loadPlayerRecord(normalizedId);
       setCurrentId(normalizedId);
       setRecord(data);
+      setNicknameInput(data.username || "");
       setMessage("ID 연결 완료! 해당 기록으로 이어서 플레이합니다.");
     } catch (error) {
       if (error instanceof GameError) {
         setMessage(error.message);
       } else {
         setMessage("ID 연결에 실패했습니다.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveNickname = async () => {
+    if (!currentId) {
+      setMessage("현재 ID를 먼저 불러와주세요.");
+      return;
+    }
+
+    setMessage("");
+    setIsLoading(true);
+    try {
+      const result = await updatePlayerNickname(nicknameInput, currentId);
+      setRecord((prev) => (prev ? { ...prev, username: result.username } : prev));
+      setNicknameInput(result.username);
+      setMessage("닉네임이 저장되었습니다.");
+    } catch (error) {
+      if (error instanceof GameError) {
+        setMessage(error.message);
+      } else {
+        setMessage("닉네임 저장에 실패했습니다.");
       }
     } finally {
       setIsLoading(false);
@@ -73,6 +100,17 @@ function MyPage() {
       </div>
 
       {message && <div className="error-message">{message}</div>}
+
+      <div className="nickname-form">
+        <input
+          value={nicknameInput}
+          onChange={(event) => setNicknameInput(event.target.value)}
+          placeholder="닉네임(2~6자, 한글/영문/특수문자 가능)"
+        />
+        <button onClick={handleSaveNickname} disabled={isLoading}>
+          {isLoading ? "저장 중..." : "닉네임 저장"}
+        </button>
+      </div>
 
       {record ? (
         <div className="stats-container">

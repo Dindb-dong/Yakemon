@@ -21,7 +21,21 @@
   margin-bottom: 0.8rem;
 }
 
+.nickname-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
 .id-link-form input {
+  flex: 1;
+  border: 2px solid #aa9258;
+  border-radius: 8px;
+  padding: 0.55rem 0.6rem;
+  font-size: 0.86rem;
+}
+
+.nickname-form input {
   flex: 1;
   border: 2px solid #aa9258;
   border-radius: 8px;
@@ -40,7 +54,24 @@
   cursor: pointer;
 }
 
+.nickname-form button {
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.55rem 0.8rem;
+  background: linear-gradient(180deg, #49a060, #2f7b47);
+  cursor: pointer;
+}
+
 .id-link-form button:disabled {
+  background: #9c9a93;
+  border-color: #7f7c75;
+  cursor: not-allowed;
+}
+
+.nickname-form button:disabled {
   background: #9c9a93;
   border-color: #7f7c75;
   cursor: not-allowed;
@@ -211,6 +242,10 @@
   }
 
   .id-link-form {
+    flex-direction: column;
+  }
+
+  .nickname-form {
     flex-direction: column;
   }
 }

@@ -12,6 +12,12 @@ export interface PlayerRecord extends GameResult {
   username: string;
 }
 
+export interface NicknameUpdateResult {
+  ok: boolean;
+  playerId: string;
+  username: string;
+}
+
 export class GameError extends Error {
   constructor(message: string, public status?: number) {
     super(message);
@@ -121,5 +127,28 @@ export async function loadPlayerRecord(playerId?: string): Promise<PlayerRecord>
       throw new GameError("ID 형식이 올바르지 않습니다.", 400);
     }
     throw new GameError("기록 조회에 실패했습니다.", error.response?.status);
+  }
+}
+
+/**
+ * Update player's nickname with server-side validation.
+ */
+export async function updatePlayerNickname(nickname: string, playerId?: string): Promise<NicknameUpdateResult> {
+  const targetId = (playerId ?? getOrCreateGuestPlayerId()).trim();
+  if (!targetId) {
+    throw new GameError("ID를 찾을 수 없습니다.");
+  }
+
+  try {
+    const response = await axios.post<NicknameUpdateResult>("/api/nickname", {
+      playerId: targetId,
+      nickname,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      throw new GameError(error.response.data?.message || "닉네임 형식이 올바르지 않습니다.", 400);
+    }
+    throw new GameError("닉네임 저장에 실패했습니다.", error.response?.status);
   }
 }
