@@ -76,6 +76,185 @@ button {
   background: linear-gradient(180deg, #9c9a92, #6f6d63);
 }
 
+.exchange-modal-shell {
+  padding: 2rem;
+  background: linear-gradient(160deg, #15203b, #111827);
+  border: 3px solid #0e1324;
+  border-radius: 16px;
+  max-width: 880px;
+  margin: 2rem auto;
+  color: #f2f5ff;
+}
+
+.exchange-title {
+  text-align: center;
+  margin: 0;
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+}
+
+.exchange-win-count {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #ffd451;
+  margin: 0.75rem 0 1rem;
+}
+
+.exchange-columns {
+  display: flex;
+  gap: 1rem;
+}
+
+.exchange-column {
+  flex: 1;
+}
+
+.exchange-column h3 {
+  margin: 0 0 0.65rem;
+}
+
+.exchange-pokemon-btn {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 2px solid #212f52;
+  border-radius: 10px;
+  background: linear-gradient(165deg, #e8edff, #d5defe);
+  color: #0f1830;
+  cursor: pointer;
+  text-align: left;
+}
+
+.exchange-pokemon-btn.selected {
+  border-color: #ffcc4d;
+  background: linear-gradient(165deg, #3d5ba9, #314a85);
+  color: #f9fcff;
+}
+
+.exchange-pokemon-btn.selected .exchange-pokemon-types {
+  color: #d8e8ff;
+}
+
+.exchange-pokemon-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exchange-pokemon-thumb {
+  width: 34px;
+  height: 34px;
+}
+
+.exchange-pokemon-name {
+  font-weight: 700;
+}
+
+.exchange-pokemon-types {
+  font-size: 0.8rem;
+  color: #41547f;
+}
+
+.exchange-footer-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.exchange-action-btn {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.exchange-action-btn.primary {
+  background: linear-gradient(140deg, #27b14e, #188f3e);
+}
+
+.exchange-action-btn.primary:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.exchange-action-btn.secondary {
+  background: linear-gradient(140deg, #757f96, #4b556b);
+}
+
+.exchange-loading-inline {
+  margin-top: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #dbe6ff;
+  font-weight: 600;
+}
+
+.exchange-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.64);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.exchange-detail-card {
+  background: linear-gradient(165deg, #e8efff, #cbd8ff);
+  color: #151a2d;
+  border-radius: 12px;
+  border: 2px solid #1b2646;
+  padding: 1.2rem;
+  width: min(430px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.exchange-detail-title {
+  margin: 0 0 0.75rem;
+}
+
+.exchange-detail-moves {
+  margin: 0.5rem 0;
+  padding-left: 1.1rem;
+}
+
+.exchange-detail-actions {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.exchange-detail-btn {
+  border: 1px solid #1f263d;
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.exchange-detail-btn.confirm {
+  background: #2563eb;
+  color: #fff;
+}
+
+.exchange-detail-btn.cancel {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.exchange-detail-btn.close {
+  background: #f3f4f6;
+}
+
 .turn-banner {
   margin-bottom: 1rem;
   border: 4px solid var(--ui-border);
@@ -886,6 +1065,12 @@ button {
   animation: spin 0.85s linear infinite;
 }
 
+.global-loading-spinner.small {
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+}
+
 .global-loading-text {
   margin: 0;
   font-size: 0.9rem;
@@ -1014,6 +1199,20 @@ button {
 
   .battle-layout--with-pad {
     padding-bottom: 230px;
+  }
+
+  .exchange-modal-shell {
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+
+  .exchange-columns {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .exchange-footer-actions {
+    flex-direction: column;
   }
 }
 

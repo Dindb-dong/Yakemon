@@ -24,12 +24,9 @@ function PokemonDetailModal({
   onClose: () => void;
 }) {
   return (
-    <div style={{
-      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-      backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999
-    }}>
-      <div style={{ background: "#fff", padding: "2rem", borderRadius: 10, width: 400 }}>
-        <h2>{pokemon.base.name}</h2>
+    <div className="exchange-detail-overlay">
+      <div className="exchange-detail-card">
+        <h2 className="exchange-detail-title">{pokemon.base.name}</h2>
         <p>타입: {pokemon.base.types.join(", ")}</p>
         <p>특성: {typeof pokemon.base.originalAbility === 'object' && pokemon.base.originalAbility !== null && 'name' in pokemon.base.originalAbility ? pokemon.base.originalAbility.name : pokemon.base.ability?.name ?? '없음'}</p>
         <p>체력: {pokemon.base.hp}</p>
@@ -40,19 +37,19 @@ function PokemonDetailModal({
         <p>스피드: {pokemon.base.speed}</p>
         <div>
           <h4>기술 목록</h4>
-          <ul>
+          <ul className="exchange-detail-moves">
             {pokemon.base.moves.map((m) => (
               <li key={m.name}>{m.name} ({m.category},{m.type}, {m.power}, {m.accuracy}, {m.pp})</li>
             ))}
           </ul>
         </div>
-        <div style={{ marginTop: "1rem", textAlign: "right" }}>
+        <div className="exchange-detail-actions">
           {isSelected ? (
-            <button onClick={onCancel} style={{ marginRight: "0.5rem" }}>취소하기</button>
+            <button className="exchange-detail-btn cancel" onClick={onCancel}>취소하기</button>
           ) : (
-            <button onClick={onConfirm} style={{ marginRight: "0.5rem" }}>이 포켓몬 선택</button>
+            <button className="exchange-detail-btn confirm" onClick={onConfirm}>이 포켓몬 선택</button>
           )}
-          <button onClick={onClose}>닫기</button>
+          <button className="exchange-detail-btn close" onClick={onClose}>닫기</button>
         </div>
       </div>
     </div>
@@ -65,9 +62,11 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
   const [selectedEnemy, setSelectedEnemy] = useState<number | null>(null);
   const [viewing, setViewing] = useState<{ side: 'my' | 'enemy', index: number } | null>(null);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
+  const [isThumbnailLoading, setIsThumbnailLoading] = useState(true);
 
   useEffect(() => {
     const loadThumbnails = async () => {
+      setIsThumbnailLoading(true);
       const all = [...myTeam, ...enemyTeam];
       const thumbMap: Record<string, string> = {};
 
@@ -77,6 +76,7 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
       }
 
       setThumbnails(thumbMap);
+      setIsThumbnailLoading(false);
     };
 
     loadThumbnails();
@@ -93,28 +93,17 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
       <button
         key={`${side}-${i}`}
         onClick={onClick}
-        style={{
-          width: "100%",
-          marginBottom: 10,
-          padding: 10,
-          border: "1px solid #ccc",
-          borderRadius: 8,
-          backgroundColor: selected ? "#007bff" : "#fff",
-          color: selected ? "white" : "black",
-          cursor: "pointer",
-          textAlign: "left",
-          transition: "background-color 0.2s",
-        }}
+        className={`exchange-pokemon-btn ${selected ? "selected" : ""}`}
       >
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+        <div className="exchange-pokemon-content">
           <img
             src={thumbnails[`${p.base.name}-${p.base.id}`]}
             alt={p.base.name}
-            style={{ width: 32, height: 32, marginRight: 8 }}
+            className="exchange-pokemon-thumb"
           />
           <div>
-            <div style={{ fontWeight: 600 }}>{p.base.name}</div>
-            <div style={{ fontSize: "0.75rem", color: selected ? "#e0e0e0" : "#666" }}>{p.base.types.join(", ")}</div>
+            <div className="exchange-pokemon-name">{p.base.name}</div>
+            <div className="exchange-pokemon-types">{p.base.types.join(", ")}</div>
           </div>
         </div>
       </button>
@@ -122,18 +111,18 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
   };
 
   return (
-    <div className="modal" style={{ padding: "2rem", background: "#f9f9f9", borderRadius: 10, maxWidth: 800, margin: "2rem auto" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>🎉 승리! 상대 포켓몬과 교체할 수 있어요</h2>
-      <div style={{ textAlign: "center", fontWeight: 'bold', fontSize: '1.5rem' }}>{winCount + 1} 연승중!</div>
-      <div style={{ display: "flex", gap: "2rem" }}>
-        <div style={{ flex: 1 }}>
+    <div className="exchange-modal-shell">
+      <h2 className="exchange-title">승리 보상: 상대 포켓몬 교환</h2>
+      <div className="exchange-win-count">{winCount + 1} 연승중</div>
+      <div className="exchange-columns">
+        <div className="exchange-column">
           <h3>내 포켓몬</h3>
           {myTeam.map((p, i) =>
             renderButton(p, i, 'my', selectedMy === i, () => setViewing({ side: 'my', index: i }))
           )}
         </div>
 
-        <div style={{ flex: 1 }}>
+        <div className="exchange-column">
           <h3>상대 포켓몬</h3>
           {enemyTeam.map((p, i) =>
             renderButton(p, i, 'enemy', selectedEnemy === i, () => setViewing({ side: 'enemy', index: i }))
@@ -141,39 +130,32 @@ function Modal({ myTeam, enemyTeam, onExchange, onSkip }: Props) {
         </div>
       </div>
 
-      <div style={{ marginTop: "2rem", display: "flex", justifyContent: "space-between" }}>
+      <div className="exchange-footer-actions">
         <button
           onClick={() => {
             if (selectedMy !== null && selectedEnemy !== null) {
               onExchange(selectedMy, selectedEnemy);
             }
           }}
-          disabled={selectedMy === null || selectedEnemy === null}
-          style={{
-            padding: "0.75rem 1.5rem",
-            backgroundColor: selectedMy !== null && selectedEnemy !== null ? "#28a745" : "#ccc",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: selectedMy !== null && selectedEnemy !== null ? "pointer" : "not-allowed"
-          }}
+          disabled={selectedMy === null || selectedEnemy === null || isThumbnailLoading}
+          className="exchange-action-btn primary"
         >
           선택한 포켓몬으로 교체
         </button>
         <button
           onClick={onSkip}
-          style={{
-            padding: "0.75rem 1.5rem",
-            backgroundColor: "#888",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer"
-          }}
+          disabled={isThumbnailLoading}
+          className="exchange-action-btn secondary"
         >
           그냥 넘어가기
         </button>
       </div>
+      {isThumbnailLoading && (
+        <div className="exchange-loading-inline" role="status" aria-live="polite" aria-busy="true">
+          <div className="global-loading-spinner small" />
+          <span>포켓몬 데이터를 불러오는 중...</span>
+        </div>
+      )}
 
       {viewing && (
         <PokemonDetailModal
