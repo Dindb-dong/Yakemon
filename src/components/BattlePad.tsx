@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 
 export type BattlePadAction = "up" | "down" | "left" | "right" | "x" | "y" | "a" | "b";
 
@@ -8,11 +8,18 @@ type BattlePadProps = {
 };
 
 function BattlePad({ onInput, disabled = false }: BattlePadProps) {
+  const lastPressAtRef = useRef(0);
+
   const startPress = useCallback(
     (action: BattlePadAction) => {
       if (disabled) {
         return;
       }
+      const now = Date.now();
+      if (now - lastPressAtRef.current < 90) {
+        return;
+      }
+      lastPressAtRef.current = now;
       onInput(action);
     },
     [disabled, onInput]
@@ -54,18 +61,18 @@ function BattlePad({ onInput, disabled = false }: BattlePadProps) {
 
       <div className="battle-pad-right">
         <button
-          className="pad-btn face-btn y-btn"
-          type="button"
-          onPointerDown={() => startPress("y")}
-        >
-          Y
-        </button>
-        <button
           className="pad-btn face-btn x-btn"
           type="button"
           onPointerDown={() => startPress("x")}
         >
           X
+        </button>
+        <button
+          className="pad-btn face-btn y-btn"
+          type="button"
+          onPointerDown={() => startPress("y")}
+        >
+          Y
         </button>
         <button
           className="pad-btn face-btn a-btn"
