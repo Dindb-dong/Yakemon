@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useBattleStore } from "../Context/useBattleStore";
 import Result from "./Result";
 import { MoveInfo } from "../models/Move";
@@ -51,7 +51,8 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [musicOn, setMusicOn] = useState(true);
   const navigate = useNavigate();
   const [redirected, setRedirected] = useState(false);
-  const slicedLogs = useMemo(() => logs.slice(-20), [logs]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     const checkLastOne = () => {
       const aliveMy = myTeam.filter(p => p.currentHp > 0).length;
@@ -87,6 +88,29 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       setRedirected(true);
     }
   }, [myTeam, enemyTeam, navigate]);
+
+  useEffect(() => {
+    if (!logs.length) {
+      return;
+    }
+
+    const latestLog = logs[logs.length - 1];
+    setToastMessage(latestLog);
+
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    toastTimerRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 2000);
+
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, [logs]);
 
   // ❗ 완전한 리다이렉트 후에는 렌더링하지 않음
   if (redirected || myTeam.length === 0 || enemyTeam.length === 0) {
@@ -144,9 +168,12 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const padCommandIdRef = useRef(0);
 
   const handlePadInput = useCallback((action: BattlePadAction) => {
+    if (watchMode || isTurnProcessing || isSwitchModalOpen) {
+      return;
+    }
     padCommandIdRef.current += 1;
     setPadCommand({ id: padCommandIdRef.current, action });
-  }, []);
+  }, [isSwitchModalOpen, isTurnProcessing, watchMode]);
   // useEffect(() => {
   //   timeLeftRef.current = timeLeft;
   //   console.log("💡 useEffect 타이머 리셋 트리거 확인", timeLeft);
@@ -431,6 +458,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   return (
 
     <div className={`battle-layout ${watchMode ? "" : "battle-layout--with-pad"}`}>
+      {toastMessage && <div className="battle-toast">{toastMessage}</div>}
       <button
         onClick={() => {
           setMusicOn((prev) => {
@@ -530,9 +558,15 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       <TurnBanner turn={turn} randomMode={randomMode} />
       <div className="main-area">
         <div className="pokemon_log">
-          <LogPanel logs={slicedLogs} />
-          <TimerBar timeLeft={timeLeft} />
-          <PokemonArea my={leftPokemon} enemy={rightPokemon} />
+          <div className="battle-timer-wrap">
+            <TimerBar timeLeft={timeLeft} />
+          </div>
+          <div className="battle-field-wrap">
+            <PokemonArea my={leftPokemon} enemy={rightPokemon} />
+          </div>
+          <div className="battle-log-wrap">
+            <LogPanel logs={logs} />
+          </div>
         </div>
 
         <div className="side-panel">

@@ -48,7 +48,7 @@ async function applyPanicUturn(side: "my" | "enemy", attacker: BattlePokemon, de
     let switchPromise: Promise<void> | null = null;
 
     if (watchMode || side === "enemy") {
-      console.log("👀 관전 모드 또는 AI: 위기회피 자동 교체");
+      console.log("👀 AI: 위기회피 자동 교체");
       const switchIndex = getBestSwitchIndex(side);
       switchPromise = new Promise<void>(async (resolve) => {
         await switchPokemon(side, switchIndex);
@@ -364,6 +364,7 @@ export async function applyDefensiveAbilityEffectAfterMultiDamage(side: "my" | "
             updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'defense', 1));
           }
         }
+        break;
     }
   }
   )
@@ -415,6 +416,7 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
             updatePokemon(opponentSide, activeOpponent, (defender) => changeRank(defender, 'defense', 1));
           }
         }
+        break;
       case "status_change":
         if (ability.name === '불꽃몸' && usedMove.isTouch) {
           if (Math.random() < 0.3) {
@@ -445,6 +447,7 @@ async function applyDefensiveAbilityEffectAfterDamage(side: "my" | "enemy", atta
             updatePokemon(side, activeMine, (prev) => addStatus(prev, '사슬묶기', side));
           }
         }
+        break;
       default:
         return;
     }
@@ -470,6 +473,7 @@ async function applyOffensiveAbilityEffectAfrerDamage(side: "my" | "enemy", atta
             updatePokemon(opponentSide, activeOpponent, (prev) => addStatus(prev, '독', opponentSide));
           }
         }
+        break;
       default:
         return;
     }

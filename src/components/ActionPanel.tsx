@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
 import SwapPanel from "./SwapPanel";
 import { useBattleStore } from "../Context/useBattleStore";
@@ -29,6 +29,7 @@ function ActionPanel({
   const [hintMode, setHintMode] = useState<boolean>(true);
   const [fightCursor, setFightCursor] = useState(0);
   const [switchCursor, setSwitchCursor] = useState(0);
+  const lastHandledPadCommandId = useRef(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
   const { turn, enemyTeam, activeEnemy } = useBattleStore.getState();
   const enemyTypes = enemyTeam[activeEnemy].base.types;
@@ -99,6 +100,10 @@ function ActionPanel({
 
   const handlePadAction = useCallback(
     (action: BattlePadAction) => {
+      if (isTurnProcessing || watchMode) {
+        return;
+      }
+
       if (action === "x") {
         setHintMode((prev) => !prev);
         return;
@@ -132,9 +137,6 @@ function ActionPanel({
       }
 
       if (action === "a") {
-        if (watchMode || isTurnProcessing) {
-          return;
-        }
         if (!currentTab) {
           setCurrentTab("fight");
           return;
@@ -160,8 +162,15 @@ function ActionPanel({
     if (!padCommand) {
       return;
     }
+    if (isTurnProcessing || watchMode) {
+      return;
+    }
+    if (padCommand.id === lastHandledPadCommandId.current) {
+      return;
+    }
+    lastHandledPadCommandId.current = padCommand.id;
     handlePadAction(padCommand.action);
-  }, [handlePadAction, padCommand]);
+  }, [handlePadAction, isTurnProcessing, padCommand, watchMode]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
