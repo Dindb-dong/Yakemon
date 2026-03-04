@@ -2,6 +2,8 @@ class AudioManager {
   private static instance: AudioManager;
   private audio?: HTMLAudioElement;
   private isMuted = false;
+  private manifestPromise?: Promise<void>;
+  private requestedCategory?: keyof typeof this.categorizedTracks;
   private categorizedTracks: Record<string, string[]> = {
     main: [],
     battle: [],
@@ -11,13 +13,22 @@ class AudioManager {
   };
 
   private constructor() {
-    fetch("/sound-manifest.json")
-      .then(res => res.json())
-      .then(data => {
-        this.categorizedTracks = data;
-        console.log("🔊 오디오 목록 로드됨", data);
-      })
-      .catch(err => console.error("🎵 오디오 매니페스트 로드 실패:", err));
+    this.loadManifest();
+  }
+
+  private loadManifest() {
+    if (!this.manifestPromise) {
+      this.manifestPromise = fetch("/sound-manifest.json")
+        .then((res) => res.json())
+        .then((data) => {
+          this.categorizedTracks = data;
+          console.log("🔊 오디오 목록 로드됨", data);
+        })
+        .catch((err) => {
+          console.error("🎵 오디오 매니페스트 로드 실패:", err);
+        });
+    }
+    return this.manifestPromise;
   }
 
   static getInstance() {
@@ -29,15 +40,29 @@ class AudioManager {
 
   play(category: keyof typeof this.categorizedTracks) {
     if (this.isMuted) return;
+    this.requestedCategory = category;
 
-    const files = this.categorizedTracks[category];
-    if (!files || files.length === 0) return;
+    const playCategory = () => {
+      if (this.isMuted || this.requestedCategory !== category) return;
+      const files = this.categorizedTracks[category];
+      if (!files || files.length === 0) return;
+      const randomFile = files[Math.floor(Math.random() * files.length)];
+      this.stop();
+      this.audio = new Audio(randomFile);
+      this.audio.loop = true;
+      this.audio.play().catch((err) => {
+        console.warn("🎵 오디오 재생 실패:", err);
+      });
+    };
 
-    const randomFile = files[Math.floor(Math.random() * files.length)];
-    this.stop();
-    this.audio = new Audio(randomFile);
-    this.audio.loop = true;
-    this.audio.play();
+    if (this.categorizedTracks[category]?.length) {
+      playCategory();
+      return;
+    }
+
+    this.loadManifest().then(() => {
+      playCategory();
+    });
   }
 
   stop() {
