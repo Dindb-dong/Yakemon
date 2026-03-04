@@ -22,10 +22,18 @@ import { useNavigate } from "react-router-dom";
 import { baseAiChooseAction } from "../utils/RL/baseAiChooseAction";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { calculateOrder } from "../utils/battleLogics/calculateOrder";
+import BattlePad, { BattlePadAction } from "./BattlePad";
 
+type BattleProps = {
+  watchMode: boolean;
+  redMode: boolean;
+  randomMode: boolean;
+  watchCount: number;
+  watchDelay: number;
+  setBattleKey: React.Dispatch<React.SetStateAction<number>>;
+};
 
-
-function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBattleKey }) {
+function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBattleKey }: BattleProps) {
   const myTeam = useBattleStore((state) => state.myTeam);
   const enemyTeam = useBattleStore((state) => state.enemyTeam);
   const {
@@ -132,6 +140,13 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [timeLeft, setTimeLeft] = useState(60); // 60초 제한
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const timeLeftRef = useRef(timeLeft);
+  const [padCommand, setPadCommand] = useState<{ id: number; action: BattlePadAction } | null>(null);
+  const padCommandIdRef = useRef(0);
+
+  const handlePadInput = useCallback((action: BattlePadAction) => {
+    padCommandIdRef.current += 1;
+    setPadCommand({ id: padCommandIdRef.current, action });
+  }, []);
   // useEffect(() => {
   //   timeLeftRef.current = timeLeft;
   //   console.log("💡 useEffect 타이머 리셋 트리거 확인", timeLeft);
@@ -255,7 +270,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
 
   const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
-    setPendingSwitch(() => (index) => {
+    setPendingSwitch(() => (index: number) => {
       onSwitchConfirmed(index);
       setIsSwitchModalOpen(false);
     });
@@ -267,7 +282,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       console.log('유턴 효과 실행중...3')
       startTimer();
       setIsSwitchModalOpen(true);
-      setPendingSwitch(() => (index) => {
+      setPendingSwitch(() => (index: number) => {
         if (switchRequest?.onSwitch) {
           switchRequest.onSwitch(index); // zustand의 콜백 실행
           console.log('유턴 효과 실행중...4')
@@ -347,7 +362,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   useEffect(() => {
     if (isFainted) {
       setIsSwitchModalOpen(true);
-      setPendingSwitch(() => async (index) => {
+      setPendingSwitch(() => async (index: number) => {
         console.log("my 포켓몬이 쓰러져서 교체 실행")
         await switchPokemon('my', index)
         clearSwitchRequest();
@@ -415,7 +430,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
   return (
 
-    <div className="battle-layout">
+    <div className={`battle-layout ${watchMode ? "" : "battle-layout--with-pad"}`}>
       <button
         onClick={() => {
           setMusicOn((prev) => {
@@ -424,23 +439,13 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
             return newState;
           });
         }}
-        style={{
-          position: "fixed", top: 10, right: 10, zIndex: 9999,
-          padding: "0.5rem", background: musicOn ? "#3f51b5" : "#999", color: "white"
-        }}
+        className={`music-toggle-button ${musicOn ? "is-on" : "is-off"}`}
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
-      <button onClick={() => { console.log(myTeam[activeMy]) }}>
-        포켓몬 정보 디버깅용
-      </button>
       {
         (isSwitchModalOpen && !watchMode) && (
-          <div style={{
-            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
-            justifyContent: "center", alignItems: "center", zIndex: 9999, flex: 1,
-          }}>
+          <div className="switch-modal-overlay">
             <div className="switch-modal">
               {isFainted && <h3>포켓몬이 쓰러졌습니다... 어느 포켓몬으로 교체하시겠습니까?</h3>}
               {!isFainted && <h3>어느 포켓몬으로 교체하시겠습니까?</h3>}
@@ -538,10 +543,17 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
             isTurnProcessing={isTurnProcessing}
             onAction={watchMode ? () => { } : executeTurn}
             watchMode={watchMode}
+            padCommand={padCommand}
           />
 
         </div>
       </div>
+      {!watchMode && (
+        <BattlePad
+          onInput={handlePadInput}
+          disabled={isTurnProcessing || isSwitchModalOpen}
+        />
+      )}
     </div>
   );
 }

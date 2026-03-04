@@ -11,18 +11,14 @@ function TimerBar({ timeLeft }: { timeLeft: number }) {
   }
 
   return (
-    <div style={{
-      width: "100%",
-      height: "10px",
-      backgroundColor: "#ccc",
-      margin: "10px 0"
-    }}>
-      <div style={{
-        height: "100%",
-        width: `${percentage}%`,
-        backgroundColor: barColor,
-        transition: "width 1s linear"
-      }} />
+    <div className="timer-bar-shell">
+      <div
+        className="timer-bar-fill"
+        style={{
+          width: `${percentage}%`,
+          backgroundColor: barColor,
+        }}
+      />
     </div>
   );
 }

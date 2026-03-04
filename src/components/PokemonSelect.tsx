@@ -27,11 +27,8 @@ export function PokemonDetailModal({
   realign: boolean;
 }) {
   return (
-    <div style={{
-      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-      backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex", justifyContent: "center", alignItems: "center"
-    }}>
-      <div style={{ background: "#fff", padding: "2rem", borderRadius: "10px", width: "400px", fontSize: "0.8rem" }}>
+    <div className="pokemon-modal-overlay">
+      <div className="pokemon-modal">
         <h2>{pokemon.name}</h2>
         <p>타입: {pokemon.types.join(", ")}</p>
         {/* <p>특성: {typeof pokemon.ability === 'string' ? pokemon.ability : pokemon.ability?.name ?? '없음'}</p> */}
@@ -42,14 +39,14 @@ export function PokemonDetailModal({
         <p>특수방어력: {realign ? pokemon.spDefense : pokemon.spDefense + 20}</p>
         <p>스피드: {realign ? pokemon.speed : pokemon.speed + 20}</p>
 
-        <div style={{ marginTop: "1rem" }}>
+        <div className="pokemon-modal-actions">
           {!isAlreadySelected && (
-            <button onClick={() => onSelect(pokemon)} style={{ marginRight: "1rem" }}>
+            <button onClick={() => onSelect(pokemon)}>
               등록하기
             </button>
           )}
           {isAlreadySelected && (
-            <button onClick={() => onSelect(pokemon)} style={{ marginRight: "1rem" }}>
+            <button onClick={() => onSelect(pokemon)}>
               취소하기
             </button>
           )}
@@ -154,10 +151,7 @@ function PokemonSelect({ onSelect }: Props) {
             return newState;
           });
         }}
-        style={{
-          position: "fixed", top: 10, right: 10, zIndex: 9999,
-          padding: "0.5rem", background: musicOn ? "#3f51b5" : "#999", color: "white"
-        }}
+        className={`music-toggle-button ${musicOn ? "is-on" : "is-off"}`}
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
@@ -169,34 +163,26 @@ function PokemonSelect({ onSelect }: Props) {
             AudioManager.getInstance().play("main");
           }
         }} />
-      )}<div style={{ padding: "2rem" }}>
-        <h2>내 포켓몬 3마리 선택</h2>
-        <div style={{ display: "flex", flexWrap: "wrap" }}>
+      )}<div className="select-screen">
+        <h2 className="select-title">내 포켓몬 3마리 선택</h2>
+        <div className="pokemon-grid">
           {sortedPokemon.map((p) => {
             const selectedIndex = selected.indexOf(p);
             return (
               <button
                 key={p.id}
                 onClick={() => openDetailModal(p)}
-                style={{
-                  backgroundColor: selected.includes(p) ? "#00bcd4" : "#eee",
-                  margin: "0.5rem",
-                  padding: "0.5rem 1rem",
-                  position: "relative",
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  minWidth: "80px",
-                }}
+                className={`pokemon-chip ${selected.includes(p) ? "selected" : ""}`}
               >
-                <div style={{ flexDirection: "row", display: "flex" }}>
+                <div className="pokemon-chip-content">
                   <img
                     src={thumbnails[p.id]}
                     alt={p.name}
-                    style={{ width: "25px", height: "25px", objectFit: "contain", marginRight: 10, borderRadius: 6 }}
+                    className="pokemon-thumb"
                   />
 
-                  <div style={{ flexDirection: "column", display: "flex" }}>
-                    <div style={{ fontSize: "0.7rem", color: "#333" }}>
+                  <div className="pokemon-chip-text">
+                    <div className="pokemon-type">
                       {p.types.join(", ")}
                     </div>
 
@@ -206,18 +192,7 @@ function PokemonSelect({ onSelect }: Props) {
 
 
                 {selectedIndex >= 0 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "-6px",
-                      right: "-16px",
-                      fontSize: "0.75rem",
-                      color: "#fff",
-                      backgroundColor: "#333",
-                      padding: "2px 6px",
-                      borderRadius: "12px",
-                    }}
-                  >
+                  <div className="selected-order">
                     {selectedIndex + 1}번째
                   </div>
                 )}
@@ -225,27 +200,11 @@ function PokemonSelect({ onSelect }: Props) {
             );
           })}
         </div>
-        <br />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-around", // 세로축 중앙 정렬
-          }}
-        >
+        <div className="battle-buttons">
           <button
             disabled={selected.length !== 3}
             onClick={() => onSelect(selected, false, false, false)}
-            style={{
-              marginTop: "1rem",
-              padding: "1rem 2rem",
-              backgroundColor: selected.length !== 3 ? "#676767" : "#7ea1ff",
-              borderRadius: "6px",
-              color: "#fff",
-              fontSize: "0.7rem",
-              border: "none",
-              cursor: selected.length === 3 ? "pointer" : "not-allowed"
-            }}
+            className="start-button normal"
           >
             배틀 시작
           </button>
@@ -261,24 +220,15 @@ function PokemonSelect({ onSelect }: Props) {
           <button
             disabled={selected.length !== 3}
             onClick={() => onSelect(selected, false, true, false)}
-            style={{
-              marginTop: "1rem",
-              padding: "1rem 2rem",
-              backgroundColor: selected.length !== 3 ? "#676767" : "#FF0000FF",
-              borderRadius: "6px",
-              color: "#fff",
-              fontSize: "0.7rem",
-              border: "none",
-              cursor: selected.length === 3 ? "pointer" : "not-allowed"
-            }}
+            className="start-button red"
           >
             레드와 배틀 시작
           </button>
         </div>
 
-        <div>
+        <div className="watch-mode">
           <h3>관전 모드</h3>
-          <div style={{ marginTop: "2rem", flexDirection: "row", flex: 1, display: "flex" }}>
+          <div className="watch-row">
             {/* <div style={{ flex: 0.3 }}> TODO: 관전횟수는 나중에 추가
       <h5>관전 횟수</h5>
       <input
@@ -289,19 +239,20 @@ function PokemonSelect({ onSelect }: Props) {
         style={{ marginRight: "0.5rem", padding: "0.25rem 0.5rem" }}
       />
     </div> */}
-            <div style={{ flex: 0.45 }}>
+            <div className="watch-input-wrap">
               <h5>관전 딜레이 타임</h5>
               <input
                 type="number"
                 min={1}
                 value={watchDelay}
                 onChange={(t) => setWatchDelay(parseFloat(t.target.value))}
-                style={{ marginRight: "0.5rem", padding: "0.25rem 0.5rem" }} />
+                className="watch-input"
+              />
             </div>
 
             <button
               onClick={() => onSelect(selected.length === 3 ? selected : [], true, true, false, watchCount, watchDelay)}
-              style={{ padding: "0.5rem 1rem", flex: 0.55 }}
+              className="watch-start-button"
             >
               관전 시작
             </button>
