@@ -333,49 +333,53 @@ function ActionPanel({
         </>
       )}
 
-      {/* 교체 모드 */}
-      {(!isMobile || currentTab === "switch") && (
-        <>
-          <SwapPanel
-            team={myTeam}
-            activeIndex={activeMy}
-            onSwitch={(index) => onAction({ type: "switch", index })}
-            watchMode={watchMode}
-            focusedSwitchIndex={currentTab === "switch" ? switchTargets[switchCursor]?.index ?? null : null}
-            selectedSwitchIndex={selectedSwitchIndex}
-          />
-          {currentTab === "switch" && selectedSwitchIndex !== null && (
-            <div className="switch-option-panel">
-              <span className={`switch-option-item ${switchOption === "detail" ? "pad-focused" : ""}`}>상세 보기</span>
-              <span className={`switch-option-item ${switchOption === "switch" ? "pad-focused" : ""}`}>교체하기</span>
-              {showSwitchDetail && (
-                <div className="switch-option-detail">
-                  {(() => {
-                    const selectedPokemon = myTeam[selectedSwitchIndex];
-                    if (!selectedPokemon) return null;
-                    return (
-                      <>
-                        <p>타입: {selectedPokemon.base.types.join(", ")}</p>
-                        <p>특성: {typeof selectedPokemon.base.ability === "string" ? selectedPokemon.base.ability : selectedPokemon.base.ability?.name ?? "없음"}</p>
-                        <p>체력: {selectedPokemon.currentHp} / {selectedPokemon.base.hp}</p>
-                        <p>공격력: {selectedPokemon.base.attack}</p>
-                        <p>방어력: {selectedPokemon.base.defense}</p>
-                        <p>특수공격력: {selectedPokemon.base.spAttack}</p>
-                        <p>특수방어력: {selectedPokemon.base.spDefense}</p>
-                        <p>스피드: {selectedPokemon.base.speed}</p>
-                        <p>상태이상: {selectedPokemon.status.join(", ") || "없음"}</p>
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
-            </div>
-          )}
-          {/* 모바일일 경우: 하단에 '싸운다' 버튼 보여줌 */}
-          {isMobile && (
-            <span className="action-toggle-btn">싸운다</span>
-          )}
-        </>
+      {currentTab === "switch" && !watchMode && (
+        <div className="switch-modal-overlay switch-modal-overlay--panel">
+          <div className="switch-modal switch-modal--panel">
+            <h3>교체할 포켓몬 선택 (Y로 열기/닫기, B로 뒤로)</h3>
+            {switchTargets.length > 0 ? (
+              <>
+                <SwapPanel
+                  team={myTeam}
+                  activeIndex={activeMy}
+                  onSwitch={(index) => onAction({ type: "switch", index })}
+                  watchMode={watchMode}
+                  focusedSwitchIndex={switchTargets[switchCursor]?.index ?? null}
+                  selectedSwitchIndex={selectedSwitchIndex}
+                />
+                {selectedSwitchIndex !== null && (
+                  <div className="switch-option-panel">
+                    <span className={`switch-option-item ${switchOption === "detail" ? "pad-focused" : ""}`}>상세 보기</span>
+                    <span className={`switch-option-item ${switchOption === "switch" ? "pad-focused" : ""}`}>교체하기</span>
+                    {showSwitchDetail && (
+                      <div className="switch-option-detail">
+                        {(() => {
+                          const selectedPokemon = myTeam[selectedSwitchIndex];
+                          if (!selectedPokemon) return null;
+                          return (
+                            <>
+                              <p>타입: {selectedPokemon.base.types.join(", ")}</p>
+                              <p>특성: {typeof selectedPokemon.base.ability === "string" ? selectedPokemon.base.ability : selectedPokemon.base.ability?.name ?? "없음"}</p>
+                              <p>체력: {selectedPokemon.currentHp} / {selectedPokemon.base.hp}</p>
+                              <p>공격력: {selectedPokemon.base.attack}</p>
+                              <p>방어력: {selectedPokemon.base.defense}</p>
+                              <p>특수공격력: {selectedPokemon.base.spAttack}</p>
+                              <p>특수방어력: {selectedPokemon.base.spDefense}</p>
+                              <p>스피드: {selectedPokemon.base.speed}</p>
+                              <p>상태이상: {selectedPokemon.status.join(", ") || "없음"}</p>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="switch-modal-empty">교체 가능한 포켓몬이 없습니다.</p>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

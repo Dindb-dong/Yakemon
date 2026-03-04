@@ -892,6 +892,20 @@ button {
   margin-top: 0;
 }
 
+.switch-modal-overlay--panel {
+  z-index: 3900;
+}
+
+.switch-modal--panel {
+  width: min(560px, 100%);
+}
+
+.switch-modal-empty {
+  margin: 0.3rem 0 0;
+  font-size: 0.86rem;
+  color: #5a4821;
+}
+
 .battle-toast-container {
   position: fixed;
   left: 50%;
