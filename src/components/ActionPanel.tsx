@@ -13,6 +13,7 @@ type ActionPanelParams = {
   onAction: any;
   watchMode: boolean;
   padCommand: { id: number; action: BattlePadAction } | null;
+  inputLocked?: boolean;
 };
 
 function ActionPanel({
@@ -23,6 +24,7 @@ function ActionPanel({
   onAction,
   watchMode,
   padCommand,
+  inputLocked = false,
 }: ActionPanelParams) {
   const isFainted = myPokemon.currentHp <= 0;
   const [currentTab, setCurrentTab] = useState<"fight" | "switch" | null>("fight");
@@ -110,7 +112,7 @@ function ActionPanel({
 
   const handlePadAction = useCallback(
     (action: BattlePadAction) => {
-      if (isTurnProcessing || watchMode) {
+      if (isTurnProcessing || watchMode || inputLocked) {
         return;
       }
 
@@ -185,14 +187,14 @@ function ActionPanel({
         setSwitchOption("detail");
       }
     },
-    [currentTab, fightCursor, getMoveDisabledState, isTurnProcessing, moveFightCursor, moveSwitchCursor, myPokemon.base.moves, myPokemon.status, onAction, selectedSwitchIndex, switchCursor, switchOption, switchTargets, watchMode]
+    [currentTab, fightCursor, getMoveDisabledState, inputLocked, isTurnProcessing, moveFightCursor, moveSwitchCursor, myPokemon.base.moves, myPokemon.status, onAction, selectedSwitchIndex, switchCursor, switchOption, switchTargets, watchMode]
   );
 
   useEffect(() => {
     if (!padCommand) {
       return;
     }
-    if (isTurnProcessing || watchMode) {
+    if (isTurnProcessing || watchMode || inputLocked) {
       return;
     }
     if (padCommand.id === lastHandledPadCommandId.current) {
@@ -200,7 +202,7 @@ function ActionPanel({
     }
     lastHandledPadCommandId.current = padCommand.id;
     handlePadAction(padCommand.action);
-  }, [handlePadAction, isTurnProcessing, padCommand, watchMode]);
+  }, [handlePadAction, inputLocked, isTurnProcessing, padCommand, watchMode]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

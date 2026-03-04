@@ -167,6 +167,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [currentWatch, setCurrentWatch] = useState(0);
   const leftPokemon = myTeam[activeMy];
   const rightPokemon = enemyTeam[activeEnemy];
+  const isFainted = leftPokemon.currentHp <= 0;
   const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
   const [isTurnProcessing, setIsTurnProcessing] = useState(false);
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
@@ -196,24 +197,21 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   //   console.log("💡 useEffect 타이머 리셋 트리거 확인", timeLeft);
   // }, [timeLeft]);
   const startTimer = useCallback(() => {
-    setTimeout(() => {
-      if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) clearInterval(timerRef.current);
 
-      timeLeftRef.current = 60;
-      setTimeLeft(60);
-      console.log("⌛ 타이머 시작 (60초)");
+    timeLeftRef.current = 60;
+    setTimeLeft(60);
+    console.log("⌛ 타이머 시작 (60초)");
 
-      timerRef.current = setInterval(() => {
+    timerRef.current = setInterval(() => {
+      timeLeftRef.current -= 1;
+      setTimeLeft(timeLeftRef.current);
 
-        timeLeftRef.current -= 1;
-        setTimeLeft(timeLeftRef.current);
-
-        if (timeLeftRef.current <= 0) {
-          clearInterval(timerRef.current!);
-          timerRef.current = null;
-        }
-      }, 1000);
-    }, 0); // 🔥 이벤트 루프 뒤로 밀어서 타이밍 맞춤
+      if (timeLeftRef.current <= 0) {
+        clearInterval(timerRef.current!);
+        timerRef.current = null;
+      }
+    }, 1000);
   }, []);
 
   useEffect(() => {
@@ -234,7 +232,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
   useEffect(() => {
     const handleTimeout = async () => {
-      if (timeLeft <= 0 && !isTurnProcessing && !watchMode) {
+      if (timeLeft <= 0 && !isTurnProcessing && !watchMode && !isSwitchModalOpen) {
         const current = myTeam[activeMy];
 
         if (current.currentHp <= 0) {
@@ -263,11 +261,11 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     };
 
     handleTimeout();
-  }, [timeLeft]);
+  }, [activeMy, isSwitchModalOpen, isTurnProcessing, myTeam, watchMode, timeLeft]);
 
   useEffect(() => {
     const handleChargingMove = async () => {
-      if (!watchMode && !isGameOver) {
+      if (!watchMode && !isGameOver && !isSwitchModalOpen && !isFainted && !isTurnProcessing) {
         const current = myTeam[activeMy];
         if (current.cannotMove) {
           addLog(`😵 ${current.base.name}은 아직 회복되지 않아 움직이지 못한다!`);
@@ -310,7 +308,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     };
 
     handleChargingMove();
-  }, [turn]); // 턴 시작할 때마다 실행
+  }, [activeMy, isFainted, isGameOver, isSwitchModalOpen, isTurnProcessing, turn, watchMode]); // 턴 시작할 때마다 실행
 
 
   const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
@@ -398,9 +396,6 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       }, 1000);
     }
   }, [turn, isGameOver, watchMode, currentWatch, isTurnProcessing]);
-
-  let isFainted: boolean = false;
-  isFainted = myTeam[activeMy].currentHp <= 0 ? true : false;
 
   // 내 포켓몬 기절했을 때 호출 
   useEffect(() => {
@@ -597,6 +592,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
             onAction={watchMode ? () => { } : executeTurn}
             watchMode={watchMode}
             padCommand={padCommand}
+            inputLocked={isSwitchModalOpen || isFainted}
           />
 
         </div>
