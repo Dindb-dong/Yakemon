@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getLeaderboard, LeaderboardEntry } from '../api/leaderboard';
+import { getLeaderboard, LeaderboardEntry, LeaderboardError } from '../api/leaderboard';
 import './Leaderboard.css';
 
 const Leaderboard = () => {
@@ -7,27 +7,46 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const data = await getLeaderboard();
-        setLeaderboardData(data);
-      } catch (err) {
+  const fetchLeaderboard = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getLeaderboard();
+      setLeaderboardData(data);
+    } catch (err) {
+      if (err instanceof LeaderboardError) {
+        setError(err.message);
+      } else {
         setError('리더보드를 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchLeaderboard();
   }, []);
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="leaderboard-container">
+        <div className="loading">리더보드를 불러오는 중...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <div className="leaderboard-container">
+        <div className="error">
+          <p>{error}</p>
+          <button onClick={fetchLeaderboard} className="retry-button">
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -38,16 +57,18 @@ const Leaderboard = () => {
           <div className="rank">순위</div>
           <div className="username">사용자</div>
           <div className="streak">연승</div>
-          <div className="wins">승리</div>
         </div>
-        {leaderboardData.map((entry) => (
-          <div key={entry.rank} className="table-row">
-            <div className="rank">{entry.rank}</div>
-            <div className="username">{entry.username}</div>
-            <div className="streak">{entry.streak}</div>
-            <div className="wins">{entry.wins}</div>
-          </div>
-        ))}
+        {leaderboardData.length === 0 ? (
+          <div className="no-data">아직 기록이 없습니다.</div>
+        ) : (
+          leaderboardData.map((entry) => (
+            <div key={entry.rank} className="table-row">
+              <div className="rank">{entry.rank}</div>
+              <div className="username">{entry.username}</div>
+              <div className="streak">{entry.streak}</div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

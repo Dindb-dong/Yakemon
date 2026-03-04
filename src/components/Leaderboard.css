@@ -1,64 +1,95 @@
 .leaderboard-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
+  max-width: 900px;
+  margin: 1.3rem auto 2rem;
+  padding: 1rem;
+  border: 4px solid #7f6a2f;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 251, 238, 0.96), rgba(245, 232, 192, 0.94));
+  box-shadow: 0 10px 18px rgba(52, 39, 12, 0.18);
+}
+
+.leaderboard-container h1 {
+  margin: 0 0 0.8rem;
+  font-family: "VT323", monospace;
+  font-size: 2.3rem;
 }
 
 .leaderboard-table {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 3px solid #6f5824;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .table-header {
   display: grid;
-  grid-template-columns: 80px 1fr 100px 100px;
-  padding: 1rem;
-  background-color: #2c3e50;
-  color: white;
-  font-weight: bold;
+  grid-template-columns: 80px 1fr 100px;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  background: linear-gradient(180deg, #3f86d8, #255ea8);
+  color: #fff;
+  font-weight: 700;
 }
 
 .table-row {
   display: grid;
-  grid-template-columns: 80px 1fr 100px 100px;
-  padding: 1rem;
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.3s ease;
+  grid-template-columns: 80px 1fr 100px;
+  gap: 0.3rem;
+  padding: 0.7rem 0.75rem;
+  border-top: 1px solid rgba(111, 88, 36, 0.25);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.table-row:nth-child(odd) {
+  background: rgba(255, 248, 230, 0.9);
 }
 
 .table-row:hover {
-  background-color: #f8f9fa;
+  background: rgba(173, 220, 255, 0.4);
 }
 
-.table-row:last-child {
-  border-bottom: none;
-}
-
-.rank {
+.rank,
+.streak {
   text-align: center;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .username {
-  padding-left: 1rem;
+  padding-left: 0.35rem;
 }
 
-.streak, .wins {
+.loading,
+.error,
+.no-data {
   text-align: center;
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: #666;
+  padding: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .error {
-  text-align: center;
-  padding: 2rem;
-  color: #e74c3c;
-  font-size: 1.2rem;
-} 
+  color: #8d2a21;
+}
+
+.retry-button {
+  margin-top: 0.5rem;
+  border: 2px solid #2d240f;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #4a8be8, #255fae);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.42rem 0.8rem;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .leaderboard-container {
+    margin: 0.8rem;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 66px 1fr 80px;
+    font-size: 0.85rem;
+  }
+}

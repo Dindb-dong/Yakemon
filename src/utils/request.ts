@@ -4,7 +4,7 @@ import { getAccessToken, getRefreshToken, removeAccessToken, setAccessToken } fr
 
 // API 기본 URL 설정
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8090';
-
+console.log(BASE_URL);
 // 기본 요청 설정
 const defaultRequest = async <T>(
   path: string,

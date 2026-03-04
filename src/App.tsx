@@ -8,36 +8,23 @@ import "./index.css";
 import { createBattlePokemon } from "./utils/battleLogics/createBattlePokemon";
 import { useBattleStore } from "./Context/useBattleStore";
 import { PokemonInfo } from "./models/Pokemon";
-import { createMockPokemon } from "./data/mockPokemon";
-import { applyAppearance } from "./utils/battleLogics/applyAppearance";
 import { BattlePokemon } from "./models/BattlePokemon";
 import BottomBar from "./components/BottomBar";
-import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { shuffleArray } from "./utils/shuffle";
-import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "./data/createWincountPokemon";
-
-const gen1Pokemon = createGen1Pokemon();
-const gen2Pokemon = gen1Pokemon.concat(createGen2Pokemon());
-const gen3Pokemon = gen2Pokemon.concat(createGen3Pokemon());
-const gen4Pokemon = gen3Pokemon.concat(createGen4Pokemon());
-const gen5Pokemon = gen4Pokemon.concat(createGen5Pokemon());
-const gen6Pokemon = gen5Pokemon.concat(createGen6Pokemon());
-const gen7Pokemon = gen6Pokemon.concat(createGen7Pokemon());
-const gen8Pokemon = gen7Pokemon.concat(createGen8Pokemon());
-const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
+import { createGen1Pokemon } from "./data/createWincountPokemon";
 
 function MainApp() {
   const mockPokemon = createGen1Pokemon();
-  const [isSelected, setIsSelected] = useState(false);
   const { setMyTeam, setEnemyTeam } = useBattleStore();
   const [watchMode, setWatchMode] = useState(false);
   const [redMode, setRedMode] = useState(false);
   const [randomeMode, setRandomMode] = useState(false);
   const [watchCount, setWatchCount] = useState(1);
   const [watchDelay, setWatchDelay] = useState(1.5);
-  const { addLog } = useBattleStore.getState();
   const [battleKey, setBattleKey] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSelect = useCallback(
     (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => {
@@ -94,7 +81,6 @@ function MainApp() {
       navigate("/battle");
       setMyTeam(myBattleTeam);
       setEnemyTeam(aiBattleTeam);
-      setIsSelected(true); // 화면 전환 트리거
     },
     [setMyTeam, setEnemyTeam]
   );
@@ -118,17 +104,13 @@ function MainApp() {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
+      {location.pathname !== "/battle" && <BottomBar />}
     </>
   );
 }
 
 function App() {
-  return (
-    <>
-      <MainApp />
-      <BottomBar />
-    </>
-  );
+  return <MainApp />;
 }
 
 export default App;

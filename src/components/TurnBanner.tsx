@@ -95,13 +95,13 @@ function TurnBanner({ turn, randomMode }: { turn: number, randomMode: boolean })
       )}
 
       {/* 필드 효과 */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem", fontSize: "0.85rem" }}>
-        <div>
+      <div className="side-effects-row">
+        <div className="side-effects left">
           {mySideEffects.map((eff, i) => (
             <div key={i}>🟩 {eff}</div>
           ))}
         </div>
-        <div>
+        <div className="side-effects right">
           {enemySideEffects.map((eff, i) => (
             <div key={i}>🟥 {eff}</div>
           ))}

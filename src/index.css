@@ -1,363 +1,890 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=VT323&display=swap");
+
+:root {
+  --ui-bg: #f5ecd4;
+  --ui-panel: #fff9e8;
+  --ui-panel-strong: #f6e7be;
+  --ui-border: #7f6a2f;
+  --ui-accent: #d6452f;
+  --ui-accent-soft: #f3c453;
+  --ui-green: #4b9b5f;
+  --ui-blue: #2369bb;
+  --ui-text: #312710;
+  --ui-shadow: 0 10px 18px rgba(52, 39, 12, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans KR", "Noto Sans KR", sans-serif;
+  color: var(--ui-text);
+  background:
+    radial-gradient(circle at 15% 15%, #fff7df 0%, rgba(255, 247, 223, 0) 45%),
+    radial-gradient(circle at 85% 8%, #e8f5d4 0%, rgba(232, 245, 212, 0) 40%),
+    linear-gradient(180deg, #e8d6a7 0%, #f3e4c2 40%, #f8eed8 100%);
+  background-attachment: fixed;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
 .battle-layout {
-  padding: 1rem;
+  position: relative;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 1rem 1.2rem 1.8rem;
 }
 
-.switch-modal {
+.battle-layout--with-pad {
+  padding-bottom: 240px;
+}
+
+.music-toggle-button {
   position: fixed;
-  top: 10%;
-  left: 50%;
-  height: 80vh;
-  overflow: scroll;
-  transform: translateX(-50%);
-  background: white;
-  border: 2px solid black;
-  padding: 16px;
-  z-index: 9999;
-}
-
-.random-button {
-  margin-top: 1rem;
-  padding: 1rem 2rem;
-  background-color: #66D16D;
-  border-radius: 6px;
+  top: 0.8rem;
+  right: 1rem;
+  z-index: 1200;
+  border: 2px solid #221b0c;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.75rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
   color: #fff;
-  font-size: 0.7rem;
-  border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.random-button:hover {
-  background-color: #6ce274;
-  color:#e2e2e2
+.music-toggle-button.is-on {
+  background: linear-gradient(180deg, #5b88e5, #2d4f96);
+}
+
+.music-toggle-button.is-off {
+  background: linear-gradient(180deg, #9c9a92, #6f6d63);
 }
 
 .turn-banner {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
   margin-bottom: 1rem;
+  border: 4px solid var(--ui-border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--ui-panel) 0%, #efe1b7 100%);
+  box-shadow: var(--ui-shadow);
+  padding: 0.8rem 1rem;
+  text-align: center;
+  font-family: "VT323", monospace;
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+}
+
+.public-env {
+  margin-top: 0.35rem;
+  font-family: "IBM Plex Sans KR", "Noto Sans KR", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.side-effects-row {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: "IBM Plex Sans KR", "Noto Sans KR", sans-serif;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.side-effects {
+  flex: 1;
+  border: 1px solid rgba(49, 39, 16, 0.15);
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .main-area {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: minmax(520px, 1.7fr) minmax(300px, 1fr);
   gap: 1rem;
 }
 
 .pokemon_log {
-  flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
-.pokemon-area {
-  flex: 0.7;
-  display: flex;
+.timer-bar-shell {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid #5a471a;
+  overflow: hidden;
+  background: rgba(77, 66, 38, 0.3);
 }
 
-.pokemon-card {
-  border: 1px solid #ccc;
-  padding: 1rem;
-  width: 48%;
-  height: 90%;
-}
-.pokemon-area p {
-  font-size: 0.9rem; /* 기본 사이즈 줄이기 */
-  margin: 0.3rem 0;
-}
-
-.side-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.action-panel > div {
-  margin-bottom: 1rem;
+.timer-bar-fill {
+  height: 100%;
+  transition: width 1s linear;
 }
 
 .log-panel {
-  flex: 0.8;
-  max-height: 120px;
-  overflow-y: auto;
-  background: #f7f7f7;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  font-size: 0.9rem;
-}
-
-.status-card {
-  background: #f8f8f8;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  margin-top: 0.5rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  flex:auto;
-}
-
-.swap-panel {
-  flex: 1;
-  padding: 0.5rem;
-  background: #fefefe;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.swap-slot {
-  margin-bottom: 0.75rem;
-  flex-direction: column;
-  justify-content: center;
-  align-self: center;
-  align-content: center;
-  align-items: center;
-}
-
-.swap-slot button {
-  margin: 0.3rem;
-  margin-left: 0;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.95rem;
-  border: none;
-  border-radius: 4px;
-  background-color: #74b7fb;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.swap-slot button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
-}
-
-.swap-slot button:hover:not(:disabled) {
-  background-color: #1565c0;
-}
-
-.status-card {
-  background: #f0f4f8;
-  padding: 0.75rem;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-.status-card p {
-  margin: 0.25rem 0;
-}
-
-.status-card ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.status-card li {
-  margin-left: 0.5rem;
-}
-
-.hint-toggle {
-  background-color: #2d8fff86;
-  width: 40%;
-  height: 40px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 0.5rem;
-  text-align: center;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  justify-self: center;
-  align-items: center;
-  align-content: center;
-  font-size: 0.8rem;
-  transition: background-color 0.2s ease-in-out;
-  align-self: center;
-  margin-bottom: 3%;
-}
-
-.hint-toggle:hover:not(:disabled) {
-  background-color: #2d8fff;
-}
-
-/* 기술 선택 버튼 그리드 */
-.move-grid {
-  flex: 1;
-  display: grid;
-  background: #fefefe;
-  grid-template-columns: repeat(2, 1fr); /* 2개씩 정렬 */
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.move-button {
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 1rem;
-  text-align: center;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  font-size: 0.95rem;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.move-button:hover:not(:disabled) {
-  background-color: #d5d5d5;
-}
-
-.move-button:disabled {
-  background-color: #aaa;
-  color: #eee;
-  cursor: not-allowed;
-}
-
-.move-button .move-name {
-  font-weight: bold;
-  display: block;
-  font-size: 1.1em;
-}
-
-.move-button .move-pp,
-.move-button .move-power,
-.move-button .move-accuracy {
-  display: block;
-  font-size: 0.9em;
-  color: #555;
-  margin-top: 2px;
-}
-
-.move-name {
-  font-size: 1rem;
-  align-self: center;
-  text-align: center;
-}
-
-.move-pp {
-  font-size: 0.75rem;
-  color: #333;
-  align-self: center;
-  text-align: center;
-}
-
-.move-type {
-  margin-top: 0.4rem;
-  padding: 0.2rem 0.5rem;
+  border: 3px solid #5b4820;
   border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: white;
-  display: inline-block;
-  align-self: center;
-  text-align: center;
+  background: #f8f1da;
+  box-shadow: var(--ui-shadow);
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 0.6rem 0.8rem;
 }
 
-/* 타입별 색상 설정 */
-.move-type.불 { background-color: #F08030; }
-.move-type.물 { background-color: #4375e8; }
-.move-type.풀 { background-color: #78C850; }
-.move-type.전기 { background-color: #F8D030; }
-.move-type.얼음 { background-color: #98D8D8; }
-.move-type.격투 { background-color: #C03028; }
-.move-type.비행 { background-color: #a2b9f3; }
-.move-type.에스퍼 { background-color: #F85888; }
-.move-type.바위 { background-color: #B8A038; }
-.move-type.고스트 { background-color: #705898; }
-.move-type.드래곤 { background-color: #4412c4; }
-.move-type.악 { background-color: #160e09; }
-.move-type.강철 { background-color: #8b8b9a; }
-.move-type.페어리 { background-color: #EE99AC; }
-.move-type.노말 { background-color: #f7f7f7; color:#160e09;}
-.move-type.독 { background-color: #A040A0; }
-.move-type.땅 { background-color: #e0b94e; }
-.move-type.벌레 { background-color: #A8B820; }
-
-.move-power,
-.move-accuracy {
-  font-size: 0.75rem;
-  color: #444;
-  align-self: center;
-  text-align: center;
+.log-title {
+  margin: 0 0 0.45rem;
+  font-family: "VT323", monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
 }
 
-.move-button.effective {
-  background-color: #fff7cc; /* 연한 노랑 */
+.log-list {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.87rem;
+  line-height: 1.45;
 }
 
-.move-button.very-effective {
-  background-color: #ffe066; /* 노랑 */
+.pokemon-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
 }
 
-.move-button.not-effective {
-  background-color: #9b9b9b; /* 연한 회색 */
+.pokemon-card {
+  min-height: 280px;
+  border: 3px solid #5b4820;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(254, 248, 228, 0.97), rgba(246, 229, 181, 0.94)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 8px, rgba(255, 255, 255, 0.04) 8px 16px);
+  box-shadow: var(--ui-shadow);
+  padding: 0.85rem 0.8rem;
 }
 
-.move-button.not-very-effective {
-  background-color: #5d5d5d; /* 연한 회색 */
+.pokemon-card h5 {
+  margin: 0 0 0.5rem;
+  font-size: 0.96rem;
+  font-weight: 700;
 }
 
-.move-button.no-effect {
-  background-color: #393939; /* 어두운 회색 */
+.pokemon-card p {
+  margin: 0.25rem 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.pokemon-image {
+  width: min(120px, 100%);
+  height: auto;
+  margin: 0.25rem auto 0.5rem;
+  display: block;
+  image-rendering: pixelated;
 }
 
 .hp-bar-container {
   width: 100%;
   height: 12px;
-  background-color: #ddd;
-  border: 1px solid #aaa;
-  border-radius: 6px;
-  margin: 4px 0 8px;
+  background: rgba(73, 57, 27, 0.16);
+  border: 2px solid #5b4820;
+  border-radius: 999px;
   overflow: hidden;
+  margin: 0.3rem 0 0.45rem;
 }
 
 .hp-bar {
   height: 100%;
-  transition: width 0.3s ease-in-out;
+  transition: width 0.3s ease;
 }
 
-/* 체력 비율에 따라 색 변경 */
 .hp-green {
-  background-color: #4caf50; /* 초록 */
+  background: linear-gradient(180deg, #8ddd80, #3f8f44);
 }
 
 .hp-yellow {
-  background-color: #fbc02d; /* 노랑 */
+  background: linear-gradient(180deg, #fee884, #d6a73b);
 }
 
 .hp-red {
-  background-color: #f44336; /* 빨강 */
+  background: linear-gradient(180deg, #ff8b7b, #bc3324);
 }
 
-.pokemon-image {
+.side-panel {
+  border: 3px solid var(--ui-border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fdf7e7 0%, #f2e3b6 100%);
+  box-shadow: var(--ui-shadow);
+  padding: 0.8rem;
+}
+
+.action-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.hint-toggle {
   width: 100%;
-  max-width: 100px;
+  border: 2px solid #3a2f13;
+  background: linear-gradient(180deg, #6cc5f5 0%, #338dcb 100%);
+  color: #fefefe;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hint-toggle:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.pad-help {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4e4125;
+  border: 1px dashed rgba(78, 65, 37, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0.35rem 0.55rem;
+}
+
+.move-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.move-button {
+  border: 2px solid #4f3f1d;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f7f7f7 0%, #ddd8c8 100%);
+  color: #2e240d;
+  min-height: 118px;
+  text-align: left;
+  padding: 0.7rem 0.7rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  box-shadow: 0 3px 0 #7f6a2f;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+}
+
+.move-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.move-button:disabled {
+  cursor: not-allowed;
+  color: #7c7560;
+  background: #cbc7bb;
+  box-shadow: none;
+}
+
+.move-name {
   display: block;
-  margin: 0 auto 0.5rem;
+  font-weight: 700;
+  font-size: 0.98rem;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+.move-pp,
+.move-power,
+.move-accuracy {
+  font-size: 0.76rem;
+  color: rgba(46, 36, 13, 0.82);
 }
 
-@keyframes shakeAndFlash {
-  0%   { transform: translateX(0); background-color: transparent; }
-  25%  { transform: translateX(-4px); background-color: rgba(255, 0, 0, 0.2); }
-  50%  { transform: translateX(4px); background-color: rgba(255, 0, 0, 0.4); }
-  75%  { transform: translateX(-2px); background-color: rgba(255, 0, 0, 0.2); }
-  100% { transform: translateX(0); background-color: transparent; }
+.move-type {
+  margin-top: 0.2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.14rem 0.5rem;
+  color: #fff;
+}
+
+.move-type.불 { background-color: #ef6d2b; }
+.move-type.물 { background-color: #2a74d8; }
+.move-type.풀 { background-color: #55ae41; }
+.move-type.전기 { background-color: #d6a314; }
+.move-type.얼음 { background-color: #4ba4b5; }
+.move-type.격투 { background-color: #a3381b; }
+.move-type.비행 { background-color: #708fcf; }
+.move-type.에스퍼 { background-color: #d34b83; }
+.move-type.바위 { background-color: #8f7a2e; }
+.move-type.고스트 { background-color: #5d4b95; }
+.move-type.드래곤 { background-color: #4a26af; }
+.move-type.악 { background-color: #4e4037; }
+.move-type.강철 { background-color: #728295; }
+.move-type.페어리 { background-color: #cb6a8a; }
+.move-type.노말 { background-color: #dbd7ce; color: #433625; }
+.move-type.독 { background-color: #8651aa; }
+.move-type.땅 { background-color: #c69a4b; }
+.move-type.벌레 { background-color: #7d9327; }
+
+.move-button.effective {
+  background: linear-gradient(180deg, #fff7cc, #f8eb99);
+}
+
+.move-button.very-effective {
+  background: linear-gradient(180deg, #ffe88b, #ffcb2e);
+}
+
+.move-button.not-effective {
+  background: linear-gradient(180deg, #d5d4cc, #b8b7af);
+}
+
+.move-button.not-very-effective {
+  background: linear-gradient(180deg, #9f9f97, #7d7d75);
+}
+
+.move-button.no-effect {
+  background: linear-gradient(180deg, #797972, #5e5e57);
+  color: #f4f4f4;
+}
+
+.move-button.no-effect .move-pp,
+.move-button.no-effect .move-power,
+.move-button.no-effect .move-accuracy {
+  color: #e2e2e2;
+}
+
+.pad-focused {
+  outline: 3px solid var(--ui-accent);
+  outline-offset: 1px;
+  animation: padFocusPulse 1s infinite;
+}
+
+@keyframes padFocusPulse {
+  0% { box-shadow: 0 0 0 rgba(214, 69, 47, 0.45); }
+  50% { box-shadow: 0 0 12px rgba(214, 69, 47, 0.45); }
+  100% { box-shadow: 0 0 0 rgba(214, 69, 47, 0.45); }
+}
+
+.swap-panel {
+  border: 2px solid #5a481f;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0.65rem;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.swap-panel h3 {
+  margin: 0 0 0.6rem;
+  font-family: "VT323", monospace;
+  font-size: 1.4rem;
+}
+
+.swap-slot {
+  margin-bottom: 0.65rem;
+}
+
+.swap-slot button {
+  border: 2px solid #3f6eb3;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #66a9ff, #3373d7);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.42rem 0.7rem;
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+}
+
+.swap-slot button:hover:not(:disabled) {
+  filter: brightness(1.07);
+}
+
+.swap-slot button:disabled {
+  background: #8e8e8e;
+  border-color: #7a7a7a;
+  cursor: not-allowed;
+}
+
+.status-card {
+  margin-top: 0.45rem;
+  border: 1px solid #b7a571;
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  background: #fff4d6;
+  font-size: 0.78rem;
+}
+
+.status-card p {
+  margin: 0.2rem 0;
+}
+
+.status-card ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1rem;
+}
+
+.status-card li {
+  margin: 0.15rem 0;
+}
+
+.action-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.action-toggle-btn {
+  border: 2px solid #2e4f89;
+  background: linear-gradient(180deg, #74abff, #4574cc);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.action-toggle-btn:disabled {
+  border-color: #7b7b7b;
+  background: #999;
+  cursor: not-allowed;
+}
+
+.switch-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 4000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.switch-modal {
+  width: min(700px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #fff8e4;
+  border: 4px solid #6f5824;
+  border-radius: 14px;
+  box-shadow: var(--ui-shadow);
+  padding: 1rem;
+}
+
+.switch-modal h3 {
+  margin-top: 0;
+}
+
+.battle-pad {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 200px;
+  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(180deg, #dbceb1 0%, #a79b81 100%);
+  border-top: 4px solid #5f4d28;
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.22);
+  touch-action: none;
+  z-index: 3000;
+}
+
+.battle-pad-disabled {
+  opacity: 0.7;
+}
+
+.battle-pad-left {
+  width: min(240px, 42vw);
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  place-items: center;
+}
+
+.dpad-up { grid-column: 2; grid-row: 1; }
+.dpad-left { grid-column: 1; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down { grid-column: 2; grid-row: 3; }
+
+.pad-center {
+  grid-column: 2;
+  grid-row: 2;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 2px solid #302613;
+  background: linear-gradient(180deg, #726853 0%, #4b4334 100%);
+}
+
+.battle-pad-right {
+  width: min(240px, 42vw);
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  place-items: center;
+}
+
+.y-btn { grid-column: 2; grid-row: 1; }
+.x-btn { grid-column: 1; grid-row: 2; }
+.a-btn { grid-column: 3; grid-row: 2; }
+.b-btn { grid-column: 2; grid-row: 3; }
+
+.pad-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  border: 2px solid #271f10;
+  background: linear-gradient(180deg, #847760 0%, #544b39 100%);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  box-shadow: 0 4px 0 rgba(20, 16, 8, 0.8);
+  user-select: none;
+  cursor: pointer;
+}
+
+.face-btn {
+  border-radius: 999px;
+}
+
+.x-btn {
+  background: linear-gradient(180deg, #3d6bc0, #1d468f);
+}
+
+.y-btn {
+  background: linear-gradient(180deg, #7a5dbd, #4e3684);
+}
+
+.a-btn {
+  background: linear-gradient(180deg, #da5a3f, #a53322);
+}
+
+.b-btn {
+  background: linear-gradient(180deg, #3aa162, #237044);
+}
+
+.pad-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(20, 16, 8, 0.8);
+}
+
+.select-screen {
+  max-width: 1240px;
+  margin: 1.2rem auto 1.8rem;
+  border: 4px solid #7f6a2f;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 252, 239, 0.95), rgba(243, 230, 191, 0.95));
+  box-shadow: var(--ui-shadow);
+  padding: 1.1rem;
+}
+
+.select-title {
+  margin: 0 0 0.9rem;
+  font-family: "VT323", monospace;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+}
+
+.pokemon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.5rem;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.pokemon-chip {
+  position: relative;
+  border: 2px solid #7d6a39;
+  border-radius: 12px;
+  padding: 0.45rem 0.5rem;
+  background: linear-gradient(180deg, #ffffff 0%, #ebe3cf 100%);
+  cursor: pointer;
+}
+
+.pokemon-chip:hover {
+  border-color: #2164ba;
+}
+
+.pokemon-chip.selected {
+  border-color: #0f5eb2;
+  background: linear-gradient(180deg, #c9ebff 0%, #8fd0ff 100%);
+}
+
+.pokemon-chip-content {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pokemon-thumb {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+}
+
+.pokemon-chip-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pokemon-type {
+  font-size: 0.64rem;
+  color: #61522d;
+}
+
+.selected-order {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.5rem;
+  border-radius: 999px;
+  background: #1f2d48;
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 0.12rem 0.46rem;
+}
+
+.battle-buttons {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.start-button,
+.random-button,
+.watch-start-button {
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.65rem 0.95rem;
+  cursor: pointer;
+}
+
+.start-button:disabled {
+  background: #9b968a;
+  border-color: #7f7a70;
+  color: #ececec;
+  cursor: not-allowed;
+}
+
+.start-button.normal {
+  background: linear-gradient(180deg, #548dff, #2c5dc5);
+}
+
+.start-button.red {
+  background: linear-gradient(180deg, #ec5b43, #ae2418);
+}
+
+.random-button {
+  background: linear-gradient(180deg, #5aba63, #2f8742);
+}
+
+.watch-mode {
+  margin-top: 1rem;
+  border: 2px solid #7f6a2f;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0.7rem;
+}
+
+.watch-mode h3,
+.watch-mode h5 {
+  margin: 0;
+}
+
+.watch-row {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-end;
+  margin-top: 0.6rem;
+}
+
+.watch-input-wrap {
+  flex: 1;
+}
+
+.watch-input {
+  margin-top: 0.35rem;
+  width: 100%;
+  border: 2px solid #a78e54;
+  border-radius: 8px;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.watch-start-button {
+  background: linear-gradient(180deg, #e0a953, #b07825);
+  white-space: nowrap;
+}
+
+.pokemon-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4200;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.pokemon-modal {
+  width: min(440px, 100%);
+  border: 4px solid #6f5824;
+  border-radius: 14px;
+  background: #fff8e3;
+  padding: 1rem 1.1rem;
+  box-shadow: var(--ui-shadow);
+  font-size: 0.86rem;
+}
+
+.pokemon-modal h2 {
+  margin-top: 0;
+}
+
+.pokemon-modal p {
+  margin: 0.28rem 0;
+}
+
+.pokemon-modal-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.pokemon-modal-actions button {
+  border: 2px solid #2d240f;
+  border-radius: 8px;
+  background: #2f72d0;
+  color: #fff;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.result-screen {
+  min-height: calc(100vh - 90px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.result-card {
+  width: min(560px, 100%);
+  border: 4px solid #7f6a2f;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 251, 238, 0.96), rgba(245, 232, 192, 0.94));
+  box-shadow: var(--ui-shadow);
+  padding: 1.2rem;
+  text-align: center;
+}
+
+.result-title {
+  margin: 0;
+  font-family: "VT323", monospace;
+  font-size: 2.8rem;
+}
+
+.result-subtitle {
+  margin: 0.4rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #8f2f25;
+}
+
+.result-save-box {
+  margin-top: 1rem;
+  border: 2px solid #8d773f;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.result-save-id,
+.result-save-status,
+.result-save-help,
+.result-save-error {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.result-save-id {
+  font-family: "VT323", monospace;
+  font-size: 1.1rem;
+}
+
+.result-save-status {
+  color: #1e6a41;
+  font-weight: 700;
+}
+
+.result-save-help {
+  color: #5a4a25;
+}
+
+.result-save-error {
+  color: #9f2f24;
+  font-weight: 700;
+}
+
+.result-main-button {
+  margin-top: 1rem;
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #4a8be8, #255fae);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.result-flow-hint {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5b4a22;
 }
 
 .damage-effect {
@@ -369,164 +896,84 @@
   background-color: rgba(0, 255, 0, 0.1);
 }
 
+@keyframes shakeAndFlash {
+  0% { transform: translateX(0); background-color: transparent; }
+  25% { transform: translateX(-4px); background-color: rgba(255, 0, 0, 0.2); }
+  50% { transform: translateX(4px); background-color: rgba(255, 0, 0, 0.35); }
+  75% { transform: translateX(-2px); background-color: rgba(255, 0, 0, 0.2); }
+  100% { transform: translateX(0); background-color: transparent; }
+}
+
 @keyframes healFlash {
-  0%   { background-color: rgba(0, 255, 0, 0.15); }
-  50%  { background-color: rgba(0, 255, 0, 0.3); }
+  0% { background-color: rgba(0, 255, 0, 0.12); }
+  50% { background-color: rgba(0, 255, 0, 0.3); }
   100% { background-color: rgba(0, 255, 0, 0.1); }
 }
 
-/* 모바일 반응형 */
-@media (max-width: 768px) {
+@media (max-width: 1080px) {
   .main-area {
-    flex-direction: column;
-  }
-  .pokemon-area {
-    flex-direction: row;
-  }
-  .pokemon-area p {
-    font-size: 0.85rem;
-  }
-  .side-panel {
-    flex-direction: column;
-  }
-  .action-panel {
-    display: flex;
-    flex:1;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .swap-slot {
-    flex-direction: row;
-  }
-  .swap-panel {
-    flex-direction: row;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-  .swap-slot button {
-    width: 100%;
-    font-size: 1rem;
-  }
-  .status-card {
-    font-size: 0.85rem;
-  }
-  .move-grid {
-    display: grid;
-    grid-template-columns: (4,1fr);
-    width: 100%;
+    grid-template-columns: 1fr;
   }
 
-  .move-button {
-    font-size: 0.85rem;
-    padding: 0.75rem;
-    height: 90%;
-    width: 100%; /* 👉 가로 꽉 차게 */
-    box-sizing: border-box;
-  }
-
-  .move-button .move-name {
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .move-button .move-pp,
-  .move-button .move-power,
-  .move-button .move-accuracy,
-  .move-button .move-type {
-    font-size: 0.75rem;
-    text-align: center;
-  }
-
-  .action-toggle {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 0.75rem;
-  }
-  
-  .action-toggle-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    background-color: #6c9ffb;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .action-toggle-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
-  .action-toggle-btn:hover:not(:disabled) {
-    background-color: #1565c0;
-  }
-
-  .log-panel {
-    max-height: 80px;
+  .battle-layout--with-pad {
+    padding-bottom: 230px;
   }
 }
 
+@media (max-width: 768px) {
+  .battle-layout {
+    padding: 0.75rem;
+  }
 
-/* === 매우 작은 화면 (예: 480px 이하 스마트폰) === */
-@media (max-width: 480px) {
-  .move-grid {
-    display: grid;
-    grid-template-columns: (4,1fr); 
-    gap: 0.5rem;
-    width: 100%;
+  .turn-banner {
+    font-size: 1.35rem;
   }
+
   .pokemon-area {
-    flex-direction: row;
-  }
-  .pokemon-area p {
-    font-size: 0.8rem;
+    grid-template-columns: 1fr;
   }
 
   .move-button {
-    font-size: 0.85rem;
-    padding: 0.75rem;
-    width: 100%; /* 👉 가로 꽉 차게 */
-    box-sizing: border-box;
+    min-height: 105px;
+    padding: 0.56rem;
   }
 
-  .move-button .move-name {
-    font-size: 1rem;
-    text-align: center;
+  .move-name {
+    font-size: 0.89rem;
   }
 
-  .move-button .move-pp,
-  .move-button .move-power,
-  .move-button .move-accuracy,
-  .move-button .move-type {
-    font-size: 0.75rem;
-    text-align: center;
+  .move-pp,
+  .move-power,
+  .move-accuracy {
+    font-size: 0.7rem;
   }
 
-  .action-toggle {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 0.75rem;
+  .battle-pad {
+    height: 180px;
+    padding: 0.75rem 0.85rem calc(0.75rem + env(safe-area-inset-bottom));
   }
-  
-  .action-toggle-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    background-color: #6c9ffb;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+
+  .battle-layout--with-pad {
+    padding-bottom: 212px;
   }
-  
-  .action-toggle-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+
+  .pad-btn {
+    width: 49px;
+    height: 49px;
+    font-size: 1.04rem;
   }
-  
-  .action-toggle-btn:hover:not(:disabled) {
-    background-color: #1565c0;
+
+  .pad-center {
+    width: 44px;
+    height: 44px;
+  }
+
+  .select-screen {
+    margin: 0.8rem;
+  }
+
+  .watch-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

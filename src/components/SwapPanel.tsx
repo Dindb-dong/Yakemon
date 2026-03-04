@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { useBattleStore } from "../Context/useBattleStore";
 
@@ -7,12 +7,20 @@ type Props = {
   activeIndex: number;
   onSwitch: (index: number) => void;
   watchMode: boolean;
+  focusedSwitchIndex?: number | null;
 };
 
-function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
+function SwapPanel({ team, activeIndex, onSwitch, watchMode, focusedSwitchIndex = null }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [viewingIndex, setViewingIndex] = useState<number | null>(null);
-  const { isSwitchWaiting } = useBattleStore.getState()
+
+  useEffect(() => {
+    if (focusedSwitchIndex === null) {
+      return;
+    }
+    setSelectedIndex(focusedSwitchIndex);
+  }, [focusedSwitchIndex]);
+
   const toggleView = (index: number) => {
     setViewingIndex((prev) => (prev === index ? null : index));
   };
@@ -29,6 +37,7 @@ function SwapPanel({ team, activeIndex, onSwitch, watchMode }: Props) {
         return (
           <div key={poke.base.name} className="swap-slot">
             <button
+              className={focusedSwitchIndex === i ? "pad-focused" : ""}
               onClick={() => setSelectedIndex(i)} disabled={isFainted || watchMode}
             >
               {poke.base.name} {isCurrent ? "(현재)" : ""}

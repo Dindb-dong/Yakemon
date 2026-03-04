@@ -10,8 +10,8 @@ function LogPanel({ logs }: { logs: string[] }) {
 
   return (
     <div className="log-panel">
-      <h4>전투 로그</h4>
-      <ul>
+      <h4 className="log-title">전투 로그</h4>
+      <ul className="log-list">
         {logs.map((log, idx) => (
           <li key={idx}>{log}</li>
         ))}
