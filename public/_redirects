@@ -1,2 +1,5 @@
+/api/count /.netlify/functions/count 200
+/api/streak /.netlify/functions/streak 200
+/api/history /.netlify/functions/history 200
+/api/leaderboard /.netlify/functions/leaderboard 200
 /* /index.html 200
-/* / 404 

@@ -2,23 +2,3 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=2628000, immutable"
-
-[[redirects]]
-  from = "/api/count"
-  to = "/.netlify/functions/count"
-  status = 200
-
-[[redirects]]
-  from = "/api/streak"
-  to = "/.netlify/functions/streak"
-  status = 200
-
-[[redirects]]
-  from = "/api/history"
-  to = "/.netlify/functions/history"
-  status = 200
-
-[[redirects]]
-  from = "/api/leaderboard"
-  to = "/.netlify/functions/leaderboard"
-  status = 200

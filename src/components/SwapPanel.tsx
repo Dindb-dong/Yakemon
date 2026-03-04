@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
-import { useBattleStore } from "../Context/useBattleStore";
 
 type Props = {
   team: BattlePokemon[];
@@ -10,77 +9,27 @@ type Props = {
   focusedSwitchIndex?: number | null;
 };
 
-function SwapPanel({ team, activeIndex, onSwitch, watchMode, focusedSwitchIndex = null }: Props) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [viewingIndex, setViewingIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (focusedSwitchIndex === null) {
-      return;
-    }
-    setSelectedIndex(focusedSwitchIndex);
-  }, [focusedSwitchIndex]);
-
-  const toggleView = (index: number) => {
-    setViewingIndex((prev) => (prev === index ? null : index));
-  };
-
+function SwapPanel({ team, activeIndex, focusedSwitchIndex = null }: Props) {
   return (
     <div className="swap-panel">
       <h3>교체하기</h3>
-      {team.map((poke, i) => {
-        const isCurrent = i === activeIndex;
-        const isFainted = poke.currentHp <= 0;
-        const isSelected = i === selectedIndex;
-        const isViewing = i === viewingIndex;
+      {team.map((pokemon, index) => {
+        const isCurrent = index === activeIndex;
+        const isFainted = pokemon.currentHp <= 0;
+        const isFocused = focusedSwitchIndex === index;
 
         return (
-          <div key={poke.base.name} className="swap-slot">
-            <button
-              className={focusedSwitchIndex === i ? "pad-focused" : ""}
-              onClick={() => setSelectedIndex(i)} disabled={isFainted || watchMode}
-            >
-              {poke.base.name} {isCurrent ? "(현재)" : ""}
-            </button>
-
-            {isSelected && (
-              <div style={{ marginTop: "0.5rem" }}>
-                <div style={{ flexDirection: 'column', justifyContent: 'center', alignContent: 'center' }}>
-                  <button onClick={() => toggleView(i)}>
-                    {isViewing ? "닫기" : "상세보기"}
-                  </button>
-                  <button disabled={isCurrent} onClick={() => onSwitch(i)} style={{ marginLeft: "0.5rem" }}>
-                    교체하기
-                  </button>
-                </div>
-                {isViewing && (
-                  <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
-                    <p>타입: {poke.base.types.join(", ")}</p>
-                    <p>특성: {typeof poke.base.ability === 'string' ? poke.base.ability : poke.base.ability?.name ?? '없음'}</p>
-                    <p>체력: {poke.currentHp} / {poke.base.hp}</p>
-                    <p>공격력: {poke.base.attack}</p>
-                    <p>방어력: {poke.base.defense}</p>
-                    <p>특수공격력: {poke.base.spAttack}</p>
-                    <p>특수방어력: {poke.base.spDefense}</p>
-                    <p>스피드: {poke.base.speed}</p>
-                    <p>상태이상: {poke.status.join(", ") || "없음"}</p>
-                    <p>위치: {poke.position || "없음"}</p>
-                    <div>
-                      <strong>기술 정보</strong>
-                      <ul>
-                        {poke.base.moves.map((m) => (
-                          <li key={m.name}>
-                            {m.name}: {poke.pp[m.name]}, ({m.getPower ? m.getPower(team, 'my') : m.power},
-                            {m.getAccuracy ? m.getAccuracy(useBattleStore.getState().publicEnv, 'my') : m.accuracy}),
-                            {m.type}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+          <div
+            key={pokemon.base.name}
+            className={`swap-slot-static ${isFocused ? "pad-focused" : ""} ${isCurrent ? "is-current" : ""} ${isFainted ? "is-fainted" : ""}`}
+          >
+            <span className="swap-name">{pokemon.base.name}</span>
+            <span className="swap-meta">
+              {isCurrent ? "현재 출전" : isFainted ? "기절" : "교체 가능"}
+            </span>
+            <span className="swap-meta">
+              HP {pokemon.currentHp} / {pokemon.base.hp}
+            </span>
           </div>
         );
       })}

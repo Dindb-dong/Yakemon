@@ -25,7 +25,7 @@ function ActionPanel({
   padCommand,
 }: ActionPanelParams) {
   const isFainted = myPokemon.currentHp <= 0;
-  const [currentTab, setCurrentTab] = useState<"fight" | "switch" | null>(null);
+  const [currentTab, setCurrentTab] = useState<"fight" | "switch" | null>("fight");
   const [hintMode, setHintMode] = useState<boolean>(true);
   const [fightCursor, setFightCursor] = useState(0);
   const [switchCursor, setSwitchCursor] = useState(0);
@@ -44,7 +44,7 @@ function ActionPanel({
   );
 
   useEffect(() => {
-    setCurrentTab(null);
+    setCurrentTab("fight");
     setFightCursor(0);
     setSwitchCursor(0);
   }, [turn]);
@@ -169,6 +169,9 @@ function ActionPanel({
       if (targetElement && ["INPUT", "TEXTAREA", "SELECT"].includes(targetElement.tagName)) {
         return;
       }
+      if (event.repeat) {
+        return;
+      }
 
       let mappedAction: BattlePadAction | null = null;
       switch (event.code) {
@@ -217,22 +220,12 @@ function ActionPanel({
 
   return (
     <div className="action-panel">
-      <button className="hint-toggle"
-        onClick={() => setHintMode(!hintMode)}
-      >타입 상성 힌트 모드 전환</button>
+      <span className="hint-toggle">타입 상성 힌트 모드 전환 (X 버튼)</span>
       <div className="pad-help">방향키/D-Pad: 이동, A: 선택, B: 뒤로, X: 힌트, Y: 탭 전환</div>
       {isMobile && currentTab === null && (
         <div className="action-toggle">
-          <button
-            className="action-toggle-btn"
-            onClick={() => setCurrentTab("fight")}
-            disabled={isFainted || isTurnProcessing}
-          >싸운다</button>
-          <button
-            className="action-toggle-btn"
-            onClick={() => setCurrentTab("switch")}
-            disabled={isTurnProcessing || myPokemon.status.includes('교체불가')}
-          >교체</button>
+          <span className="action-toggle-btn">싸운다</span>
+          <span className="action-toggle-btn">교체</span>
         </div>
       )}
 
@@ -252,11 +245,9 @@ function ActionPanel({
                   else if (effectiveness === 0 && move.category !== '변화') effectivenessClass = "no-effect";
 
                   return (
-                    <button
+                    <span
                       key={move.name}
-                      className={`move-button ${effectivenessClass} ${currentTab === "fight" && myPokemon.base.moves[fightCursor]?.name === move.name ? "pad-focused" : ""}`}
-                      onClick={() => onAction(move)}
-                      disabled={getMoveDisabledState(move)}
+                      className={`move-button ${effectivenessClass} ${currentTab === "fight" && myPokemon.base.moves[fightCursor]?.name === move.name ? "pad-focused" : ""} ${getMoveDisabledState(move) ? "is-disabled" : ""}`}
                     >
                       <span className="move-name">{move.name}</span>
                       <span className="move-power">{move.category}</span>
@@ -267,7 +258,7 @@ function ActionPanel({
                       </span>
                       <span className="move-accuracy">명중율: {move.getAccuracy ? move.getAccuracy(useBattleStore.getState().publicEnv, 'my') : move.accuracy}</span>
                       <span className={`move-type ${move.type}`}>{move.type}</span>
-                    </button>
+                    </span>
                   );
                 })}</>
             )
@@ -277,11 +268,9 @@ function ActionPanel({
                 {myPokemon.base.moves.map((move) => {
 
                   return (
-                    <button
+                    <span
                       key={move.name}
-                      className={`move-button ${currentTab === "fight" && myPokemon.base.moves[fightCursor]?.name === move.name ? "pad-focused" : ""}`}
-                      onClick={() => onAction(move)}
-                      disabled={getMoveDisabledState(move)}
+                      className={`move-button ${currentTab === "fight" && myPokemon.base.moves[fightCursor]?.name === move.name ? "pad-focused" : ""} ${getMoveDisabledState(move) ? "is-disabled" : ""}`}
                     >
                       <span className="move-name">{move.name}</span>
                       <span className="move-pp">pp: {myPokemon.pp[move.name]} / {
@@ -289,7 +278,7 @@ function ActionPanel({
                       <span className="move-power">위력: {move.power}</span>
                       <span className="move-accuracy">명중율: {move.accuracy}</span>
                       <span className={`move-type ${move.type}`}>{move.type}</span>
-                    </button>
+                    </span>
                   );
                 })}</>
             )
@@ -298,11 +287,7 @@ function ActionPanel({
           </div>
           {/* 모바일일 경우: 하단에 '교체' 버튼 보여줌 */}
           {isMobile && (
-            <button
-              className="action-toggle-btn"
-              onClick={() => setCurrentTab("switch")}
-              disabled={isTurnProcessing}
-            >교체</button>
+            <span className="action-toggle-btn">교체</span>
           )}
         </>
       )}
@@ -319,11 +304,7 @@ function ActionPanel({
           />
           {/* 모바일일 경우: 하단에 '싸운다' 버튼 보여줌 */}
           {isMobile && (
-            <button
-              className="action-toggle-btn"
-              onClick={() => setCurrentTab("fight")}
-              disabled={isTurnProcessing}
-            >싸운다</button>
+            <span className="action-toggle-btn">싸운다</span>
           )}
         </>
       )}
