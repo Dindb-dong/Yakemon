@@ -51,8 +51,11 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [musicOn, setMusicOn] = useState(true);
   const navigate = useNavigate();
   const [redirected, setRedirected] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastQueue, setToastQueue] = useState<string[]>([]);
+  const [activeToast, setActiveToast] = useState<{ id: number; message: string } | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const toastIdRef = useRef(0);
+  const lastToastLogIndexRef = useRef(logs.length);
   useEffect(() => {
     const checkLastOne = () => {
       const aliveMy = myTeam.filter(p => p.currentHp > 0).length;
@@ -90,27 +93,41 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   }, [myTeam, enemyTeam, navigate]);
 
   useEffect(() => {
-    if (!logs.length) {
+    const previousIndex = lastToastLogIndexRef.current;
+    if (logs.length <= previousIndex) {
+      lastToastLogIndexRef.current = logs.length;
       return;
     }
+    const incomingLogs = logs.slice(previousIndex);
+    lastToastLogIndexRef.current = logs.length;
+    setToastQueue((prev) => [...prev, ...incomingLogs]);
+  }, [logs]);
 
-    const latestLog = logs[logs.length - 1];
-    setToastMessage(latestLog);
+  useEffect(() => {
+    if (activeToast || toastQueue.length === 0) {
+      return;
+    }
+    const [nextToast, ...restQueue] = toastQueue;
+    setToastQueue(restQueue);
+    toastIdRef.current += 1;
+    setActiveToast({ id: toastIdRef.current, message: nextToast });
 
     if (toastTimerRef.current) {
       clearTimeout(toastTimerRef.current);
     }
 
     toastTimerRef.current = setTimeout(() => {
-      setToastMessage(null);
+      setActiveToast(null);
     }, 2000);
+  }, [activeToast, toastQueue]);
 
+  useEffect(() => {
     return () => {
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
       }
     };
-  }, [logs]);
+  }, []);
 
   // ❗ 완전한 리다이렉트 후에는 렌더링하지 않음
   if (redirected || myTeam.length === 0 || enemyTeam.length === 0) {
@@ -458,7 +475,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   return (
 
     <div className={`battle-layout ${watchMode ? "" : "battle-layout--with-pad"}`}>
-      {toastMessage && <div className="battle-toast">{toastMessage}</div>}
+      <div className="battle-toast-container">
+        {activeToast && <div key={activeToast.id} className="battle-toast">{activeToast.message}</div>}
+      </div>
       <button
         onClick={() => {
           setMusicOn((prev) => {
