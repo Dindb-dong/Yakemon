@@ -226,19 +226,19 @@ function PokemonSelect({ onSelect }: Props) {
           </button>
         </div>
 
-        <div className="watch-mode">
+        {/* <div className="watch-mode">
           <h3>관전 모드</h3>
           <div className="watch-row">
-            {/* <div style={{ flex: 0.3 }}> TODO: 관전횟수는 나중에 추가
-      <h5>관전 횟수</h5>
-      <input
-        type="number"
-        min={1}
-        value={watchCount}
-        onChange={(e) => setWatchCount(parseInt(e.target.value))}
-        style={{ marginRight: "0.5rem", padding: "0.25rem 0.5rem" }}
-      />
-    </div> */}
+            <div style={{ flex: 0.3 }}> TODO: 관전횟수는 나중에 추가
+              <h5>관전 횟수</h5>
+              <input
+                type="number"
+                min={1}
+                value={watchCount}
+                onChange={(e) => setWatchCount(parseInt(e.target.value))}
+                style={{ marginRight: "0.5rem", padding: "0.25rem 0.5rem" }}
+              />
+            </div>
             <div className="watch-input-wrap">
               <h5>관전 딜레이 타임</h5>
               <input
@@ -257,7 +257,7 @@ function PokemonSelect({ onSelect }: Props) {
               관전 시작
             </button>
           </div>
-        </div>
+        </div> */}
 
       </div>
       {showDetailModal && selectedPokemonInfo && (
