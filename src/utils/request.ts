@@ -2,9 +2,9 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getAccessToken, getRefreshToken, removeAccessToken, setAccessToken } from './storage';
 
 
-// API 기본 URL 설정
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8090';
-console.log(BASE_URL);
+// Frontend should call same-origin API path so no secret env value is baked into the bundle.
+const API_PREFIX = '/api';
+
 // 기본 요청 설정
 const defaultRequest = async <T>(
   path: string,
@@ -13,7 +13,7 @@ const defaultRequest = async <T>(
   const accessToken = await getAccessToken();
   const refreshToken = await getRefreshToken();
 
-  const url = `${BASE_URL}/api${path}`;
+  const url = `${API_PREFIX}${path}`;
   const headers = {
     ...config.headers,
     Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
@@ -36,9 +36,7 @@ const defaultRequest = async <T>(
     if (error.response.status === 401) {
       // 토큰 만료 처리
       try {
-        const refreshResponse = await axios.post(`${BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
+        const refreshResponse = await axios.post(`${API_PREFIX}/auth/refresh`, { refreshToken });
 
         if (refreshResponse.status === 200) {
           const newAccessToken = refreshResponse.data.accessToken;
