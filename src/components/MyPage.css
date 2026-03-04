@@ -15,6 +15,37 @@
   gap: 0.8rem;
 }
 
+.id-link-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.id-link-form input {
+  flex: 1;
+  border: 2px solid #aa9258;
+  border-radius: 8px;
+  padding: 0.55rem 0.6rem;
+  font-size: 0.86rem;
+}
+
+.id-link-form button {
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.55rem 0.8rem;
+  background: linear-gradient(180deg, #4a8be8, #255fae);
+  cursor: pointer;
+}
+
+.id-link-form button:disabled {
+  background: #9c9a93;
+  border-color: #7f7c75;
+  cursor: not-allowed;
+}
+
 .guest-mode-box {
   border: 2px dashed #8b7538;
   border-radius: 10px;
@@ -148,6 +179,17 @@
   font-family: "VT323", monospace;
   font-size: 2rem;
   color: #264d8a;
+  word-break: break-word;
+}
+
+.empty-record-box {
+  border: 2px dashed #8b7538;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+  padding: 0.7rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.86rem;
+  color: #5f4c24;
 }
 
 .error-message {
@@ -166,5 +208,9 @@
   .auth-container,
   .mypage-container {
     margin: 0.8rem;
+  }
+
+  .id-link-form {
+    flex-direction: column;
   }
 }
