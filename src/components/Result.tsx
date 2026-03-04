@@ -67,6 +67,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
   const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
+  const isFlowMode = isVictory && randomMode;
   const guestPlayerId = getOrCreateGuestPlayerId();
 
   useEffect(() => {
@@ -225,7 +226,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   };
 
   return (
-    <div className="result-screen">
+    <div className={`result-screen ${isFlowMode ? "result-screen-flow" : ""}`}>
       <button
         onClick={() => {
           setMusicOn((prev) => {

@@ -1,110 +1,61 @@
 import React from "react";
+import { BattlePokemon } from "../models/BattlePokemon";
 
-const HintModal = ({ enemyTeam, onClose }) => {
+type HintModalProps = {
+  enemyTeam: BattlePokemon[];
+  onClose: () => void;
+};
+
+const typeClassMap: Record<string, string> = {
+  불: "fire",
+  물: "water",
+  풀: "grass",
+  전기: "electric",
+  얼음: "ice",
+  바위: "rock",
+  땅: "ground",
+  비행: "flying",
+  독: "poison",
+  벌레: "bug",
+  고스트: "ghost",
+  강철: "steel",
+  드래곤: "dragon",
+  악: "dark",
+  페어리: "fairy",
+  에스퍼: "psychic",
+  노말: "normal",
+  격투: "fighting",
+};
+
+function HintModal({ enemyTeam, onClose }: HintModalProps) {
   return (
-    <div style={styles.overlay}>
-      <div style={styles.modal}>
-        <h2 style={styles.title}>⚔️ 다음 상대는...</h2>
-        <div style={styles.cardContainer}>
-          {enemyTeam.map((poke, i) => (
-            <div key={i} style={styles.card}>
-              <h3 style={styles.pokemonName}>{poke.base.name}</h3>
-              <div style={styles.typeContainer}>
-                {poke.base.types.map((type) => (
-                  <span key={type} style={{ ...styles.typeBadge, ...getTypeStyle(type) }}>
+    <div className="hint-modal-overlay">
+      <div className="hint-modal-card">
+        <h2 className="hint-modal-title">다음 상대는...</h2>
+        <p className="hint-modal-subtitle">상대 포켓몬의 타입을 확인하고 교체 전략을 선택하세요.</p>
+        <div className="hint-modal-team">
+          {enemyTeam.map((pokemon) => (
+            <article key={`${pokemon.base.id}-${pokemon.base.name}`} className="hint-modal-pokemon">
+              <h3 className="hint-modal-pokemon-name">{pokemon.base.name}</h3>
+              <div className="hint-modal-types">
+                {pokemon.base.types.map((type) => (
+                  <span
+                    key={`${pokemon.base.id}-${type}`}
+                    className={`hint-type-badge ${typeClassMap[type] ?? "unknown"}`}
+                  >
                     {type}
                   </span>
                 ))}
               </div>
-            </div>
+            </article>
           ))}
         </div>
-        <button style={styles.closeButton} onClick={onClose}>확인</button>
+        <button className="hint-modal-confirm" onClick={onClose}>
+          확인
+        </button>
       </div>
     </div>
   );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  overlay: {
-    position: "fixed",
-    top: 0, left: 0,
-    width: "100vw",
-    height: "100vh",
-    backgroundColor: "rgba(0,0,0,0.6)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999
-  },
-  modal: {
-    backgroundColor: "#ffffff",
-    padding: "2rem",
-    borderRadius: "12px",
-    width: "90%",
-    maxWidth: "500px",
-    textAlign: "center",
-    boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
-  },
-  title: {
-    fontSize: "1.5rem",
-    marginBottom: "1rem"
-  },
-  cardContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-    marginBottom: "1.5rem"
-  },
-  card: {
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    padding: "1rem",
-    backgroundColor: "#f9f9f9"
-  },
-  pokemonName: {
-    fontSize: "1.2rem",
-    marginBottom: "0.5rem"
-  },
-  typeContainer: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "0.5rem",
-    flexWrap: "wrap"
-  },
-  typeBadge: {
-    padding: "0.25rem 0.6rem",
-    borderRadius: "999px",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: "0.75rem",
-    textTransform: "capitalize"
-  },
-  closeButton: {
-    padding: "0.6rem 1.2rem",
-    backgroundColor: "#3f51b5",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "1rem",
-    cursor: "pointer"
-  }
-};
-
-// 타입별 배지 색상
-const getTypeStyle = (type: string) => {
-  const colors: Record<string, string> = {
-    불: "#F08030", 물: "#6890F0", 풀: "#78C850",
-    전기: "#F8D030", 얼음: "#98D8D8", 바위: "#B8A038",
-    땅: "#E0C068", 비행: "#A890F0", 독: "#A040A0",
-    벌레: "#A8B820", 고스트: "#705898", 강철: "#B8B8D0",
-    드래곤: "#7038F8", 악: "#705848", 페어리: "#EE99AC",
-    에스퍼: "#F85888", 노말: "#A8A878", 격투: "#C03028",
-    없음: "#888"
-  };
-  return {
-    backgroundColor: colors[type] || "#666"
-  };
-};
+}
 
 export default HintModal;
