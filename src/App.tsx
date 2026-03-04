@@ -13,6 +13,7 @@ import BottomBar from "./components/BottomBar";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { shuffleArray } from "./utils/shuffle";
 import { createGen1Pokemon } from "./data/createWincountPokemon";
+import { getOrCreateGuestPlayerId, loadPlayerRecord, PokemonEffortRow } from "./api/playhistory";
 
 function MainApp() {
   const mockPokemon = createGen1Pokemon();
@@ -27,7 +28,7 @@ function MainApp() {
   const location = useLocation();
 
   const handleSelect = useCallback(
-    (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => {
+    async (playerPokemons: PokemonInfo[], watchMode: boolean, redMode: boolean, randomMode: boolean, watchCount?: number, watchDelay?: number) => {
       setWatchMode(watchMode);
       setRedMode(redMode);
       setRandomMode(randomMode);
@@ -52,6 +53,28 @@ function MainApp() {
         );
       const shuffledEnemyRaw = shuffleArray(enemyRaw);
       let myBattleTeam: BattlePokemon[] = [];
+      let effortByPokemonId: Record<number, PokemonEffortRow["statBonus"]> = {};
+
+      try {
+        const record = await loadPlayerRecord(getOrCreateGuestPlayerId());
+        effortByPokemonId = record.pokemonEffort.reduce<Record<number, PokemonEffortRow["statBonus"]>>((acc, row) => {
+          acc[row.pokemonId] = row.statBonus;
+          return acc;
+        }, {});
+      } catch (error) {
+        console.warn("노력치 정보를 불러오지 못해 기본 스탯으로 시작합니다.");
+      }
+
+      const getEffortBonus = (pokemon: PokemonInfo) => {
+        return effortByPokemonId[pokemon.id] || {
+          hp: 0,
+          attack: 0,
+          defense: 0,
+          spAttack: 0,
+          spDefense: 0,
+          speed: 0,
+        };
+      };
 
       if (playerPokemons.length !== 3) {
         console.error("포켓몬 선택이 잘못되었습니다.");
@@ -60,7 +83,7 @@ function MainApp() {
           if (!p || !p.moves) {
             console.error(`playerPokemons[${i}]가 이상함:`, p);
           }
-          return createBattlePokemon(p);
+          return createBattlePokemon(p, false, getEffortBonus(p));
         });
       } else {
         console.log("선택된 포켓몬:", playerPokemons);
@@ -68,7 +91,7 @@ function MainApp() {
           if (!p || !p.moves) {
             console.error(`playerPokemons[${i}]가 이상함:`, p);
           }
-          return createBattlePokemon(p);
+          return createBattlePokemon(p, false, getEffortBonus(p));
         });
       }
       console.log("AI 포켓몬:", shuffledEnemyRaw);

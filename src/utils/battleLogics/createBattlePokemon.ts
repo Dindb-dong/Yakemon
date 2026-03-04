@@ -2,6 +2,15 @@ import { BattlePokemon } from "../../models/BattlePokemon";
 import { PokemonInfo } from "../../models/Pokemon";
 import { RankState } from "../../models/RankState";
 
+type EffortStatBonus = {
+  hp: number;
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  speed: number;
+};
+
 // 기본 랭크 상태
 const defaultRank: RankState = {
   attack: 0,
@@ -21,10 +30,19 @@ export const formConditionMap: Record<number, (self: BattlePokemon) => boolean> 
 };
 
 // BattlePokemon 생성 함수
-export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): BattlePokemon {
+export function createBattlePokemon(base: PokemonInfo, exchange?: boolean, effortBonus?: Partial<EffortStatBonus>): BattlePokemon {
   if (!base || !base.moves) {
     throw new Error(`createBattlePokemon: 유효하지 않은 포켓몬 데이터: ${JSON.stringify(base)}`);
   }
+
+  const appliedBonus: EffortStatBonus = {
+    hp: effortBonus?.hp ?? 0,
+    attack: effortBonus?.attack ?? 0,
+    defense: effortBonus?.defense ?? 0,
+    spAttack: effortBonus?.spAttack ?? 0,
+    spDefense: effortBonus?.spDefense ?? 0,
+    speed: effortBonus?.speed ?? 0,
+  };
 
   const pp: Record<string, number> = {};
   base.moves.forEach((move) => {
@@ -36,12 +54,12 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
     base: !exchange ?
       {
         ...base,
-        hp: base.hp + 75,
-        attack: base.attack + 20,
-        spAttack: base.spAttack + 20,
-        defense: base.defense + 20,
-        spDefense: base.spDefense + 20,
-        speed: base.speed + 20,
+        hp: base.hp + 75 + appliedBonus.hp,
+        attack: base.attack + 20 + appliedBonus.attack,
+        spAttack: base.spAttack + 20 + appliedBonus.spAttack,
+        defense: base.defense + 20 + appliedBonus.defense,
+        spDefense: base.spDefense + 20 + appliedBonus.spDefense,
+        speed: base.speed + 20 + appliedBonus.speed,
         originalAbility: base.ability ?? null, // 원본 특성 복사
         originalTypes: base.types // 원본 타입 복사, 기본값 빈 배열
       } : base.memorizedBase ? {
@@ -53,7 +71,7 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean): Batt
         ability: base.originalAbility ?? base.ability ?? null,
         types: base.originalTypes ?? base.types ?? [] // 원본 타입 복사, 기본값 빈 배열
       },
-    currentHp: !exchange ? base.hp + 75 : base.hp,
+    currentHp: !exchange ? base.hp + 75 + appliedBonus.hp : base.hp,
     pp,
     rank: defaultRank,
     status: [],
