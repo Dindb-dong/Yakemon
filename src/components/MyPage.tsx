@@ -1,7 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GameError, getOrCreateGuestPlayerId, loadPlayerRecord, PlayerRecord, setGuestPlayerId, updatePlayerNickname } from "../api/playhistory";
+import {
+  EffortStatKey,
+  GameError,
+  getOrCreateGuestPlayerId,
+  investPokemonEffort,
+  loadPlayerRecord,
+  PlayerRecord,
+  setGuestPlayerId,
+  updatePlayerNickname
+} from "../api/playhistory";
 import "./MyPage.css";
+
+const EFFORT_STAT_OPTIONS: Array<{ value: EffortStatKey; label: string }> = [
+  { value: "hp", label: "HP" },
+  { value: "attack", label: "공격" },
+  { value: "defense", label: "방어" },
+  { value: "spAttack", label: "특수공격" },
+  { value: "spDefense", label: "특수방어" },
+  { value: "speed", label: "스피드" },
+];
 
 function MyPage() {
   const navigate = useNavigate();
@@ -11,6 +29,8 @@ function MyPage() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
+  const [effortStatByPokemon, setEffortStatByPokemon] = useState<Record<number, EffortStatKey>>({});
+  const [effortAmountByPokemon, setEffortAmountByPokemon] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const init = async () => {
@@ -76,6 +96,41 @@ function MyPage() {
     }
   };
 
+  const handleInvestEffort = async (pokemonId: number, pokemonName: string) => {
+    if (!currentId) {
+      setMessage("현재 ID를 먼저 불러와주세요.");
+      return;
+    }
+
+    const selectedStat = effortStatByPokemon[pokemonId] || "attack";
+    const amount = effortAmountByPokemon[pokemonId] || 4;
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const result = await investPokemonEffort(
+        {
+          pokemonId,
+          pokemonName,
+          stat: selectedStat,
+          amount,
+        },
+        currentId
+      );
+
+      setRecord((prev) => (prev ? { ...prev, pokemonEffort: result.pokemonEffort } : prev));
+      setMessage(`${pokemonName}의 ${selectedStat} 노력치 +${result.spent} 투자 완료`);
+    } catch (error) {
+      if (error instanceof GameError) {
+        setMessage(error.message);
+      } else {
+        setMessage("노력치 투자에 실패했습니다.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const winRate = record && record.winCount + record.loseCount > 0
     ? Math.round((record.winCount / (record.winCount + record.loseCount)) * 100)
     : 0;
@@ -113,32 +168,98 @@ function MyPage() {
       </div>
 
       {record ? (
-        <div className="stats-container">
-          <div className="stat-box">
-            <h3>이름</h3>
-            <p>{record.username}</p>
+        <>
+          <div className="stats-container">
+            <div className="stat-box">
+              <h3>이름</h3>
+              <p>{record.username}</p>
+            </div>
+            <div className="stat-box">
+              <h3>승리</h3>
+              <p>{record.winCount}</p>
+            </div>
+            <div className="stat-box">
+              <h3>패배</h3>
+              <p>{record.loseCount}</p>
+            </div>
+            <div className="stat-box">
+              <h3>현재 연승</h3>
+              <p>{record.winStreak}</p>
+            </div>
+            <div className="stat-box">
+              <h3>최고 연승</h3>
+              <p>{record.bestWinStreak}</p>
+            </div>
+            <div className="stat-box">
+              <h3>승률</h3>
+              <p>{winRate}%</p>
+            </div>
           </div>
-          <div className="stat-box">
-            <h3>승리</h3>
-            <p>{record.winCount}</p>
-          </div>
-          <div className="stat-box">
-            <h3>패배</h3>
-            <p>{record.loseCount}</p>
-          </div>
-          <div className="stat-box">
-            <h3>현재 연승</h3>
-            <p>{record.winStreak}</p>
-          </div>
-          <div className="stat-box">
-            <h3>최고 연승</h3>
-            <p>{record.bestWinStreak}</p>
-          </div>
-          <div className="stat-box">
-            <h3>승률</h3>
-            <p>{winRate}%</p>
-          </div>
-        </div>
+          <section className="effort-section">
+            <h3>포켓몬 노력치 성장</h3>
+            <p className="effort-section-help">한 능력치는 최대 252, 총합은 최대 510까지 투자됩니다. 4 포인트마다 실제 능력치가 +1 증가합니다.</p>
+            {record.pokemonEffort.length === 0 ? (
+              <div className="empty-record-box">아직 성장 데이터가 없습니다. 배틀에 참여한 포켓몬부터 포인트가 쌓입니다.</div>
+            ) : (
+              <div className="effort-list">
+                {record.pokemonEffort.map((row) => (
+                  <article key={row.pokemonId} className="effort-card">
+                    <div className="effort-card-head">
+                      <h4>{row.pokemonName}</h4>
+                      <p>도감번호 #{row.pokemonId}</p>
+                    </div>
+                    <div className="effort-grid">
+                      {EFFORT_STAT_OPTIONS.map((stat) => (
+                        <div key={`${row.pokemonId}-${stat.value}`} className="effort-stat-item">
+                          <span>{stat.label}</span>
+                          <strong>{row.ev[stat.value]} (보너스 +{row.statBonus[stat.value]})</strong>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="effort-summary">
+                      <span>총 투자: {row.totalEffort}/510</span>
+                      <span>남은 포인트: {row.unspentEffort}</span>
+                      <span>참여 횟수: {row.battles}회</span>
+                    </div>
+                    <div className="effort-invest-row">
+                      <select
+                        value={effortStatByPokemon[row.pokemonId] || "attack"}
+                        onChange={(event) =>
+                          setEffortStatByPokemon((prev) => ({
+                            ...prev,
+                            [row.pokemonId]: event.target.value as EffortStatKey,
+                          }))
+                        }
+                      >
+                        {EFFORT_STAT_OPTIONS.map((stat) => (
+                          <option key={`${row.pokemonId}-${stat.value}-option`} value={stat.value}>{stat.label}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        min={1}
+                        max={252}
+                        value={effortAmountByPokemon[row.pokemonId] || 4}
+                        onChange={(event) =>
+                          setEffortAmountByPokemon((prev) => ({
+                            ...prev,
+                            [row.pokemonId]: Number(event.target.value),
+                          }))
+                        }
+                      />
+                      <button
+                        onClick={() => handleInvestEffort(row.pokemonId, row.pokemonName)}
+                        disabled={isLoading || row.unspentEffort <= 0}
+                      >
+                        {isLoading ? "투자 중..." : "투자"}
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        </>
       ) : (
         <div className="empty-record-box">
           아직 이 ID에 저장된 기록이 없습니다. 배틀을 1회 진행한 뒤 다시 확인하세요.

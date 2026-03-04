@@ -4,4 +4,6 @@
 /api/leaderboard /.netlify/functions/leaderboard 200
 /api/player /.netlify/functions/player 200
 /api/nickname /.netlify/functions/nickname 200
+/api/effort/settle /.netlify/functions/effort-settle 200
+/api/effort/invest /.netlify/functions/effort-invest 200
 /* /index.html 200

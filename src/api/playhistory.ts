@@ -10,12 +10,38 @@ export interface GameResult {
 
 export interface PlayerRecord extends GameResult {
   username: string;
+  pokemonEffort: PokemonEffortRow[];
 }
 
 export interface NicknameUpdateResult {
   ok: boolean;
   playerId: string;
   username: string;
+}
+
+export type EffortStatKey = "hp" | "attack" | "defense" | "spAttack" | "spDefense" | "speed";
+
+export interface PokemonEffortRow {
+  pokemonId: number;
+  pokemonName: string;
+  ev: Record<EffortStatKey, number>;
+  totalEffort: number;
+  unspentEffort: number;
+  battles: number;
+  statBonus: Record<EffortStatKey, number>;
+}
+
+export interface EffortSettleResult {
+  ok: boolean;
+  rewardPerBattle: number;
+  pokemonEffort: PokemonEffortRow[];
+}
+
+export interface EffortInvestResult {
+  ok: boolean;
+  spent: number;
+  updated: PokemonEffortRow;
+  pokemonEffort: PokemonEffortRow[];
 }
 
 export class GameError extends Error {
@@ -150,5 +176,57 @@ export async function updatePlayerNickname(nickname: string, playerId?: string):
       throw new GameError(error.response.data?.message || "닉네임 형식이 올바르지 않습니다.", 400);
     }
     throw new GameError("닉네임 저장에 실패했습니다.", error.response?.status);
+  }
+}
+
+/**
+ * Reward effort points to participated pokemons after one battle.
+ */
+export async function settleEffortAfterBattle(
+  participatedPokemons: Array<{ pokemonId: number; pokemonName: string }>,
+  playerId?: string
+): Promise<EffortSettleResult> {
+  const targetId = (playerId ?? getOrCreateGuestPlayerId()).trim();
+  if (!targetId) {
+    throw new GameError("ID를 찾을 수 없습니다.");
+  }
+
+  try {
+    const response = await axios.post<EffortSettleResult>("/api/effort/settle", {
+      playerId: targetId,
+      participatedPokemons,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      throw new GameError(error.response.data?.message || "노력치 정산 요청이 올바르지 않습니다.", 400);
+    }
+    throw new GameError("노력치 정산에 실패했습니다.", error.response?.status);
+  }
+}
+
+/**
+ * Invest player's unspent effort points into one pokemon stat.
+ */
+export async function investPokemonEffort(
+  payload: { pokemonId: number; pokemonName: string; stat: EffortStatKey; amount: number },
+  playerId?: string
+): Promise<EffortInvestResult> {
+  const targetId = (playerId ?? getOrCreateGuestPlayerId()).trim();
+  if (!targetId) {
+    throw new GameError("ID를 찾을 수 없습니다.");
+  }
+
+  try {
+    const response = await axios.post<EffortInvestResult>("/api/effort/invest", {
+      playerId: targetId,
+      ...payload,
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      throw new GameError(error.response.data?.message || "노력치 투자 요청이 올바르지 않습니다.", 400);
+    }
+    throw new GameError("노력치 투자에 실패했습니다.", error.response?.status);
   }
 }

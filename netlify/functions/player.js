@@ -1,6 +1,7 @@
 const { getDb } = require("./_lib/mongo");
 const { json } = require("./_lib/http");
 const { normalizePlayerId } = require("./_lib/player");
+const { toEffortRow } = require("./_lib/effort");
 
 /**
  * Return one player's stats by playerId.
@@ -24,6 +25,16 @@ exports.handler = async (event) => {
       return json(404, { message: "Player not found" });
     }
 
+    const effortRows = Object.values(player.pokemonEffort || {})
+      .map((row) => toEffortRow(row))
+      .filter((row) => row.pokemonId > 0)
+      .sort((a, b) => {
+        if (b.battles !== a.battles) {
+          return b.battles - a.battles;
+        }
+        return b.totalEffort - a.totalEffort;
+      });
+
     return json(200, {
       playerId: player.playerId,
       username: player.displayName || `Trainer-${String(player.playerId || "").slice(-6).toUpperCase()}`,
@@ -31,6 +42,7 @@ exports.handler = async (event) => {
       loseCount: player.loseCount || 0,
       winStreak: player.winStreak || 0,
       bestWinStreak: player.bestWinStreak || 0,
+      pokemonEffort: effortRows,
     });
   } catch (error) {
     console.error("[player] failed", error);

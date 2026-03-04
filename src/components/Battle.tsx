@@ -183,6 +183,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const timeLeftRef = useRef(timeLeft);
   const [padCommand, setPadCommand] = useState<{ id: number; action: BattlePadAction } | null>(null);
   const padCommandIdRef = useRef(0);
+  const participatedMyPokemonRef = useRef<Record<string, { pokemonId: number; pokemonName: string }>>({});
 
   const handlePadInput = useCallback((action: BattlePadAction) => {
     if (watchMode || isTurnProcessing || isSwitchModalOpen) {
@@ -212,6 +213,20 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       }
     }, 1000);
   }, []);
+
+  useEffect(() => {
+    const current = myTeam[activeMy];
+    if (!current?.base?.id) {
+      return;
+    }
+    const key = String(current.base.id);
+    if (!participatedMyPokemonRef.current[key]) {
+      participatedMyPokemonRef.current[key] = {
+        pokemonId: current.base.id,
+        pokemonName: current.base.name,
+      };
+    }
+  }, [activeMy, myTeam]);
 
   useEffect(() => {
     if (!watchMode && !isGameOver) {
@@ -460,7 +475,12 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     }
     return (
       <div>
-        <Result winner={winner} setBattleKey={setBattleKey} randomMode={randomMode} />
+        <Result
+          winner={winner}
+          setBattleKey={setBattleKey}
+          randomMode={randomMode}
+          participatedMyPokemons={Object.values(participatedMyPokemonRef.current)}
+        />
       </div>
     )
   }

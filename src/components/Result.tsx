@@ -22,16 +22,24 @@ import {
 } from "../data/createWincountPokemon";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { delay } from "../utils/delay";
-import { addPlayHistory, GameError, getOrCreateGuestPlayerId, updateWinCount, updateWinStreak } from "../api/playhistory";
+import {
+  addPlayHistory,
+  GameError,
+  getOrCreateGuestPlayerId,
+  settleEffortAfterBattle,
+  updateWinCount,
+  updateWinStreak
+} from "../api/playhistory";
 import { PokemonInfo } from "../models/Pokemon";
 
 type ResultProps = {
   winner: string;
   setBattleKey: React.Dispatch<React.SetStateAction<number>>;
   randomMode: boolean;
+  participatedMyPokemons: Array<{ pokemonId: number; pokemonName: string }>;
 };
 
-function Result({ winner, setBattleKey, randomMode }: ResultProps) {
+function Result({ winner, setBattleKey, randomMode, participatedMyPokemons }: ResultProps) {
   const {
     myTeam,
     enemyTeam,
@@ -65,6 +73,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   const [apiError, setApiError] = useState<string | null>(null);
   const [saveStatusText, setSaveStatusText] = useState<string>("");
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+  const hasSyncedRef = useRef(false);
 
   const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
   const isFlowMode = isVictory && randomMode;
@@ -72,18 +81,26 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
 
   useEffect(() => {
     async function initializeResult() {
+      if (hasSyncedRef.current) {
+        return;
+      }
+      hasSyncedRef.current = true;
       const mode = randomMode ? "random" : "normal";
       setLoadingMessage("전적 정보를 동기화하고 있습니다...");
 
       try {
+        if (participatedMyPokemons.length > 0) {
+          await settleEffortAfterBattle(participatedMyPokemons);
+        }
+
         if (isVictory) {
           const winResult = await updateWinStreak("win");
           await addPlayHistory("win", mode);
-          setSaveStatusText(`기록 저장 완료 · 현재 연승 ${winResult.winStreak}`);
+          setSaveStatusText(`기록/노력치 저장 완료 · 현재 연승 ${winResult.winStreak}`);
         } else {
           const loseResult = await updateWinCount("lose");
           await addPlayHistory("lose", mode);
-          setSaveStatusText(`기록 저장 완료 · 승 ${loseResult.winCount} / 패 ${loseResult.loseCount}`);
+          setSaveStatusText(`기록/노력치 저장 완료 · 승 ${loseResult.winCount} / 패 ${loseResult.loseCount}`);
         }
       } catch (error) {
         if (error instanceof GameError) {
@@ -119,7 +136,7 @@ function Result({ winner, setBattleKey, randomMode }: ResultProps) {
     }
 
     return () => AudioManager.getInstance().stop();
-  }, [isVictory, musicOn, randomMode]);
+  }, [isVictory, musicOn, participatedMyPokemons, randomMode]);
 
   /**
    * Generate next enemy team for random battle progression.

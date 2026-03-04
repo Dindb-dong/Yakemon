@@ -63,6 +63,7 @@ async function ensurePlayer(playersCollection, playerId) {
         loseCount: 0,
         winStreak: 0,
         bestWinStreak: 0,
+        pokemonEffort: {},
         createdAt: now,
       },
       $set: {

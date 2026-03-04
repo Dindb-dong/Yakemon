@@ -235,6 +235,126 @@
   text-align: center;
 }
 
+.effort-section {
+  margin-top: 1rem;
+  border: 3px solid #7f6a2f;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 0.8rem;
+}
+
+.effort-section h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #5f4c24;
+}
+
+.effort-section-help {
+  margin: 0.35rem 0 0.8rem;
+  font-size: 0.82rem;
+  color: #6a5427;
+}
+
+.effort-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.effort-card {
+  border: 2px solid #9e8544;
+  border-radius: 10px;
+  background: rgba(254, 250, 237, 0.95);
+  padding: 0.65rem;
+}
+
+.effort-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.effort-card-head h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.effort-card-head p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6a5427;
+}
+
+.effort-grid {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.effort-stat-item {
+  border: 1px solid #c8b076;
+  border-radius: 8px;
+  background: #fff8e4;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.effort-stat-item strong {
+  color: #274f89;
+}
+
+.effort-summary {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.79rem;
+  color: #5f4c24;
+}
+
+.effort-invest-row {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.effort-invest-row select,
+.effort-invest-row input {
+  border: 2px solid #aa9258;
+  border-radius: 8px;
+  padding: 0.42rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+.effort-invest-row select {
+  flex: 1;
+}
+
+.effort-invest-row input {
+  width: 84px;
+}
+
+.effort-invest-row button {
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.45rem 0.8rem;
+  background: linear-gradient(180deg, #49a060, #2f7b47);
+  cursor: pointer;
+}
+
+.effort-invest-row button:disabled {
+  background: #9c9a93;
+  border-color: #7f7c75;
+  cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
   .auth-container,
   .mypage-container {
@@ -247,5 +367,13 @@
 
   .nickname-form {
     flex-direction: column;
+  }
+
+  .effort-invest-row {
+    flex-direction: column;
+  }
+
+  .effort-invest-row input {
+    width: 100%;
   }
 }
