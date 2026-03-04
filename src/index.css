@@ -801,6 +801,92 @@ button {
   cursor: pointer;
 }
 
+.result-screen {
+  min-height: calc(100vh - 90px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.result-card {
+  width: min(560px, 100%);
+  border: 4px solid #7f6a2f;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 251, 238, 0.96), rgba(245, 232, 192, 0.94));
+  box-shadow: var(--ui-shadow);
+  padding: 1.2rem;
+  text-align: center;
+}
+
+.result-title {
+  margin: 0;
+  font-family: "VT323", monospace;
+  font-size: 2.8rem;
+}
+
+.result-subtitle {
+  margin: 0.4rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #8f2f25;
+}
+
+.result-save-box {
+  margin-top: 1rem;
+  border: 2px solid #8d773f;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.result-save-id,
+.result-save-status,
+.result-save-help,
+.result-save-error {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.result-save-id {
+  font-family: "VT323", monospace;
+  font-size: 1.1rem;
+}
+
+.result-save-status {
+  color: #1e6a41;
+  font-weight: 700;
+}
+
+.result-save-help {
+  color: #5a4a25;
+}
+
+.result-save-error {
+  color: #9f2f24;
+  font-weight: 700;
+}
+
+.result-main-button {
+  margin-top: 1rem;
+  border: 2px solid #2d240f;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #4a8be8, #255fae);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.result-flow-hint {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5b4a22;
+}
+
 .damage-effect {
   animation: shakeAndFlash 0.4s ease-in-out;
 }

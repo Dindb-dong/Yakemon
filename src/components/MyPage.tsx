@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { login, register, getProfile } from '../api/auth';
 import { User } from '../types/user';
 import { getAccessToken, setAccessToken, removeAccessToken } from '../utils/storage';
+import { getOrCreateGuestPlayerId } from '../api/playhistory';
 import './MyPage.css';
 
 interface ApiError {
@@ -17,9 +18,11 @@ const MyPage = () => {
   const [userStats, setUserStats] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [guestId, setGuestId] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
+    setGuestId(getOrCreateGuestPlayerId());
     const checkToken = async () => {
       const token = await getAccessToken();
       if (token) {
@@ -134,6 +137,12 @@ const MyPage = () => {
   if (!isLoggedIn) {
     return (
       <div className="auth-container">
+        <div className="guest-mode-box">
+          <h3>게스트 기록 모드</h3>
+          <p>현재 전적 저장은 게스트 ID 기준으로 동작합니다.</p>
+          <p>인증 백엔드가 연결되지 않으면 로그인/회원가입은 동작하지 않습니다.</p>
+          <p className="guest-id">ID: {guestId.slice(-12)}</p>
+        </div>
         {error && <div className="error-message">{error}</div>}
         {!showLoginForm && !showSignupForm && (
           <div className="auth-buttons">

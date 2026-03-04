@@ -1,5 +1,4 @@
-import { request } from '../utils/request';
-import { User } from '../types/user';
+import axios from "axios";
 
 export interface LeaderboardEntry {
   rank: number;
@@ -7,25 +6,34 @@ export interface LeaderboardEntry {
   streak: number;
 }
 
+interface LeaderboardResponseRow {
+  rank: number;
+  username: string;
+  winStreak: number;
+}
+
 export class LeaderboardError extends Error {
   constructor(message: string, public status?: number) {
     super(message);
-    this.name = 'LeaderboardError';
+    this.name = "LeaderboardError";
   }
 }
 
-export const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+/**
+ * Fetch leaderboard rows from Netlify Functions and map them for UI.
+ */
+export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   try {
-    const response = await request.get<User[]>('/leaderboard');
-    return response.data.map((user, index) => ({
-      rank: index + 1,
-      username: user.username,
-      streak: user.winStreak,
+    const response = await axios.get<LeaderboardResponseRow[]>("/api/leaderboard");
+    return response.data.map((row) => ({
+      rank: row.rank,
+      username: row.username,
+      streak: row.winStreak,
     }));
   } catch (error: any) {
     if (error.response?.status === 400) {
-      throw new LeaderboardError('리더보드를 불러오는데 실패했습니다.');
+      throw new LeaderboardError("리더보드를 불러오는데 실패했습니다.", 400);
     }
-    throw new LeaderboardError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    throw new LeaderboardError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", error.response?.status);
   }
-}; 
+}

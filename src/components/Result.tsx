@@ -1,23 +1,37 @@
-// Result.tsx
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AudioManager from "../utils/AudioManager";
 import { useBattleStore } from "../Context/useBattleStore";
-import Modal from "./Modal"; // 선택 UI용 모달 컴포넌트 필요 (아래에 예시도 있음)
 import HintModal from "./HintModal";
-import { createMockPokemon } from "../data/mockPokemon";
+import Modal from "./Modal";
+import RealignModal from "./RealignModal";
 import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon";
 import { resetBattlePokemon } from "../utils/resetBattlePokemon";
 import { resetEnvironment } from "../utils/battleLogics/updateEnvironment";
-import { replace, useNavigate } from "react-router-dom";
-import { PokemonInfo } from "../models/Pokemon";
 import { shuffleArray } from "../utils/shuffle";
-import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "../data/createWincountPokemon";
-import RealignModal from "./RealignModal";
+import {
+  createGen1Pokemon,
+  createGen2Pokemon,
+  createGen3Pokemon,
+  createGen4Pokemon,
+  createGen5Pokemon,
+  createGen6Pokemon,
+  createGen7Pokemon,
+  createGen8Pokemon,
+  createGen9Pokemon,
+} from "../data/createWincountPokemon";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { delay } from "../utils/delay";
-import { updateWinCount, updateWinStreak, addPlayHistory, GameError } from "../api/playhistory";
+import { addPlayHistory, GameError, getOrCreateGuestPlayerId, updateWinCount, updateWinStreak } from "../api/playhistory";
+import { PokemonInfo } from "../models/Pokemon";
 
-function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattleKey: React.Dispatch<React.SetStateAction<number>>; randomMode: boolean }) {
+type ResultProps = {
+  winner: string;
+  setBattleKey: React.Dispatch<React.SetStateAction<number>>;
+  randomMode: boolean;
+};
+
+function Result({ winner, setBattleKey, randomMode }: ResultProps) {
   const {
     myTeam,
     enemyTeam,
@@ -29,8 +43,9 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
     setTurn,
     addLog,
     setWinCount,
-    resetAll
+    resetAll,
   } = useBattleStore();
+
   const gen1Pokemon = createGen1Pokemon();
   const gen2Pokemon = gen1Pokemon.concat(createGen2Pokemon());
   const gen3Pokemon = gen2Pokemon.concat(createGen3Pokemon());
@@ -40,55 +55,58 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
   const gen7Pokemon = gen6Pokemon.concat(createGen7Pokemon());
   const gen8Pokemon = gen7Pokemon.concat(createGen8Pokemon());
   const gen9Pokemon = gen8Pokemon.concat(createGen9Pokemon());
-  const [musicOn, setMusicOn] = useState(true);
+
   const navigate = useNavigate();
-  const [showHintModal, setShowHintModal] = useState(false);         // 힌트용 모달
-  const [showExchangeModal, setShowExchangeModal] = useState(false); // 교체용 모달
-  const [showRealignModal, setShowRealignModal] = useState(false);   // 순서 정렬 모달
+  const [musicOn, setMusicOn] = useState(true);
+  const [showHintModal, setShowHintModal] = useState(false);
+  const [showExchangeModal, setShowExchangeModal] = useState(false);
+  const [showRealignModal, setShowRealignModal] = useState(false);
   const memorizedEnemyRef = useRef<BattlePokemon[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [saveStatusText, setSaveStatusText] = useState<string>("");
 
   const isVictory = winner === "AI에게 승리!" || winner === "왼쪽 플레이어 승리";
+  const guestPlayerId = getOrCreateGuestPlayerId();
 
   useEffect(() => {
-    async function initialize() {
-      if (isVictory) {
-        try {
-          // 게임 결과 업데이트
-          await updateWinStreak('win');
-          await addPlayHistory('win');
-          memorizedEnemyRef.current = enemyTeam.map((p) => ({
-            ...p,
-            base: { ...p.base },
-            pp: { ...p.pp },
-            rank: { ...p.rank },
-            status: [...p.status],
-          }));
-          await delay(1000);
-          generateNewRandomPokemon();
-          setShowHintModal(true);
-        } catch (error) {
-          if (error instanceof GameError) {
-            setApiError(error.message);
-          } else {
-            setApiError('게임 기록 업데이트에 실패했습니다.');
-          }
+    async function initializeResult() {
+      const mode = randomMode ? "random" : "normal";
+
+      try {
+        if (isVictory) {
+          const winResult = await updateWinStreak("win");
+          await addPlayHistory("win", mode);
+          setSaveStatusText(`기록 저장 완료 · 현재 연승 ${winResult.winStreak}`);
+        } else {
+          const loseResult = await updateWinCount("lose");
+          await addPlayHistory("lose", mode);
+          setSaveStatusText(`기록 저장 완료 · 승 ${loseResult.winCount} / 패 ${loseResult.loseCount}`);
         }
-      } else {
-        try {
-          // 패배 시에도 기록 업데이트
-          await updateWinCount('lose');
-          await addPlayHistory('lose');
-        } catch (error) {
-          if (error instanceof GameError) {
-            setApiError(error.message);
-          } else {
-            setApiError('게임 기록 업데이트에 실패했습니다.');
-          }
+      } catch (error) {
+        if (error instanceof GameError) {
+          setApiError(error.message);
+        } else {
+          setApiError("기록 저장 중 오류가 발생했습니다.");
         }
       }
+
+      if (isVictory) {
+        memorizedEnemyRef.current = enemyTeam.map((pokemon) => ({
+          ...pokemon,
+          base: { ...pokemon.base },
+          pp: { ...pokemon.pp },
+          rank: { ...pokemon.rank },
+          status: [...pokemon.status],
+        }));
+
+        await delay(1000);
+        generateNewRandomPokemon();
+        setShowHintModal(true);
+      }
     }
-    initialize();
+
+    initializeResult();
+
     if (musicOn) {
       AudioManager.getInstance().play(isVictory ? "win" : "defeat");
     } else {
@@ -96,8 +114,11 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
     }
 
     return () => AudioManager.getInstance().stop();
-  }, [musicOn]);
+  }, [isVictory, musicOn, randomMode]);
 
+  /**
+   * Generate next enemy team for random battle progression.
+   */
   function generateNewRandomPokemon() {
     const allGens = [
       gen1Pokemon,
@@ -111,175 +132,168 @@ function Result({ winner, setBattleKey, randomMode }: { winner: string; setBattl
       gen9Pokemon,
     ];
 
-    // winCount가 0이면 gen1, 1이면 gen2, ..., 8 이상이면 gen9
     const index = Math.min(winCount, allGens.length - 1);
     const pokemonList = shuffleArray(allGens[index]);
-
     const enemyRaw: PokemonInfo[] = [];
 
-    // 1. 첫 번째 포켓몬 랜덤 선택
     const first = pokemonList[Math.floor(Math.random() * pokemonList.length)];
     enemyRaw.push(first);
 
-    // 2. 두 번째 포켓몬 - 첫 번째와 타입 겹치지 않는 것 중 랜덤
-    const secondPool = pokemonList.filter(p =>
-      !p.types.some(type => first.types.includes(type)) &&
-      !enemyRaw.includes(p)
+    const secondPool = pokemonList.filter(
+      (pokemon) => !pokemon.types.some((type) => first.types.includes(type)) && !enemyRaw.includes(pokemon)
     );
-    if (secondPool.length === 0) return; // 예외 처리
+    if (secondPool.length === 0) {
+      return;
+    }
     const second = secondPool[Math.floor(Math.random() * secondPool.length)];
     enemyRaw.push(second);
 
-    // 3. 세 번째 포켓몬 - 두 마리와 타입 2개 이상 겹치지 않는 것 중 랜덤
     const combinedTypes = [...first.types, ...second.types];
-    const thirdPool = pokemonList.filter(p => {
-      if (enemyRaw.includes(p)) return false;
-      const overlap = p.types.filter(type => combinedTypes.includes(type));
+    const thirdPool = pokemonList.filter((pokemon) => {
+      if (enemyRaw.includes(pokemon)) {
+        return false;
+      }
+      const overlap = pokemon.types.filter((type) => combinedTypes.includes(type));
       return overlap.length < 1;
     });
-    if (thirdPool.length === 0) return; // 예외 처리
+    if (thirdPool.length === 0) {
+      return;
+    }
     const third = thirdPool[Math.floor(Math.random() * thirdPool.length)];
     enemyRaw.push(third);
 
-    // 무작위 셔플
     const shuffledEnemy = enemyRaw.sort(() => Math.random() - 0.5);
-    const newEnemyTeam = shuffledEnemy.map((p) => createBattlePokemon(p));
-    newEnemyTeam.forEach((p) => p.currentHp = 0);
+    const newEnemyTeam = shuffledEnemy.map((pokemon) => createBattlePokemon(pokemon));
+    newEnemyTeam.forEach((pokemon) => {
+      pokemon.currentHp = 0;
+    });
     setEnemyTeam(newEnemyTeam);
   }
 
+  /**
+   * Start the next random battle with refreshed state.
+   */
   const startNextBattle = () => {
-    // 상태 초기화
-    enemyTeam.forEach((p) => p.currentHp = p.base.hp);
+    enemyTeam.forEach((pokemon) => {
+      pokemon.currentHp = pokemon.base.hp;
+    });
+
     resetEnvironment();
     setActiveMy(0);
     setActiveEnemy(0);
     setTurn(1);
     setWinCount(winCount + 1);
     addLog(`${winCount + 2}번째 전투 시작!`);
+
     setTimeout(() => {
-      // 💡 배틀 리셋하려면 navigate로 다시 진입
-      setBattleKey(prev => prev + 1); // 👈 이걸 통해 완전히 새로운 Battle 시작
+      setBattleKey((prev) => prev + 1);
     }, 300);
-
-
   };
 
+  /**
+   * Exchange one of my team members with one memorized enemy and continue flow.
+   */
   const handleExchange = (myIndex: number, enemyIndex: number) => {
     const memorizedTeam = memorizedEnemyRef.current;
-    if (!memorizedTeam) return;
-    console.log("🎯 선택된 enemy base:", memorizedTeam[enemyIndex].base.memorizedBase ?? memorizedTeam[enemyIndex].base);
-    const newMyTeam = [...myTeam];
-    // 교체한 포켓몬을 먼저 생성한 뒤 초기화
-    const exchanged = createBattlePokemon(memorizedTeam[enemyIndex].base.memorizedBase ?? memorizedTeam[enemyIndex].base, true);
-    console.log("🧪 생성된 교체 포켓몬:", exchanged);
-    newMyTeam[myIndex] = exchanged;
+    if (!memorizedTeam) {
+      return;
+    }
 
-    const resetTeam = newMyTeam.map((p) => resetBattlePokemon(p)); // 나머지도 초기화
+    const newMyTeam = [...myTeam];
+    const exchanged = createBattlePokemon(memorizedTeam[enemyIndex].base.memorizedBase ?? memorizedTeam[enemyIndex].base, true);
+    newMyTeam[myIndex] = exchanged;
+    const resetTeam = newMyTeam.map((pokemon) => resetBattlePokemon(pokemon));
 
     setMyTeam(resetTeam);
     setShowExchangeModal(false);
     setShowRealignModal(true);
   };
 
+  /**
+   * Skip exchange phase and continue to realign flow.
+   */
   const handleSkip = () => {
-    setMyTeam(myTeam.map((p) => resetBattlePokemon(p)));
+    setMyTeam(myTeam.map((pokemon) => resetBattlePokemon(pokemon)));
     setShowExchangeModal(false);
     setShowRealignModal(true);
   };
 
   return (
-    <>
-      {apiError && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'rgba(255, 0, 0, 0.1)',
-          padding: '1rem',
-          borderRadius: '8px',
-          zIndex: 10000
-        }}>
-          {apiError}
-        </div>
-      )}
+    <div className="result-screen">
+      <button
+        onClick={() => {
+          setMusicOn((prev) => {
+            const nextState = !prev;
+            AudioManager.getInstance().mute(!nextState);
+            return nextState;
+          });
+        }}
+        className={`music-toggle-button ${musicOn ? "is-on" : "is-off"}`}
+      >
+        {musicOn ? "브금 끄기" : "브금 켜기"}
+      </button>
+
       {showHintModal && isVictory && randomMode && (
         <HintModal
           enemyTeam={enemyTeam}
           onClose={() => {
             setShowHintModal(false);
-            setShowExchangeModal(true); // 교체 모달로 이동
-          }}
-        />
-      )}
-      {showExchangeModal && (
-        <Modal
-          myTeam={myTeam}
-          enemyTeam={memorizedEnemyRef.current ?? []}
-          onExchange={(myIndex, enemyIndex) => {
-            handleExchange(myIndex, enemyIndex);
-          }}
-          onSkip={handleSkip}
-        />
-      )}
-      {showRealignModal && (
-        <RealignModal
-          myTeam={myTeam}
-          onConfirm={(newOrder) => {
-            const newTeam = newOrder.map((i) => myTeam[i]);
-            setMyTeam(newTeam);
-            setShowRealignModal(false);
-            startNextBattle(); // 최종적으로 전투 시작
+            setShowExchangeModal(true);
           }}
         />
       )}
 
-      <button
-        onClick={() => {
-          setMusicOn((prev) => {
-            const newState = !prev;
-            AudioManager.getInstance().mute(!newState);
-            return newState;
-          });
-        }}
-        style={{
-          position: "fixed", top: 10, right: 10, zIndex: 9999,
-          padding: "0.5rem", background: musicOn ? "#3f51b5" : "#999", color: "white"
-        }}
-      >
-        {musicOn ? "브금 끄기" : "브금 켜기"}
-      </button>
-      {/* {isVictory && randomMode && !showExchangeModal && !showHintModal && !showRealignModal && (
-        <div style={{ padding: "2rem", textAlign: "center" }}>
-          <h1>{winner}</h1>
-          <button onClick={handleSkip}>다음 전투 시작</button>
+      {showExchangeModal && (
+        <Modal
+          myTeam={myTeam}
+          enemyTeam={memorizedEnemyRef.current ?? []}
+          onExchange={(myIndex, enemyIndex) => handleExchange(myIndex, enemyIndex)}
+          onSkip={handleSkip}
+        />
+      )}
+
+      {showRealignModal && (
+        <RealignModal
+          myTeam={myTeam}
+          onConfirm={(newOrder) => {
+            const newTeam = newOrder.map((index) => myTeam[index]);
+            setMyTeam(newTeam);
+            setShowRealignModal(false);
+            startNextBattle();
+          }}
+        />
+      )}
+
+      <div className="result-card">
+        <h1 className="result-title">{winner}</h1>
+        {randomMode && !isVictory && <p className="result-subtitle">{winCount} 연승에서 도전 종료</p>}
+
+        <div className="result-save-box">
+          <p className="result-save-id">플레이어 ID: {guestPlayerId.slice(-12)}</p>
+          {saveStatusText && <p className="result-save-status">{saveStatusText}</p>}
+          {apiError && <p className="result-save-error">{apiError}</p>}
+          {!apiError && (
+            <p className="result-save-help">
+              로그인 없이 브라우저 기준으로 전적이 저장됩니다.
+            </p>
+          )}
         </div>
-      )} */}
-      {!isVictory && (
-        <div style={{ padding: "2rem", textAlign: "center" }}>
-          <h1>{winner}</h1>
-          {randomMode && (<h1>{winCount} 연승에서 실패...</h1>)}
-          <button onClick={() => {
-            navigate('/', { replace: true })
-            resetAll()
-          }}>
+
+        {!isVictory || !randomMode ? (
+          <button
+            className="result-main-button"
+            onClick={() => {
+              navigate("/", { replace: true });
+              resetAll();
+            }}
+          >
             새로운 전투 시작
           </button>
-        </div>
-      )}
-      {isVictory && !randomMode && (
-        <div style={{ padding: "2rem", textAlign: "center" }}>
-          <h1>{winner}</h1>
-          <button onClick={() => {
-            navigate('/', { replace: true })
-            resetAll()
-          }}>
-            새로운 전투 시작
-          </button>
-        </div>
-      )}
-    </>
+        ) : (
+          <p className="result-flow-hint">상대 교체/정렬 단계를 완료하면 다음 전투가 시작됩니다.</p>
+        )}
+      </div>
+    </div>
   );
 }
 

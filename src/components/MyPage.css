@@ -15,6 +15,29 @@
   gap: 0.8rem;
 }
 
+.guest-mode-box {
+  border: 2px dashed #8b7538;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+  padding: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.guest-mode-box h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.guest-mode-box p {
+  margin: 0.3rem 0 0;
+  font-size: 0.84rem;
+}
+
+.guest-id {
+  font-family: "VT323", monospace;
+  font-size: 1.1rem !important;
+}
+
 .auth-buttons button,
 .auth-form button,
 .logout-button {
