@@ -7,7 +7,6 @@ import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon"
 import TurnBanner from "./TurnBanner";
 import PokemonArea from "./PokemonArea";
 import ActionPanel from "./ActionPanel";
-import LogPanel from "./LogPanel";
 import TimerBar from "./TimerBar";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { calculateRankEffect } from "../utils/battleLogics/rankEffect";
@@ -462,7 +461,6 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     return (
       <div>
         <Result winner={winner} setBattleKey={setBattleKey} randomMode={randomMode} />
-        <LogPanel logs={logs.slice(-20)} />
       </div>
     )
   }
@@ -577,9 +575,6 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
           </div>
           <div className="battle-field-wrap">
             <PokemonArea my={leftPokemon} enemy={rightPokemon} />
-          </div>
-          <div className="battle-log-wrap">
-            <LogPanel logs={logs} />
           </div>
         </div>
 
