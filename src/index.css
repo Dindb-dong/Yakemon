@@ -894,10 +894,13 @@ button {
 
 .switch-modal-overlay--panel {
   z-index: 3900;
+  bottom: 200px;
+  pointer-events: none;
 }
 
 .switch-modal--panel {
   width: min(560px, 100%);
+  pointer-events: auto;
 }
 
 .switch-modal-empty {
@@ -1656,6 +1659,10 @@ button {
 
   .battle-layout--with-pad {
     padding-bottom: 212px;
+  }
+
+  .switch-modal-overlay--panel {
+    bottom: 180px;
   }
 
   .pad-btn {
