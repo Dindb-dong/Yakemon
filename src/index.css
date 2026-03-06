@@ -54,7 +54,7 @@ button {
 }
 
 .battle-layout--with-pad {
-  padding-bottom: 212px;
+  padding-bottom: 184px;
 }
 
 .music-toggle-button {
@@ -702,7 +702,7 @@ button {
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
+  gap: 0.38rem;
 }
 
 .move-button {
@@ -710,9 +710,9 @@ button {
   border-radius: 12px;
   background: linear-gradient(180deg, #f7f7f7 0%, #ddd8c8 100%);
   color: #2e240d;
-  min-height: 92px;
+  min-height: 80px;
   text-align: left;
-  padding: 0.5rem 0.5rem 0.46rem;
+  padding: 0.42rem 0.42rem 0.36rem;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -730,13 +730,13 @@ button {
 .move-name {
   display: block;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
 }
 
 .move-pp,
 .move-power,
 .move-accuracy {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: rgba(46, 36, 13, 0.82);
 }
 
@@ -745,7 +745,7 @@ button {
   border-radius: 999px;
   display: inline-flex;
   align-self: flex-start;
-  font-size: 0.64rem;
+  font-size: 0.58rem;
   font-weight: 700;
   padding: 0.14rem 0.5rem;
   color: #fff;
@@ -1008,8 +1008,8 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 200px;
-  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+  height: 168px;
+  padding: 0.65rem 1.2rem calc(0.65rem + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1042,8 +1042,8 @@ button {
 .pad-center {
   grid-column: 2;
   grid-row: 2;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   border: 2px solid #302613;
   background: linear-gradient(180deg, #726853 0%, #4b4334 100%);
@@ -1064,13 +1064,13 @@ button {
 .b-btn { grid-column: 2; grid-row: 3; }
 
 .pad-btn {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   border-radius: 14px;
   border: 2px solid #271f10;
   background: linear-gradient(180deg, #847760 0%, #544b39 100%);
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 1.02rem;
   font-weight: 700;
   box-shadow: 0 4px 0 rgba(20, 16, 8, 0.8);
   user-select: none;
@@ -1813,7 +1813,7 @@ button {
   }
 
   .battle-layout--with-pad {
-    padding-bottom: 206px;
+    padding-bottom: 176px;
   }
 
   .exchange-modal-shell {
@@ -1870,27 +1870,27 @@ button {
   }
 
   .move-button {
-    min-height: 82px;
-    padding: 0.44rem;
+    min-height: 72px;
+    padding: 0.35rem;
   }
 
   .move-name {
-    font-size: 0.8rem;
+    font-size: 0.74rem;
   }
 
   .move-pp,
   .move-power,
   .move-accuracy {
-    font-size: 0.62rem;
+    font-size: 0.56rem;
   }
 
   .battle-pad {
-    height: 180px;
-    padding: 0.75rem 0.85rem calc(0.75rem + env(safe-area-inset-bottom));
+    height: 154px;
+    padding: 0.5rem 0.72rem calc(0.5rem + env(safe-area-inset-bottom));
   }
 
   .battle-layout--with-pad {
-    padding-bottom: 212px;
+    padding-bottom: 170px;
   }
 
   .pokemon-detail-overlay--with-pad {
@@ -1911,18 +1911,18 @@ button {
   }
 
   .switch-modal-overlay--panel {
-    bottom: 180px;
+    bottom: 154px;
   }
 
   .pad-btn {
-    width: 49px;
-    height: 49px;
-    font-size: 1.04rem;
+    width: 44px;
+    height: 44px;
+    font-size: 0.92rem;
   }
 
   .pad-center {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
   }
 
   .select-screen {
