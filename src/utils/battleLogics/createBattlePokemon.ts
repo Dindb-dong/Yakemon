@@ -1,15 +1,7 @@
 import { BattlePokemon } from "../../models/BattlePokemon";
 import { PokemonInfo } from "../../models/Pokemon";
 import { RankState } from "../../models/RankState";
-
-type EffortStatBonus = {
-  hp: number;
-  attack: number;
-  defense: number;
-  spAttack: number;
-  spDefense: number;
-  speed: number;
-};
+import { EffortStatBonus } from "../../models/BattlePokemon";
 
 // 기본 랭크 상태
 const defaultRank: RankState = {
@@ -80,6 +72,7 @@ export function createBattlePokemon(base: PokemonInfo, exchange?: boolean, effor
     isActive: false,
     unUsableMove: undefined,
     formCondition: formConditionMap[base.id] ?? undefined,
+    effortBonus: appliedBonus,
   };
 }
 // Example:

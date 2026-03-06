@@ -3,6 +3,15 @@ import { RankState } from "./RankState";
 import { StatusState } from "./Status";
 import { MoveInfo } from "./Move";
 
+export type EffortStatBonus = {
+  hp: number;
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  speed: number;
+};
+
 export type BattlePokemon = {
   base: PokemonInfo;               // 기본 정보 (정적인 데이터)
   currentHp: number;               // 남은 체력
@@ -29,4 +38,5 @@ export type BattlePokemon = {
   lostType?: boolean; // 타입이 사라진 상태인지 
   tempType?: string[]; // 임시로 저장해두는 현재의 타입 (불사르기, 전광쌍격, 날개쉬기 등)
   substitute?: BattlePokemon;
+  effortBonus?: EffortStatBonus; // 노력치로 보정된 실제 증가분 UI 표기용
 };

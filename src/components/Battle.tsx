@@ -22,6 +22,7 @@ import { baseAiChooseAction } from "../utils/RL/baseAiChooseAction";
 import { BattlePokemon } from "../models/BattlePokemon";
 import { calculateOrder } from "../utils/battleLogics/calculateOrder";
 import BattlePad, { BattlePadAction } from "./BattlePad";
+import PokemonDetailViewModal from "./PokemonDetailViewModal";
 
 type BattleProps = {
   watchMode: boolean;
@@ -163,10 +164,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
   const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [viewingIndex, setViewingIndex] = useState<number | null>(null);
-  const toggleView = (index: number) => {
-    setViewingIndex((prev) => (prev === index ? null : index));
-  };
+  const [detailModalIndex, setDetailModalIndex] = useState<number | null>(null);
   const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
   const isRunningRef = useRef(false);
   const [timeLeft, setTimeLeft] = useState(60); // 60초 제한
@@ -496,6 +494,14 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       >
         {musicOn ? "브금 끄기" : "브금 켜기"}
       </button>
+      {detailModalIndex !== null && myTeam[detailModalIndex] && (
+        <PokemonDetailViewModal
+          pokemon={myTeam[detailModalIndex]}
+          side="my"
+          avoidPad
+          onClose={() => setDetailModalIndex(null)}
+        />
+      )}
       {
         (isSwitchModalOpen && !watchMode) && (
           <div className="switch-modal-overlay">
@@ -506,7 +512,6 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
                 const isCurrent = i === activeMy;
                 const isFainted = poke.currentHp <= 0;
                 const isSelected = i === selectedIndex;
-                const isViewing = i === viewingIndex;
 
                 return (
                   <div key={poke.base.name} className="swap-slot">
@@ -518,46 +523,19 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
                     </button>
 
                     {isSelected && (
-                      <div style={{ marginTop: "0.5rem" }}>
-                        <div style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                          <button onClick={() => toggleView(i)}>
-                            {isViewing ? "닫기" : "상세보기"}
+                      <div className="battle-switch-actions">
+                        <div className="battle-switch-actions-row">
+                          <button onClick={() => setDetailModalIndex(i)}>
+                            상세보기
                           </button>
                           <button disabled={isCurrent} onClick={() => {
                             if (pendingSwitch) {
                               pendingSwitch(i); // index 넘겨주기
                             }
-                          }} style={{ marginLeft: "0.5rem" }}>
+                          }} className="battle-switch-confirm-button">
                             교체하기
                           </button>
                         </div>
-                        {isViewing && (
-                          <div className="status-card" style={{ marginTop: "0.5rem", padding: "0.5rem", border: "1px solid #ccc" }}>
-                            <p>타입: {poke.base.types.join(", ")}</p>
-                            <p>특성: {typeof poke.base.ability === 'string' ? poke.base.ability : poke.base.ability?.name ?? '없음'}</p>
-                            <p>체력: {poke.currentHp} / {poke.base.hp}</p>
-                            <p>공격력: {poke.base.attack}</p>
-                            <p>방어력: {poke.base.defense}</p>
-                            <p>특수공격력: {poke.base.spAttack}</p>
-                            <p>특수방어력: {poke.base.spDefense}</p>
-                            <p>스피드: {poke.base.speed}</p>
-                            <p>상태이상: {poke.status.join(", ") || "없음"}</p>
-                            <p>위치: {poke.position || "없음"}</p>
-                            <div>
-                              <strong>기술 정보</strong>
-                              <ul>
-                                {poke.base.moves.map((m) => (
-                                  <li key={m.name}>
-                                    {m.name}: {poke.pp[m.name]}, (
-                                    {m.getPower ? m.getPower(myTeam, 'my') : m.power}
-                                    , {m.getAccuracy ? m.getAccuracy(useBattleStore.getState().publicEnv, 'my') : m.accuracy}),
-                                    {m.type}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>

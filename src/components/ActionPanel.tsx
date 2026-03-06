@@ -4,6 +4,7 @@ import SwapPanel from "./SwapPanel";
 import { useBattleStore } from "../Context/useBattleStore";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
 import { BattlePadAction } from "./BattlePad";
+import PokemonDetailViewModal from "./PokemonDetailViewModal";
 
 type ActionPanelParams = {
   myPokemon: BattlePokemon;
@@ -33,7 +34,7 @@ function ActionPanel({
   const [switchCursor, setSwitchCursor] = useState(0);
   const [selectedSwitchIndex, setSelectedSwitchIndex] = useState<number | null>(null);
   const [switchOption, setSwitchOption] = useState<"detail" | "switch">("detail");
-  const [showSwitchDetail, setShowSwitchDetail] = useState(false);
+  const [detailSwitchIndex, setDetailSwitchIndex] = useState<number | null>(null);
   const lastHandledPadCommandId = useRef(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
   const { turn, enemyTeam, activeEnemy } = useBattleStore.getState();
@@ -55,7 +56,7 @@ function ActionPanel({
     setSwitchCursor(0);
     setSelectedSwitchIndex(null);
     setSwitchOption("detail");
-    setShowSwitchDetail(false);
+    setDetailSwitchIndex(null);
   }, [turn]);
 
   useEffect(() => {
@@ -133,7 +134,7 @@ function ActionPanel({
       if (action === "b") {
         if (currentTab === "switch" && selectedSwitchIndex !== null) {
           setSelectedSwitchIndex(null);
-          setShowSwitchDetail(false);
+          setDetailSwitchIndex(null);
           setSwitchOption("detail");
           return;
         }
@@ -174,16 +175,16 @@ function ActionPanel({
         if (selectedSwitchIndex === null) {
           setSelectedSwitchIndex(selectedSwitch.index);
           setSwitchOption("detail");
-          setShowSwitchDetail(false);
+          setDetailSwitchIndex(null);
           return;
         }
         if (switchOption === "detail") {
-          setShowSwitchDetail((prev) => !prev);
+          setDetailSwitchIndex(selectedSwitchIndex);
           return;
         }
         onAction({ type: "switch", index: selectedSwitchIndex });
         setSelectedSwitchIndex(null);
-        setShowSwitchDetail(false);
+        setDetailSwitchIndex(null);
         setSwitchOption("detail");
       }
     },
@@ -351,38 +352,6 @@ function ActionPanel({
                   <div className="switch-option-panel">
                     <span className={`switch-option-item ${switchOption === "detail" ? "pad-focused" : ""}`}>상세 보기</span>
                     <span className={`switch-option-item ${switchOption === "switch" ? "pad-focused" : ""}`}>교체하기</span>
-                    {showSwitchDetail && (
-                      <div className="switch-option-detail">
-                        {(() => {
-                          const selectedPokemon = myTeam[selectedSwitchIndex];
-                          if (!selectedPokemon) return null;
-                          return (
-                            <>
-                              <p>타입: {selectedPokemon.base.types.join(", ")}</p>
-                              <p>특성: {typeof selectedPokemon.base.ability === "string" ? selectedPokemon.base.ability : selectedPokemon.base.ability?.name ?? "없음"}</p>
-                              <p>체력: {selectedPokemon.currentHp} / {selectedPokemon.base.hp}</p>
-                              <p>공격력: {selectedPokemon.base.attack}</p>
-                              <p>방어력: {selectedPokemon.base.defense}</p>
-                              <p>특수공격력: {selectedPokemon.base.spAttack}</p>
-                              <p>특수방어력: {selectedPokemon.base.spDefense}</p>
-                              <p>스피드: {selectedPokemon.base.speed}</p>
-                              <p>상태이상: {selectedPokemon.status.join(", ") || "없음"}</p>
-                              <div>
-                                <strong>기술 정보</strong>
-                                <ul>
-                                  {selectedPokemon.base.moves.map((move) => (
-                                    <li key={`${selectedPokemon.base.id}-${move.name}`}>
-                                      {move.name}: {selectedPokemon.pp[move.name]} / {move.pp ?? "?"} (
-                                      {move.getPower ? move.getPower(myTeam, "my") : move.power}, {move.getAccuracy ? move.getAccuracy(useBattleStore.getState().publicEnv, "my") : move.accuracy}), {move.type}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    )}
                   </div>
                 )}
               </>
@@ -391,6 +360,14 @@ function ActionPanel({
             )}
           </div>
         </div>
+      )}
+      {detailSwitchIndex !== null && myTeam[detailSwitchIndex] && (
+        <PokemonDetailViewModal
+          pokemon={myTeam[detailSwitchIndex]}
+          side="my"
+          avoidPad
+          onClose={() => setDetailSwitchIndex(null)}
+        />
       )}
     </div>
   );

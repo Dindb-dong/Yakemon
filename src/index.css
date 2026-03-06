@@ -1406,17 +1406,184 @@ button {
   font-weight: 700;
 }
 
-.switch-option-detail {
-  margin-top: 0.2rem;
-  border: 1px solid #b7a571;
-  border-radius: 8px;
-  padding: 0.5rem;
-  background: #fff4d6;
-  font-size: 0.78rem;
+.battle-switch-actions {
+  margin-top: 0.45rem;
 }
 
-.switch-option-detail p {
-  margin: 0.2rem 0;
+.battle-switch-actions-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.battle-switch-confirm-button {
+  margin-left: 0 !important;
+}
+
+.pokemon-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  z-index: 5000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.9rem;
+}
+
+.pokemon-detail-overlay--with-pad {
+  padding-bottom: 220px;
+}
+
+.pokemon-detail-card {
+  width: min(850px, 100%);
+  max-height: min(76vh, 720px);
+  overflow-y: auto;
+  border-radius: 14px;
+  border: 4px solid #6f5824;
+  background:
+    linear-gradient(180deg, rgba(255, 249, 231, 0.98), rgba(237, 223, 184, 0.98)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 7px, rgba(255, 255, 255, 0.04) 7px 14px);
+  box-shadow: var(--ui-shadow);
+  padding: 0.85rem 0.9rem;
+}
+
+.pokemon-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.7rem;
+  border-bottom: 2px dashed rgba(78, 62, 28, 0.5);
+  padding-bottom: 0.55rem;
+}
+
+.pokemon-detail-name {
+  margin: 0;
+  font-family: "VT323", monospace;
+  font-size: 2.1rem;
+}
+
+.pokemon-detail-sub {
+  margin: 0.12rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4f3d1d;
+}
+
+.pokemon-detail-sprite {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.pokemon-detail-content {
+  margin-top: 0.65rem;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 0.65rem;
+}
+
+.pokemon-detail-panel {
+  border: 2px solid #8f7a46;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 0.58rem 0.64rem;
+}
+
+.pokemon-detail-panel h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.93rem;
+}
+
+.pokemon-detail-hp,
+.pokemon-detail-status {
+  margin: 0.2rem 0 0;
+  font-size: 0.76rem;
+  color: #48371b;
+}
+
+.pokemon-detail-stat-list {
+  margin: 0.3rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.pokemon-detail-stat-list li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  border-bottom: 1px dashed rgba(80, 62, 26, 0.2);
+  padding-bottom: 0.08rem;
+}
+
+.pokemon-detail-stat-list strong {
+  color: #1f3f72;
+}
+
+.pokemon-detail-move-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.46rem;
+}
+
+.pokemon-detail-move-list li {
+  border: 1px solid rgba(80, 62, 26, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.66);
+  padding: 0.35rem 0.44rem;
+}
+
+.pokemon-detail-move-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pokemon-detail-move-head strong {
+  font-size: 0.84rem;
+}
+
+.pokemon-detail-move-list p {
+  margin: 0.16rem 0 0;
+  font-size: 0.72rem;
+  color: #4d3b1d;
+}
+
+.pokemon-detail-actions {
+  margin-top: 0.7rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.pokemon-detail-btn {
+  border: 2px solid #2d240f;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+}
+
+.pokemon-detail-btn.confirm {
+  background: linear-gradient(180deg, #4a8be8, #255fae);
+}
+
+.pokemon-detail-btn.cancel {
+  background: linear-gradient(180deg, #ca8a23, #965f11);
+}
+
+.pokemon-detail-btn.close {
+  background: linear-gradient(180deg, #8c98aa, #626d7e);
 }
 
 .global-loading-overlay {
@@ -1674,6 +1841,23 @@ button {
 
   .battle-layout--with-pad {
     padding-bottom: 212px;
+  }
+
+  .pokemon-detail-overlay--with-pad {
+    padding-bottom: 188px;
+  }
+
+  .pokemon-detail-card {
+    max-height: min(72vh, 640px);
+    padding: 0.7rem;
+  }
+
+  .pokemon-detail-name {
+    font-size: 1.7rem;
+  }
+
+  .pokemon-detail-content {
+    grid-template-columns: 1fr;
   }
 
   .switch-modal-overlay--panel {
