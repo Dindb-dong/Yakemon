@@ -823,6 +823,19 @@ button {
   cursor: pointer;
 }
 
+.battle-switch-pokemon-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.battle-switch-thumb {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .swap-slot button:hover:not(:disabled) {
   filter: brightness(1.07);
 }
@@ -1361,6 +1374,25 @@ button {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+.swap-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.swap-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.32rem;
+}
+
+.swap-thumb {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .swap-slot-static.is-current {

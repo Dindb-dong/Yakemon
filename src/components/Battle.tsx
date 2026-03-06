@@ -5,7 +5,7 @@ import { MoveInfo } from "../models/Move";
 import { battleSequence, removeFaintedPokemon } from "../utils/battleLogics/battleSequence";
 import { createBattlePokemon } from "../utils/battleLogics/createBattlePokemon"
 import TurnBanner from "./TurnBanner";
-import PokemonArea from "./PokemonArea";
+import PokemonArea, { getHpImagePath } from "./PokemonArea";
 import ActionPanel from "./ActionPanel";
 import TimerBar from "./TimerBar";
 import { calculateTypeEffectiveness } from "../utils/typeRalation";
@@ -165,6 +165,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [detailModalIndex, setDetailModalIndex] = useState<number | null>(null);
+  const [switchThumbnails, setSwitchThumbnails] = useState<Record<string, string>>({});
   const isGameOver = !myTeam.some((p) => p.currentHp > 0) || !enemyTeam.some((p) => p.currentHp > 0);
   const isRunningRef = useRef(false);
   const [timeLeft, setTimeLeft] = useState(60); // 60초 제한
@@ -216,6 +217,29 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       };
     }
   }, [activeMy, myTeam]);
+
+  useEffect(() => {
+    if (!isSwitchModalOpen) {
+      return;
+    }
+
+    let isMounted = true;
+    const loadSwitchThumbnails = async () => {
+      const entries = await Promise.all(myTeam.map(async (pokemon, index) => {
+        const imageUrl = await getHpImagePath(pokemon.base.id, Math.max(pokemon.currentHp / Math.max(pokemon.base.hp, 1), 0), pokemon.formNum);
+        return [`${pokemon.base.id}-${index}`, imageUrl] as const;
+      }));
+      if (!isMounted) {
+        return;
+      }
+      setSwitchThumbnails(Object.fromEntries(entries));
+    };
+
+    loadSwitchThumbnails();
+    return () => {
+      isMounted = false;
+    };
+  }, [isSwitchModalOpen, myTeam]);
 
   useEffect(() => {
     if (!watchMode && !isGameOver) {
@@ -518,8 +542,14 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
                     <button
                       disabled={isFainted}
                       onClick={() => setSelectedIndex(i)}
+                      className="battle-switch-pokemon-button"
                     >
-                      {poke.base.name} {isCurrent ? "(현재)" : ""}
+                      <img
+                        className="battle-switch-thumb"
+                        src={switchThumbnails[`${poke.base.id}-${i}`]}
+                        alt={poke.base.name}
+                      />
+                      <span>{poke.base.name} {isCurrent ? "(현재)" : ""}</span>
                     </button>
 
                     {isSelected && (
