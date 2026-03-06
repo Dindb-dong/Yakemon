@@ -11,6 +11,7 @@ import {
   updatePlayerNickname
 } from "../api/playhistory";
 import "./MyPage.css";
+import { getHpImagePath } from "./PokemonArea";
 
 const EFFORT_STAT_OPTIONS: Array<{ value: EffortStatKey; label: string }> = [
   { value: "hp", label: "HP" },
@@ -31,6 +32,7 @@ function MyPage() {
   const [nicknameInput, setNicknameInput] = useState("");
   const [effortStatByPokemon, setEffortStatByPokemon] = useState<Record<number, EffortStatKey>>({});
   const [effortAmountByPokemon, setEffortAmountByPokemon] = useState<Record<number, number>>({});
+  const [effortThumbnails, setEffortThumbnails] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const init = async () => {
@@ -135,6 +137,34 @@ function MyPage() {
     ? Math.round((record.winCount / (record.winCount + record.loseCount)) * 100)
     : 0;
 
+  useEffect(() => {
+    if (!record?.pokemonEffort?.length) {
+      return;
+    }
+    let isMounted = true;
+
+    const loadThumbnails = async () => {
+      const entries = await Promise.all(record.pokemonEffort.map(async (row) => {
+        const imageUrl = await getHpImagePath(row.pokemonId, 1, 1);
+        return [row.pokemonId, imageUrl] as const;
+      }));
+
+      if (!isMounted) {
+        return;
+      }
+      const nextMap: Record<number, string> = {};
+      entries.forEach(([pokemonId, imageUrl]) => {
+        nextMap[pokemonId] = imageUrl;
+      });
+      setEffortThumbnails(nextMap);
+    };
+
+    loadThumbnails();
+    return () => {
+      isMounted = false;
+    };
+  }, [record?.pokemonEffort]);
+
   return (
     <div className="auth-container">
       <div className="guest-mode-box">
@@ -203,10 +233,18 @@ function MyPage() {
             ) : (
               <div className="effort-list">
                 {record.pokemonEffort.map((row) => (
-                  <article key={row.pokemonId} className="effort-card">
+                  <article key={row.pokemonId} className={`effort-card ${row.unspentEffort > 0 ? "is-investable" : ""}`}>
                     <div className="effort-card-head">
-                      <h4>{row.pokemonName}</h4>
-                      <p>도감번호 #{row.pokemonId}</p>
+                      <div className="effort-pokemon-head">
+                        <div className="effort-thumb-wrap">
+                          <img className="effort-thumb" src={effortThumbnails[row.pokemonId]} alt={row.pokemonName} />
+                        </div>
+                        <div>
+                          <h4>{row.pokemonName}</h4>
+                          <p>도감번호 #{row.pokemonId}</p>
+                        </div>
+                      </div>
+                      {row.unspentEffort > 0 && <span className="effort-ready-badge">투자 가능</span>}
                     </div>
                     <div className="effort-grid">
                       {EFFORT_STAT_OPTIONS.map((stat) => (

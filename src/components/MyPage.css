@@ -257,77 +257,120 @@
 
 .effort-list {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
 }
 
 .effort-card {
-  border: 2px solid #9e8544;
+  border: 2px solid #7b63c3;
   border-radius: 10px;
-  background: rgba(254, 250, 237, 0.95);
-  padding: 0.65rem;
+  background: linear-gradient(180deg, #7a62c5 0%, #614bad 100%);
+  color: #f4f0ff;
+  padding: 0.6rem;
+  box-shadow: 0 4px 0 rgba(58, 42, 98, 0.75);
+}
+
+.effort-card.is-investable {
+  border-color: #f7d84e;
+  box-shadow: 0 0 0 2px rgba(247, 216, 78, 0.28), 0 6px 0 rgba(70, 52, 14, 0.65);
 }
 
 .effort-card-head {
   display: flex;
   justify-content: space-between;
   gap: 0.6rem;
-  align-items: baseline;
+  align-items: center;
+}
+
+.effort-pokemon-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.effort-thumb-wrap {
+  width: 42px;
+  height: 42px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  background: rgba(36, 24, 73, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.effort-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .effort-card-head h4 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.98rem;
 }
 
 .effort-card-head p {
   margin: 0;
-  font-size: 0.8rem;
-  color: #6a5427;
+  font-size: 0.74rem;
+  color: rgba(244, 240, 255, 0.82);
+}
+
+.effort-ready-badge {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f7d84e, #d9a923);
+  color: #3d2b03;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .effort-grid {
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   display: grid;
-  gap: 0.4rem;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.32rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .effort-stat-item {
-  border: 1px solid #c8b076;
+  border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 8px;
-  background: #fff8e4;
-  padding: 0.4rem 0.5rem;
+  background: rgba(20, 11, 47, 0.24);
+  padding: 0.3rem 0.38rem;
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 0.34rem;
+  font-size: 0.72rem;
 }
 
 .effort-stat-item strong {
-  color: #274f89;
+  color: #fff5c8;
 }
 
 .effort-summary {
-  margin-top: 0.5rem;
+  margin-top: 0.4rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 0.79rem;
-  color: #5f4c24;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: rgba(244, 240, 255, 0.9);
 }
 
 .effort-invest-row {
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   display: flex;
-  gap: 0.45rem;
+  gap: 0.32rem;
 }
 
 .effort-invest-row select,
 .effort-invest-row input {
-  border: 2px solid #aa9258;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 8px;
-  padding: 0.42rem 0.5rem;
-  font-size: 0.82rem;
+  padding: 0.34rem 0.38rem;
+  font-size: 0.74rem;
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .effort-invest-row select {
@@ -335,16 +378,16 @@
 }
 
 .effort-invest-row input {
-  width: 84px;
+  width: 72px;
 }
 
 .effort-invest-row button {
   border: 2px solid #2d240f;
   border-radius: 10px;
   color: #fff;
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  padding: 0.45rem 0.8rem;
+  padding: 0.36rem 0.64rem;
   background: linear-gradient(180deg, #49a060, #2f7b47);
   cursor: pointer;
 }
