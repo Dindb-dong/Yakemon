@@ -79,34 +79,33 @@ function TurnBanner({ turn, randomMode }: { turn: number, randomMode: boolean })
 
   const mySideEffects = getSideEffects(myEnv.screen ?? null, myEnvEffects, myEnv.trap, "my");
   const enemySideEffects = getSideEffects(enemyEnv.screen ?? null, enemyEnvEffects, enemyEnv.trap, "enemy");
+  const sideSummary = [...mySideEffects, ...enemySideEffects];
 
   return (
     <div className="turn-banner">
-      <div>턴 {turn}</div>
-      {randomMode && <div>{winCount}연승중!</div>}
+      <div className="turn-banner-main-row">
+        <span className="turn-banner-main-status">
+          {randomMode ? `${winCount} 연승중 · ` : ""}{turn}턴 진행중
+        </span>
+      </div>
 
       {/* 공용 효과 */}
       {activeEffects.length > 0 && (
-        <div className="public-env">
+        <div className="public-env turn-banner-inline">
           {activeEffects.map((effect, idx) => (
-            <div key={idx}>{effect}</div>
+            <span key={idx}>{effect}</span>
           ))}
         </div>
       )}
 
       {/* 필드 효과 */}
-      <div className="side-effects-row">
-        <div className="side-effects left">
-          {mySideEffects.map((eff, i) => (
-            <div key={i}>🟩 {eff}</div>
+      {sideSummary.length > 0 && (
+        <div className="side-effects-row turn-banner-inline">
+          {sideSummary.map((eff, i) => (
+            <span key={i}>{eff}</span>
           ))}
         </div>
-        <div className="side-effects right">
-          {enemySideEffects.map((eff, i) => (
-            <div key={i}>🟥 {eff}</div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
