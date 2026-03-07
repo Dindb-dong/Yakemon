@@ -1913,12 +1913,19 @@ button {
 }
 
 .damage-effect {
-  animation: shakeAndFlash 0.4s ease-in-out;
+  animation: shakeAndFlash 0.55s ease-in-out;
+  background:
+    linear-gradient(180deg, rgba(255, 186, 186, 0.9), rgba(255, 110, 110, 0.8)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 8px, rgba(255, 255, 255, 0.04) 8px 16px);
+  box-shadow: 0 0 0 2px rgba(220, 35, 35, 0.35);
 }
 
 .heal-effect {
-  animation: healFlash 0.4s ease-in-out;
-  background-color: rgba(0, 255, 0, 0.1);
+  animation: healFlash 0.55s ease-in-out;
+  background:
+    linear-gradient(180deg, rgba(206, 255, 190, 0.9), rgba(134, 225, 120, 0.82)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 8px, rgba(255, 255, 255, 0.04) 8px 16px);
+  box-shadow: 0 0 0 2px rgba(64, 164, 72, 0.34);
 }
 
 .attack-lunge-left {
