@@ -1788,6 +1788,18 @@ button {
   background-color: rgba(0, 255, 0, 0.1);
 }
 
+.attack-lunge-left {
+  animation: attackLungeLeft 1s ease-in-out;
+}
+
+.attack-lunge-right {
+  animation: attackLungeRight 1s ease-in-out;
+}
+
+.attack-hit-shake {
+  animation: attackHitShake 1s ease-in-out;
+}
+
 @keyframes shakeAndFlash {
   0% { transform: translateX(0); background-color: transparent; }
   25% { transform: translateX(-4px); background-color: rgba(255, 0, 0, 0.2); }
@@ -1800,6 +1812,27 @@ button {
   0% { background-color: rgba(0, 255, 0, 0.12); }
   50% { background-color: rgba(0, 255, 0, 0.3); }
   100% { background-color: rgba(0, 255, 0, 0.1); }
+}
+
+@keyframes attackLungeLeft {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(38px) scale(1.05); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes attackLungeRight {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(-38px) scale(1.05); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes attackHitShake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
 }
 
 @keyframes spin {

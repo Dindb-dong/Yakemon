@@ -97,6 +97,10 @@ function PokemonArea({ my, enemy }: Props) {
   const [enemyDamage, setEnemyDamage] = useState(false);
   const [myHeal, setMyHeal] = useState(false);
   const [enemyHeal, setEnemyHeal] = useState(false);
+  const [myAttackMotion, setMyAttackMotion] = useState(false);
+  const [enemyAttackMotion, setEnemyAttackMotion] = useState(false);
+  const [myHitMotion, setMyHitMotion] = useState(false);
+  const [enemyHitMotion, setEnemyHitMotion] = useState(false);
 
 
   useEffect(() => {
@@ -124,10 +128,40 @@ function PokemonArea({ my, enemy }: Props) {
 
     setEnemyPrevHp(enemy.currentHp);
   }, [enemy]);
+
+  useEffect(() => {
+    const timers: number[] = [];
+    const handleAttackMotion = (event: Event) => {
+      const customEvent = event as CustomEvent<{ side?: "my" | "enemy" }>;
+      const side = customEvent.detail?.side;
+      if (side === "my") {
+        setMyAttackMotion(true);
+        timers.push(window.setTimeout(() => setMyAttackMotion(false), 1000));
+        timers.push(window.setTimeout(() => {
+          setEnemyHitMotion(true);
+          timers.push(window.setTimeout(() => setEnemyHitMotion(false), 1000));
+        }, 1000));
+      } else if (side === "enemy") {
+        setEnemyAttackMotion(true);
+        timers.push(window.setTimeout(() => setEnemyAttackMotion(false), 1000));
+        timers.push(window.setTimeout(() => {
+          setMyHitMotion(true);
+          timers.push(window.setTimeout(() => setMyHitMotion(false), 1000));
+        }, 1000));
+      }
+    };
+
+    window.addEventListener("yakemon:attack-motion", handleAttackMotion as EventListener);
+    return () => {
+      window.removeEventListener("yakemon:attack-motion", handleAttackMotion as EventListener);
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, []);
+
   return (
     <div className="pokemon-area">
       {my &&
-        <div className={`pokemon-card ${myDamage ? 'damage-effect' : ''} ${myHeal ? 'heal-effect' : ''}`}>
+        <div className={`pokemon-card ${myDamage ? 'damage-effect' : ''} ${myHeal ? 'heal-effect' : ''} ${myAttackMotion ? "attack-lunge-left" : ""} ${myHitMotion ? "attack-hit-shake" : ""}`}>
           <h5>{my.base.name} (내 포켓몬)</h5>
           {my.position === null &&
             <img
@@ -148,7 +182,7 @@ function PokemonArea({ my, enemy }: Props) {
         </div>
       }
       {enemy &&
-        <div className={`pokemon-card ${enemyDamage ? 'damage-effect' : ''} ${enemyHeal ? 'heal-effect' : ''}`}>
+        <div className={`pokemon-card ${enemyDamage ? 'damage-effect' : ''} ${enemyHeal ? 'heal-effect' : ''} ${enemyAttackMotion ? "attack-lunge-right" : ""} ${enemyHitMotion ? "attack-hit-shake" : ""}`}>
           <h5>{enemy.base.name} (상대 포켓몬)</h5>
           {enemy.position === null &&
             <img

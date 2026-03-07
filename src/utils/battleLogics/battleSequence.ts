@@ -25,6 +25,13 @@ export type BattleAction = MoveInfo | { type: "switch", index: number } | null;
 const ACTION_CAST_DELAY_MS = 2000;
 const ACTION_RESOLVE_DELAY_MS = 2000;
 
+function emitAttackMotion(side: "my" | "enemy") {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.dispatchEvent(new CustomEvent("yakemon:attack-motion", { detail: { side } }));
+}
+
 export async function battleSequence(
   myAction: BattleAction,
   enemyAction: BattleAction,
@@ -208,6 +215,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
   const defender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   if (currentIndex != activeIndex) return;
+  emitAttackMotion(side);
   await delay(ACTION_CAST_DELAY_MS);
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
   try {
