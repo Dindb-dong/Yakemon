@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BattlePokemon } from "../models/BattlePokemon";
-import { PokemonDetailModal } from "./PokemonSelect";
 import { getHpImagePath } from "./PokemonArea";
+import PokemonDetailViewModal from "./PokemonDetailViewModal";
 
 type RealignModalProps = {
   myTeam: BattlePokemon[];
@@ -84,16 +84,23 @@ function RealignModal({ myTeam, onConfirm }: RealignModalProps) {
         </div>
 
         {selectedPokemonIndex !== null && (
-          <PokemonDetailModal
-            pokemon={myTeam[selectedPokemonIndex].base}
+          <PokemonDetailViewModal
+            pokemon={myTeam[selectedPokemonIndex]}
+            side="my"
+            avoidPad={false}
+            showActionButtons
             onClose={() => setSelectedPokemonIndex(null)}
-            onSelect={() =>
+            onConfirm={() =>
+              selectedPokemonIndex !== null && !selectedOrder.includes(selectedPokemonIndex)
+                ? handleRegister(selectedPokemonIndex)
+                : undefined
+            }
+            onCancel={() =>
               selectedOrder.includes(selectedPokemonIndex)
                 ? handleRemove(selectedPokemonIndex)
-                : handleRegister(selectedPokemonIndex)
+                : undefined
             }
-            isAlreadySelected={selectedOrder.includes(selectedPokemonIndex)}
-            realign={true}
+            isSelected={selectedOrder.includes(selectedPokemonIndex)}
           />
         )}
       </div>
