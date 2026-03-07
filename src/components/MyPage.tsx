@@ -29,6 +29,7 @@ function MyPage() {
   const [currentId, setCurrentId] = useState("");
   const [idInput, setIdInput] = useState("");
   const [record, setRecord] = useState<PlayerRecord | null>(null);
+  const [isRecordLoading, setIsRecordLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
@@ -72,6 +73,8 @@ function MyPage() {
         setNicknameInput(data.username || "");
       } catch (error) {
         setRecord(null);
+      } finally {
+        setIsRecordLoading(false);
       }
     };
 
@@ -83,6 +86,7 @@ function MyPage() {
     setIsLoading(true);
 
     try {
+      setIsRecordLoading(true);
       const normalizedId = setGuestPlayerId(idInput);
       const data = await loadPlayerRecord(normalizedId);
       setCurrentId(normalizedId);
@@ -99,6 +103,7 @@ function MyPage() {
       }
     } finally {
       setIsLoading(false);
+      setIsRecordLoading(false);
     }
   };
 
@@ -238,7 +243,9 @@ function MyPage() {
         </button>
       </div>
 
-      {record ? (
+      {isRecordLoading ? (
+        <div className="empty-record-box">기록을 불러오는 중입니다...</div>
+      ) : record ? (
         <>
           <div className="stats-container">
             <div className="stat-box">
