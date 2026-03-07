@@ -172,6 +172,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const isFainted = leftPokemon.currentHp <= 0;
   const [selectedMove, setSelectedMove] = useState<MoveInfo | null>(null);
   const [isTurnProcessing, setIsTurnProcessing] = useState(false);
+  const [inputArmed, setInputArmed] = useState(false);
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
   const [pendingSwitch, setPendingSwitch] = useState<((index: number) => void) | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -187,12 +188,19 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const participatedMyPokemonRef = useRef<Record<string, { pokemonId: number; pokemonName: string }>>({});
 
   const handlePadInput = useCallback((action: BattlePadAction) => {
-    if (watchMode || isTurnProcessing || isSwitchModalOpen) {
+    if (watchMode || isTurnProcessing || isSwitchModalOpen || !inputArmed) {
       return;
     }
     padCommandIdRef.current += 1;
     setPadCommand({ id: padCommandIdRef.current, action });
-  }, [isSwitchModalOpen, isTurnProcessing, watchMode]);
+  }, [inputArmed, isSwitchModalOpen, isTurnProcessing, watchMode]);
+
+  useEffect(() => {
+    const armTimer = window.setTimeout(() => {
+      setInputArmed(true);
+    }, 1200);
+    return () => window.clearTimeout(armTimer);
+  }, []);
   // useEffect(() => {
   //   timeLeftRef.current = timeLeft;
   //   console.log("💡 useEffect 타이머 리셋 트리거 확인", timeLeft);
@@ -270,7 +278,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
   useEffect(() => {
     const handleTimeout = async () => {
-      if (timeLeft <= 0 && !isTurnProcessing && !watchMode && !isSwitchModalOpen) {
+      if (timeLeft <= 0 && !isTurnProcessing && !watchMode && !isSwitchModalOpen && inputArmed) {
         const current = myTeam[activeMy];
 
         if (current.currentHp <= 0) {
@@ -299,11 +307,11 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     };
 
     handleTimeout();
-  }, [activeMy, isSwitchModalOpen, isTurnProcessing, myTeam, watchMode, timeLeft]);
+  }, [activeMy, inputArmed, isSwitchModalOpen, isTurnProcessing, myTeam, watchMode, timeLeft]);
 
   useEffect(() => {
     const handleChargingMove = async () => {
-      if (!watchMode && !isGameOver && !isSwitchModalOpen && !isFainted && !isTurnProcessing) {
+      if (!watchMode && !isGameOver && !isSwitchModalOpen && !isFainted && !isTurnProcessing && inputArmed) {
         const current = myTeam[activeMy];
         if (current.cannotMove) {
           addLog(`😵 ${current.base.name}은 아직 회복되지 않아 움직이지 못한다!`);
@@ -346,7 +354,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     };
 
     handleChargingMove();
-  }, [activeMy, isFainted, isGameOver, isSwitchModalOpen, isTurnProcessing, turn, watchMode]); // 턴 시작할 때마다 실행
+  }, [activeMy, inputArmed, isFainted, isGameOver, isSwitchModalOpen, isTurnProcessing, turn, watchMode]); // 턴 시작할 때마다 실행
 
 
   const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
@@ -619,7 +627,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
             onAction={watchMode ? () => { } : executeTurn}
             watchMode={watchMode}
             padCommand={padCommand}
-            inputLocked={isSwitchModalOpen || isFainted}
+            inputLocked={!inputArmed || isSwitchModalOpen || isFainted}
           />
 
         </div>
@@ -627,7 +635,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       {!watchMode && (
         <BattlePad
           onInput={handlePadInput}
-          disabled={isTurnProcessing || isSwitchModalOpen}
+          disabled={!inputArmed || isTurnProcessing || isSwitchModalOpen}
         />
       )}
     </div>
