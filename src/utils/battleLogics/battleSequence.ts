@@ -22,6 +22,8 @@ import { setAbility, setTypes, useMovePP } from "./updateBattlePokemon";
 import { delay } from "../delay";
 
 export type BattleAction = MoveInfo | { type: "switch", index: number } | null;
+const ACTION_CAST_DELAY_MS = 2000;
+const ACTION_RESOLVE_DELAY_MS = 2000;
 
 export async function battleSequence(
   myAction: BattleAction,
@@ -206,105 +208,110 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
   const defender: BattlePokemon = side === 'my' ? enemyTeam[activeEnemy] : myTeam[activeMy];
   const activeIndex = side === 'my' ? activeMy : activeEnemy;
   if (currentIndex != activeIndex) return;
+  await delay(ACTION_CAST_DELAY_MS);
   const opponentSide = side === 'my' ? 'enemy' : 'my'; // 상대 진영 계산 
-  if (isTripleHit) { // 트리플악셀, 트리플킥
-    const hitCount = getHitCount(move);
-
-    // 리베로, 변환자재
-    if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
-      updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
-      updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
-      addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
-      console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
-    }
-    for (let i = 0; i < hitCount; i++) {
-      // 매 턴마다 최신 defender 상태 확인
-      const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
-        side === "my" ? activeEnemy : activeMy
-      ];
-
-      if (currentDefender.currentHp <= 0) break;
-      const currentPower = move.power + (move.name === "트리플킥" ? 10 * i : 20 * i); // 0→1→2단계 누적
-      const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate, isMultiHit: isTripleHit });
-      updatePokemon(side, activeIndex, (attacker) => useMovePP(attacker, move.name, defender.base.ability?.name === '프레셔'));
-      if (result?.success) {
-        const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
-          side === "my" ? activeEnemy : activeMy
-        ];
-        await delay(1000);
-        await applyAfterDamage(side, attacker, currentDefender1, move, result.damage, watchMode, true);
-        await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
-      } else {
-        break; // 빗나가면 중단
-      }
-    }
-    return;
-  } else if (isDoubleHit || isMultiHit) { // 첫타 맞으면 다 맞춤 
-    // 리베로, 변환자재
-    if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
-      updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
-      updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
-      addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
-      console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
-    }
-    const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
-    console.log('1번째 타격!')
-    if (result?.success) {
-      const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
-        side === "my" ? activeEnemy : activeMy
-      ];
-      await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
+  try {
+    if (isTripleHit) { // 트리플악셀, 트리플킥
       const hitCount = getHitCount(move);
-      console.log(hitCount)
-      for (let i = 0; i < hitCount - 1; i++) {
+
+      // 리베로, 변환자재
+      if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
+        updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
+        updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
+        addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+        console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
+      }
+      for (let i = 0; i < hitCount; i++) {
         // 매 턴마다 최신 defender 상태 확인
         const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
           side === "my" ? activeEnemy : activeMy
         ];
 
         if (currentDefender.currentHp <= 0) break;
-        await delay(1000);
-        console.log(`${i + 2}번째 타격!`)
-        const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate, isMultiHit: true });
+        const currentPower = move.power + (move.name === "트리플킥" ? 10 * i : 20 * i); // 0→1→2단계 누적
+        const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate, isMultiHit: isTripleHit });
+        updatePokemon(side, activeIndex, (attacker) => useMovePP(attacker, move.name, defender.base.ability?.name === '프레셔'));
         if (result?.success) {
+          const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
+            side === "my" ? activeEnemy : activeMy
+          ];
+          await delay(1000);
+          await applyAfterDamage(side, attacker, currentDefender1, move, result.damage, watchMode, true);
+          await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
+        } else {
+          break; // 빗나가면 중단
+        }
+      }
+      return;
+    } else if (isDoubleHit || isMultiHit) { // 첫타 맞으면 다 맞춤 
+      // 리베로, 변환자재
+      if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
+        updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
+        updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
+        addLog(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+        console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
+      }
+      const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
+      console.log('1번째 타격!')
+      if (result?.success) {
+        const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+          side === "my" ? activeEnemy : activeMy
+        ];
+        await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
+        const hitCount = getHitCount(move);
+        console.log(hitCount)
+        for (let i = 0; i < hitCount - 1; i++) {
+          // 매 턴마다 최신 defender 상태 확인
           const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
             side === "my" ? activeEnemy : activeMy
           ];
-          await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
-          await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
+
+          if (currentDefender.currentHp <= 0) break;
+          await delay(1000);
+          console.log(`${i + 2}번째 타격!`)
+          const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate, isMultiHit: true });
+          if (result?.success) {
+            const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+              side === "my" ? activeEnemy : activeMy
+            ];
+            await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
+            await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
+          }
         }
+        const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
+          side === "my" ? activeEnemy : activeMy
+        ];
+        await applyMoveEffectAfterMultiDamage(side, attacker, currentDefender1, move, result?.damage, watchMode);
+        addLog("📊 총 " + hitCount + "번 맞았다!");
+        console.log("총 " + hitCount + "번 맞았다!");
       }
-      const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
-        side === "my" ? activeEnemy : activeMy
-      ];
-      await applyMoveEffectAfterMultiDamage(side, attacker, currentDefender1, move, result?.damage, watchMode);
-      addLog("📊 총 " + hitCount + "번 맞았다!");
-      console.log("총 " + hitCount + "번 맞았다!");
+      return;
     }
-    return;
-  }
-  else { // 그냥 다른 기술들
-    // 리베로, 변환자재
-    if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
-      updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
-      updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
-      addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
-      console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
-    }
-    const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
-    if (result?.success) {
-      if (defender.base.ability?.name === '매직가드' && move.category === '변화') {
-        addLog(`${defender.base.name}은 매직가드로 피해를 입지 않았다!`);
-        console.log(`${defender.base.name}은 매직가드로 피해를 입지 않았다!`);
-        await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
-        return;
+    else { // 그냥 다른 기술들
+      // 리베로, 변환자재
+      if (attacker.base.ability && hasAbility(attacker.base.ability, ['리베로', '변환자재'])) {
+        updatePokemon(side, activeIndex, (prev) => setTypes(prev, [move.type])); // 타입 바꿔주고
+        updatePokemon(side, activeIndex, (prev) => setAbility(prev, null)); // 특성 삭제
+        addLog(`🔃 ${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`)
+        console.log(`${attacker.base.name}의 타입은 ${move.type}타입으로 변했다!`);
       }
-      const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
-        side === "my" ? activeEnemy : activeMy
-      ];
-      await applyAfterDamage(side, attacker, currentDefender, move, result?.damage, watchMode);
+      const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
+      if (result?.success) {
+        if (defender.base.ability?.name === '매직가드' && move.category === '변화') {
+          addLog(`${defender.base.name}은 매직가드로 피해를 입지 않았다!`);
+          console.log(`${defender.base.name}은 매직가드로 피해를 입지 않았다!`);
+          await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
+          return;
+        }
+        const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+          side === "my" ? activeEnemy : activeMy
+        ];
+        await applyAfterDamage(side, attacker, currentDefender, move, result?.damage, watchMode);
+      }
+      return;
     }
-    return;
+  } finally {
+    await delay(ACTION_RESOLVE_DELAY_MS);
   }
 }
 
