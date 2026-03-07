@@ -33,6 +33,12 @@ type BattleProps = {
   setBattleKey: React.Dispatch<React.SetStateAction<number>>;
 };
 
+type BattleToast = {
+  id: number;
+  message: string;
+  expiresAt: number;
+};
+
 function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBattleKey }: BattleProps) {
   const myTeam = useBattleStore((state) => state.myTeam);
   const enemyTeam = useBattleStore((state) => state.enemyTeam);
@@ -51,9 +57,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [musicOn, setMusicOn] = useState(true);
   const navigate = useNavigate();
   const [redirected, setRedirected] = useState(false);
-  const [activeToasts, setActiveToasts] = useState<Array<{ id: number; message: string }>>([]);
-  const toastTimersRef = useRef<number[]>([]);
+  const [activeToasts, setActiveToasts] = useState<BattleToast[]>([]);
   const toastIdRef = useRef(0);
+  const toastExpireCursorRef = useRef(Date.now());
   const lastToastLogIndexRef = useRef(logs.length);
   useEffect(() => {
     const checkLastOne = () => {
@@ -99,24 +105,29 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     }
     const incomingLogs = logs.slice(previousIndex).filter((message) => message.trim().length > 0);
     lastToastLogIndexRef.current = logs.length;
+    let cursor = Math.max(toastExpireCursorRef.current, Date.now());
     const created = incomingLogs.map((message) => {
       toastIdRef.current += 1;
-      return { id: toastIdRef.current, message };
+      cursor += 2000;
+      return { id: toastIdRef.current, message, expiresAt: cursor };
     });
-    setActiveToasts((prev) => [...prev, ...created].slice(-8));
-
-    created.forEach((toast) => {
-      const timer = window.setTimeout(() => {
-        setActiveToasts((prev) => prev.filter((item) => item.id !== toast.id));
-      }, 2200);
-      toastTimersRef.current.push(timer);
-    });
+    toastExpireCursorRef.current = cursor;
+    setActiveToasts((prev) => [...prev, ...created]);
   }, [logs]);
 
   useEffect(() => {
+    const interval = window.setInterval(() => {
+      const now = Date.now();
+      setActiveToasts((prev) => {
+        if (!prev.length) {
+          return prev;
+        }
+        return prev.filter((toast) => toast.expiresAt > now);
+      });
+    }, 200);
+
     return () => {
-      toastTimersRef.current.forEach((timer) => window.clearTimeout(timer));
-      toastTimersRef.current = [];
+      window.clearInterval(interval);
     };
   }, []);
 
