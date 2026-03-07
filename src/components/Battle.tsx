@@ -38,6 +38,12 @@ type BattleToast = {
   message: string;
   expiresAt: number;
 };
+type PendingBattleToast = {
+  id: number;
+  message: string;
+};
+const MAX_ACTIVE_TOASTS = 3;
+const TOAST_DURATION_MS = 2000;
 
 function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBattleKey }: BattleProps) {
   const myTeam = useBattleStore((state) => state.myTeam);
@@ -59,7 +65,7 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
   const [redirected, setRedirected] = useState(false);
   const [activeToasts, setActiveToasts] = useState<BattleToast[]>([]);
   const toastIdRef = useRef(0);
-  const toastExpireCursorRef = useRef(Date.now());
+  const pendingToastQueueRef = useRef<PendingBattleToast[]>([]);
   const lastToastLogIndexRef = useRef(logs.length);
   useEffect(() => {
     const checkLastOne = () => {
@@ -105,24 +111,34 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     }
     const incomingLogs = logs.slice(previousIndex).filter((message) => message.trim().length > 0);
     lastToastLogIndexRef.current = logs.length;
-    let cursor = Math.max(toastExpireCursorRef.current, Date.now());
     const created = incomingLogs.map((message) => {
       toastIdRef.current += 1;
-      cursor += 2000;
-      return { id: toastIdRef.current, message, expiresAt: cursor };
+      return { id: toastIdRef.current, message };
     });
-    toastExpireCursorRef.current = cursor;
-    setActiveToasts((prev) => [...prev, ...created]);
+    pendingToastQueueRef.current.push(...created);
   }, [logs]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       const now = Date.now();
       setActiveToasts((prev) => {
-        if (!prev.length) {
-          return prev;
+        const remained = prev.filter((toast) => toast.expiresAt > now);
+        if (remained.length >= MAX_ACTIVE_TOASTS || pendingToastQueueRef.current.length === 0) {
+          return remained;
         }
-        return prev.filter((toast) => toast.expiresAt > now);
+
+        const nextToasts = [...remained];
+        while (nextToasts.length < MAX_ACTIVE_TOASTS && pendingToastQueueRef.current.length > 0) {
+          const nextPending = pendingToastQueueRef.current.shift();
+          if (!nextPending) {
+            break;
+          }
+          nextToasts.push({
+            ...nextPending,
+            expiresAt: now + TOAST_DURATION_MS,
+          });
+        }
+        return nextToasts;
       });
     }, 200);
 

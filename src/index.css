@@ -1066,14 +1066,14 @@ button {
   width: 100%;
   border: 2px solid #2a2211;
   border-radius: 10px;
-  background: rgba(27, 42, 84, 0.72);
+  background: rgba(27, 42, 84, 0.52);
   color: #fff;
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.4;
   padding: 0.45rem 0.7rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(1.5px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(1.2px);
   animation: battleToastInOut 2.2s ease-in-out;
 }
 
