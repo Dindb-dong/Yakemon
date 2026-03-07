@@ -59,7 +59,7 @@ button {
 
 .music-toggle-button {
   position: fixed;
-  top: 0.8rem;
+  top: 5.4rem;
   right: 1rem;
   z-index: 1200;
   border: 2px solid #221b0c;
@@ -327,25 +327,67 @@ button {
   font-weight: 700;
 }
 
-.hint-type-badge.fire { background: #f08030; }
-.hint-type-badge.water { background: #6890f0; }
-.hint-type-badge.grass { background: #78c850; }
-.hint-type-badge.electric { background: #f8d030; color: #2f2715; }
-.hint-type-badge.ice { background: #98d8d8; color: #243232; }
-.hint-type-badge.rock { background: #b8a038; }
-.hint-type-badge.ground { background: #e0c068; color: #3d2f15; }
-.hint-type-badge.flying { background: #a890f0; }
-.hint-type-badge.poison { background: #a040a0; }
-.hint-type-badge.bug { background: #a8b820; }
-.hint-type-badge.ghost { background: #705898; }
-.hint-type-badge.steel { background: #b8b8d0; color: #252525; }
-.hint-type-badge.dragon { background: #7038f8; }
-.hint-type-badge.dark { background: #705848; }
-.hint-type-badge.fairy { background: #ee99ac; }
-.hint-type-badge.psychic { background: #f85888; }
-.hint-type-badge.normal { background: #a8a878; }
-.hint-type-badge.fighting { background: #c03028; }
-.hint-type-badge.unknown { background: #7d7d7d; }
+.hint-type-badge.fire {
+  background: #f08030;
+}
+.hint-type-badge.water {
+  background: #6890f0;
+}
+.hint-type-badge.grass {
+  background: #78c850;
+}
+.hint-type-badge.electric {
+  background: #f8d030;
+  color: #2f2715;
+}
+.hint-type-badge.ice {
+  background: #98d8d8;
+  color: #243232;
+}
+.hint-type-badge.rock {
+  background: #b8a038;
+}
+.hint-type-badge.ground {
+  background: #e0c068;
+  color: #3d2f15;
+}
+.hint-type-badge.flying {
+  background: #a890f0;
+}
+.hint-type-badge.poison {
+  background: #a040a0;
+}
+.hint-type-badge.bug {
+  background: #a8b820;
+}
+.hint-type-badge.ghost {
+  background: #705898;
+}
+.hint-type-badge.steel {
+  background: #b8b8d0;
+  color: #252525;
+}
+.hint-type-badge.dragon {
+  background: #7038f8;
+}
+.hint-type-badge.dark {
+  background: #705848;
+}
+.hint-type-badge.fairy {
+  background: #ee99ac;
+}
+.hint-type-badge.psychic {
+  background: #f85888;
+}
+.hint-type-badge.normal {
+  background: #a8a878;
+}
+.hint-type-badge.fighting {
+  background: #c03028;
+}
+.hint-type-badge.unknown {
+  background: #7d7d7d;
+}
 
 .hint-modal-confirm {
   margin-top: 0.9rem;
@@ -604,8 +646,16 @@ button {
   border: 3px solid #5b4820;
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(254, 248, 228, 0.97), rgba(246, 229, 181, 0.94)),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 8px, rgba(255, 255, 255, 0.04) 8px 16px);
+    linear-gradient(
+      180deg,
+      rgba(254, 248, 228, 0.97),
+      rgba(246, 229, 181, 0.94)
+    ),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.18) 0 8px,
+      rgba(255, 255, 255, 0.04) 8px 16px
+    );
   box-shadow: var(--ui-shadow);
   padding: 0.58rem 0.55rem;
 }
@@ -751,24 +801,61 @@ button {
   color: #fff;
 }
 
-.move-type.불 { background-color: #ef6d2b; }
-.move-type.물 { background-color: #2a74d8; }
-.move-type.풀 { background-color: #55ae41; }
-.move-type.전기 { background-color: #d6a314; }
-.move-type.얼음 { background-color: #4ba4b5; }
-.move-type.격투 { background-color: #a3381b; }
-.move-type.비행 { background-color: #708fcf; }
-.move-type.에스퍼 { background-color: #d34b83; }
-.move-type.바위 { background-color: #8f7a2e; }
-.move-type.고스트 { background-color: #5d4b95; }
-.move-type.드래곤 { background-color: #4a26af; }
-.move-type.악 { background-color: #4e4037; }
-.move-type.강철 { background-color: #728295; }
-.move-type.페어리 { background-color: #cb6a8a; }
-.move-type.노말 { background-color: #dbd7ce; color: #433625; }
-.move-type.독 { background-color: #8651aa; }
-.move-type.땅 { background-color: #c69a4b; }
-.move-type.벌레 { background-color: #7d9327; }
+.move-type.불 {
+  background-color: #ef6d2b;
+}
+.move-type.물 {
+  background-color: #2a74d8;
+}
+.move-type.풀 {
+  background-color: #55ae41;
+}
+.move-type.전기 {
+  background-color: #d6a314;
+}
+.move-type.얼음 {
+  background-color: #4ba4b5;
+}
+.move-type.격투 {
+  background-color: #a3381b;
+}
+.move-type.비행 {
+  background-color: #708fcf;
+}
+.move-type.에스퍼 {
+  background-color: #d34b83;
+}
+.move-type.바위 {
+  background-color: #8f7a2e;
+}
+.move-type.고스트 {
+  background-color: #5d4b95;
+}
+.move-type.드래곤 {
+  background-color: #4a26af;
+}
+.move-type.악 {
+  background-color: #4e4037;
+}
+.move-type.강철 {
+  background-color: #728295;
+}
+.move-type.페어리 {
+  background-color: #cb6a8a;
+}
+.move-type.노말 {
+  background-color: #dbd7ce;
+  color: #433625;
+}
+.move-type.독 {
+  background-color: #8651aa;
+}
+.move-type.땅 {
+  background-color: #c69a4b;
+}
+.move-type.벌레 {
+  background-color: #7d9327;
+}
 
 .move-button.effective {
   background: linear-gradient(180deg, #fff7cc, #f8eb99);
@@ -804,9 +891,15 @@ button {
 }
 
 @keyframes padFocusPulse {
-  0% { box-shadow: 0 0 0 rgba(214, 69, 47, 0.45); }
-  50% { box-shadow: 0 0 12px rgba(214, 69, 47, 0.45); }
-  100% { box-shadow: 0 0 0 rgba(214, 69, 47, 0.45); }
+  0% {
+    box-shadow: 0 0 0 rgba(214, 69, 47, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(214, 69, 47, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(214, 69, 47, 0.45);
+  }
 }
 
 .swap-panel {
@@ -1034,10 +1127,22 @@ button {
   place-items: center;
 }
 
-.dpad-up { grid-column: 2; grid-row: 1; }
-.dpad-left { grid-column: 1; grid-row: 2; }
-.dpad-right { grid-column: 3; grid-row: 2; }
-.dpad-down { grid-column: 2; grid-row: 3; }
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
 
 .pad-center {
   grid-column: 2;
@@ -1058,10 +1163,22 @@ button {
   place-items: center;
 }
 
-.x-btn { grid-column: 2; grid-row: 1; }
-.y-btn { grid-column: 1; grid-row: 2; }
-.a-btn { grid-column: 3; grid-row: 2; }
-.b-btn { grid-column: 2; grid-row: 3; }
+.x-btn {
+  grid-column: 2;
+  grid-row: 1;
+}
+.y-btn {
+  grid-column: 1;
+  grid-row: 2;
+}
+.a-btn {
+  grid-column: 3;
+  grid-row: 2;
+}
+.b-btn {
+  grid-column: 2;
+  grid-row: 3;
+}
 
 .pad-btn {
   width: 50px;
@@ -1107,7 +1224,11 @@ button {
   margin: 1.2rem auto 1.8rem;
   border: 4px solid #7f6a2f;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 252, 239, 0.95), rgba(243, 230, 191, 0.95));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 239, 0.95),
+    rgba(243, 230, 191, 0.95)
+  );
   box-shadow: var(--ui-shadow);
   padding: 1.1rem;
 }
@@ -1492,8 +1613,16 @@ button {
   border-radius: 14px;
   border: 4px solid #6f5824;
   background:
-    linear-gradient(180deg, rgba(255, 249, 231, 0.98), rgba(237, 223, 184, 0.98)),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 7px, rgba(255, 255, 255, 0.04) 7px 14px);
+    linear-gradient(
+      180deg,
+      rgba(255, 249, 231, 0.98),
+      rgba(237, 223, 184, 0.98)
+    ),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0 7px,
+      rgba(255, 255, 255, 0.04) 7px 14px
+    );
   box-shadow: var(--ui-shadow);
   padding: 0.85rem 0.9rem;
 }
@@ -1705,7 +1834,11 @@ button {
   width: min(560px, 100%);
   border: 4px solid #7f6a2f;
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255, 251, 238, 0.96), rgba(245, 232, 192, 0.94));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 251, 238, 0.96),
+    rgba(245, 232, 192, 0.94)
+  );
   box-shadow: var(--ui-shadow);
   padding: 1.2rem;
   text-align: center;
@@ -1801,43 +1934,92 @@ button {
 }
 
 @keyframes shakeAndFlash {
-  0% { transform: translateX(0); background-color: transparent; }
-  25% { transform: translateX(-4px); background-color: rgba(255, 0, 0, 0.2); }
-  50% { transform: translateX(4px); background-color: rgba(255, 0, 0, 0.35); }
-  75% { transform: translateX(-2px); background-color: rgba(255, 0, 0, 0.2); }
-  100% { transform: translateX(0); background-color: transparent; }
+  0% {
+    transform: translateX(0);
+    background-color: transparent;
+  }
+  25% {
+    transform: translateX(-4px);
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  50% {
+    transform: translateX(4px);
+    background-color: rgba(255, 0, 0, 0.35);
+  }
+  75% {
+    transform: translateX(-2px);
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+  100% {
+    transform: translateX(0);
+    background-color: transparent;
+  }
 }
 
 @keyframes healFlash {
-  0% { background-color: rgba(0, 255, 0, 0.12); }
-  50% { background-color: rgba(0, 255, 0, 0.3); }
-  100% { background-color: rgba(0, 255, 0, 0.1); }
+  0% {
+    background-color: rgba(0, 255, 0, 0.12);
+  }
+  50% {
+    background-color: rgba(0, 255, 0, 0.3);
+  }
+  100% {
+    background-color: rgba(0, 255, 0, 0.1);
+  }
 }
 
 @keyframes attackLungeLeft {
-  0% { transform: translateX(0) scale(1); }
-  45% { transform: translateX(38px) scale(1.05); }
-  100% { transform: translateX(0) scale(1); }
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  45% {
+    transform: translateX(38px) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
 }
 
 @keyframes attackLungeRight {
-  0% { transform: translateX(0) scale(1); }
-  45% { transform: translateX(-38px) scale(1.05); }
-  100% { transform: translateX(0) scale(1); }
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  45% {
+    transform: translateX(-38px) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
 }
 
 @keyframes attackHitShake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(7px); }
-  60% { transform: translateX(-6px); }
-  80% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1080px) {

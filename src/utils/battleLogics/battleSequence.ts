@@ -75,8 +75,8 @@ export async function battleSequence(
     applyEndTurnEffects();
     return;
   }
-  addLog("우선도 및 스피드 계산중...");
-  console.log("우선도 및 스피드 계산중...");
+  // addLog("우선도 및 스피드 계산중...");
+  // console.log("우선도 및 스피드 계산중...");
   function isMoveAction(action: BattleAction): action is MoveInfo {
     return (action as MoveInfo).power !== undefined;
   }
@@ -231,16 +231,17 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
       }
       for (let i = 0; i < hitCount; i++) {
         // 매 턴마다 최신 defender 상태 확인
-        const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
-          side === "my" ? activeEnemy : activeMy
-        ];
+        // const currentDefender = useBattleStore.getState().enemyTeam[activeEnemy]
+        // const currentDefender = useBattleStore.getState().myTeam[activeMy]
+        // 이런 형식이어야 하니까, 아래를 변환해야 함 
+        const currentDefender = useBattleStore.getState()[(side as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][(side as "my" | "enemy") === "my" ? activeEnemy : activeMy];
 
         if (currentDefender.currentHp <= 0) break;
         const currentPower = move.power + (move.name === "트리플킥" ? 10 * i : 20 * i); // 0→1→2단계 누적
         const result = await calculateMoveDamage({ moveName: move.name, side, overridePower: currentPower, wasLate: wasLate, isMultiHit: isTripleHit });
         updatePokemon(side, activeIndex, (attacker) => useMovePP(attacker, move.name, defender.base.ability?.name === '프레셔'));
         if (result?.success) {
-          const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
+          const currentDefender1 = useBattleStore.getState()[(side as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][
             side === "my" ? activeEnemy : activeMy
           ];
           await delay(1000);
@@ -262,7 +263,7 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
       const result = await calculateMoveDamage({ moveName: move.name, side, wasLate: wasLate });
       console.log('1번째 타격!')
       if (result?.success) {
-        const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+        const currentDefender = useBattleStore.getState()[(side as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][
           side === "my" ? activeEnemy : activeMy
         ];
         await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
@@ -270,8 +271,8 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
         console.log(hitCount)
         for (let i = 0; i < hitCount - 1; i++) {
           // 매 턴마다 최신 defender 상태 확인
-          const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
-            side === "my" ? activeEnemy : activeMy
+          const currentDefender = useBattleStore.getState()[(opponentSide as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][
+            (opponentSide as "my" | "enemy") === "my" ? activeEnemy : activeMy
           ];
 
           if (currentDefender.currentHp <= 0) break;
@@ -279,14 +280,14 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
           console.log(`${i + 2}번째 타격!`)
           const result = await calculateMoveDamage({ moveName: move.name, side, isAlwaysHit: true, wasLate: wasLate, isMultiHit: true });
           if (result?.success) {
-            const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
+            const currentDefender = useBattleStore.getState()[(side as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][
               side === "my" ? activeEnemy : activeMy
             ];
             await applyAfterDamage(side, attacker, currentDefender, move, result.damage, watchMode, true);
             await applyDefensiveAbilityEffectAfterMultiDamage(side, attacker, defender, move, result?.damage, watchMode);
           }
         }
-        const currentDefender1 = useBattleStore.getState()[opponentSide + "Team"][
+        const currentDefender1 = useBattleStore.getState()[(side as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][
           side === "my" ? activeEnemy : activeMy
         ];
         await applyMoveEffectAfterMultiDamage(side, attacker, currentDefender1, move, result?.damage, watchMode);
@@ -311,8 +312,8 @@ async function handleMove(side: "my" | "enemy", move: MoveInfo, currentIndex: nu
           await applyAfterDamage(side, attacker, defender, move, result?.damage, watchMode);
           return;
         }
-        const currentDefender = useBattleStore.getState()[opponentSide + "Team"][
-          side === "my" ? activeEnemy : activeMy
+        const currentDefender = useBattleStore.getState()[(side as "my" | "enemy") === "my" ? "enemyTeam" : "myTeam"][
+          (side as "my" | "enemy") === "my" ? activeEnemy : activeMy
         ];
         await applyAfterDamage(side, attacker, currentDefender, move, result?.damage, watchMode);
       }
