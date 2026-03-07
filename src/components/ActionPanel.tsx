@@ -183,6 +183,7 @@ function ActionPanel({
           return;
         }
         onAction({ type: "switch", index: selectedSwitchIndex });
+        setCurrentTab("fight");
         setSelectedSwitchIndex(null);
         setDetailSwitchIndex(null);
         setSwitchOption("detail");

@@ -359,8 +359,9 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
 
   const requestSwitch = (onSwitchConfirmed: (index: number) => void) => {
     setPendingSwitch(() => (index: number) => {
-      onSwitchConfirmed(index);
+      setSelectedIndex(null);
       setIsSwitchModalOpen(false);
+      onSwitchConfirmed(index);
     });
     setIsSwitchModalOpen(true);
   };
@@ -371,13 +372,14 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
       startTimer();
       setIsSwitchModalOpen(true);
       setPendingSwitch(() => (index: number) => {
+        setSelectedIndex(null);
+        setIsSwitchModalOpen(false);
         if (switchRequest?.onSwitch) {
           switchRequest.onSwitch(index); // zustand의 콜백 실행
           console.log('유턴 효과 실행중...4')
 
         }
         clearSwitchRequest();
-        setIsSwitchModalOpen(false);
       });
     }
   }, [isSwitchWaiting, switchRequest]);
@@ -448,10 +450,11 @@ function Battle({ watchMode, redMode, randomMode, watchCount, watchDelay, setBat
     if (isFainted) {
       setIsSwitchModalOpen(true);
       setPendingSwitch(() => async (index: number) => {
+        setSelectedIndex(null);
+        setIsSwitchModalOpen(false);
         console.log("my 포켓몬이 쓰러져서 교체 실행")
         await switchPokemon('my', index)
         clearSwitchRequest();
-        setIsSwitchModalOpen(false);
       });
     }
 
