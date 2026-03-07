@@ -56,7 +56,8 @@ const Leaderboard = () => {
         <div className="table-header">
           <div className="rank">순위</div>
           <div className="username">사용자</div>
-          <div className="streak">연승</div>
+          <div className="streak">최고 연승</div>
+          <div className="win-rate">승률</div>
         </div>
         {leaderboardData.length === 0 ? (
           <div className="no-data">아직 기록이 없습니다.</div>
@@ -65,7 +66,8 @@ const Leaderboard = () => {
             <div key={entry.rank} className="table-row">
               <div className="rank">{entry.rank}</div>
               <div className="username">{entry.username}</div>
-              <div className="streak">{entry.streak}</div>
+              <div className="streak">{entry.bestStreak}</div>
+              <div className="win-rate">{entry.winRate}%</div>
             </div>
           ))
         )}

@@ -22,7 +22,7 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 80px 1fr 100px;
+  grid-template-columns: 80px 1fr 120px 90px;
   gap: 0.3rem;
   padding: 0.75rem;
   background: linear-gradient(180deg, #3f86d8, #255ea8);
@@ -32,7 +32,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 80px 1fr 100px;
+  grid-template-columns: 80px 1fr 120px 90px;
   gap: 0.3rem;
   padding: 0.7rem 0.75rem;
   border-top: 1px solid rgba(111, 88, 36, 0.25);
@@ -48,7 +48,8 @@
 }
 
 .rank,
-.streak {
+.streak,
+.win-rate {
   text-align: center;
   font-weight: 700;
 }
@@ -89,7 +90,7 @@
 
   .table-header,
   .table-row {
-    grid-template-columns: 66px 1fr 80px;
+    grid-template-columns: 58px 1fr 84px 66px;
     font-size: 0.85rem;
   }
 }

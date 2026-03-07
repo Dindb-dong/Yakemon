@@ -3,13 +3,16 @@ import axios from "axios";
 export interface LeaderboardEntry {
   rank: number;
   username: string;
-  streak: number;
+  bestStreak: number;
+  winRate: number;
 }
 
 interface LeaderboardResponseRow {
   rank: number;
   username: string;
-  winStreak: number;
+  bestWinStreak: number;
+  winCount: number;
+  loseCount: number;
 }
 
 export class LeaderboardError extends Error {
@@ -28,7 +31,10 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
     return response.data.map((row) => ({
       rank: row.rank,
       username: row.username,
-      streak: row.winStreak,
+      bestStreak: row.bestWinStreak ?? 0,
+      winRate: row.winCount + row.loseCount > 0
+        ? Math.round((row.winCount / (row.winCount + row.loseCount)) * 100)
+        : 0,
     }));
   } catch (error: any) {
     if (error.response?.status === 400) {
