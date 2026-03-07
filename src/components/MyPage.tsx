@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   EffortStatKey,
@@ -12,6 +12,8 @@ import {
 } from "../api/playhistory";
 import "./MyPage.css";
 import { getHpImagePath } from "./PokemonArea";
+import { createGen1Pokemon, createGen2Pokemon, createGen3Pokemon, createGen4Pokemon, createGen5Pokemon, createGen6Pokemon, createGen7Pokemon, createGen8Pokemon, createGen9Pokemon } from "../data/createWincountPokemon";
+import { MoveInfo } from "../models/Move";
 
 const EFFORT_STAT_OPTIONS: Array<{ value: EffortStatKey; label: string }> = [
   { value: "hp", label: "HP" },
@@ -33,6 +35,30 @@ function MyPage() {
   const [effortStatByPokemon, setEffortStatByPokemon] = useState<Record<number, EffortStatKey>>({});
   const [effortAmountByPokemon, setEffortAmountByPokemon] = useState<Record<number, number>>({});
   const [effortThumbnails, setEffortThumbnails] = useState<Record<number, string>>({});
+  const [selectedPokemonId, setSelectedPokemonId] = useState<number | null>(null);
+  const [boxPage, setBoxPage] = useState(0);
+
+  const allPokemonCatalog = useMemo(() => (
+    createGen1Pokemon()
+      .concat(createGen2Pokemon())
+      .concat(createGen3Pokemon())
+      .concat(createGen4Pokemon())
+      .concat(createGen5Pokemon())
+      .concat(createGen6Pokemon())
+      .concat(createGen7Pokemon())
+      .concat(createGen8Pokemon())
+      .concat(createGen9Pokemon())
+  ), []);
+
+  const catalogById = useMemo(() => {
+    const map = new Map<number, { moves: MoveInfo[] }>();
+    allPokemonCatalog.forEach((pokemon) => {
+      if (!map.has(pokemon.id)) {
+        map.set(pokemon.id, { moves: pokemon.moves });
+      }
+    });
+    return map;
+  }, [allPokemonCatalog]);
 
   useEffect(() => {
     const init = async () => {
@@ -63,6 +89,8 @@ function MyPage() {
       setRecord(data);
       setNicknameInput(data.username || "");
       setMessage("ID 연결 완료! 해당 기록으로 이어서 플레이합니다.");
+      setBoxPage(0);
+      setSelectedPokemonId(null);
     } catch (error) {
       if (error instanceof GameError) {
         setMessage(error.message);
@@ -136,6 +164,19 @@ function MyPage() {
   const winRate = record && record.winCount + record.loseCount > 0
     ? Math.round((record.winCount / (record.winCount + record.loseCount)) * 100)
     : 0;
+
+  const effortRows = record?.pokemonEffort ?? [];
+  const rowsPerPage = 36;
+  const totalPages = Math.max(1, Math.ceil(effortRows.length / rowsPerPage));
+  const currentRows = effortRows.slice(boxPage * rowsPerPage, (boxPage + 1) * rowsPerPage);
+  const selectedRow = selectedPokemonId === null
+    ? null
+    : effortRows.find((row) => row.pokemonId === selectedPokemonId) ?? null;
+  const selectedMoves = selectedRow ? (catalogById.get(selectedRow.pokemonId)?.moves ?? []) : [];
+
+  useEffect(() => {
+    setBoxPage((prev) => Math.min(prev, totalPages - 1));
+  }, [totalPages]);
 
   useEffect(() => {
     if (!record?.pokemonEffort?.length) {
@@ -228,72 +269,42 @@ function MyPage() {
           <section className="effort-section">
             <h3>포켓몬 노력치 성장</h3>
             <p className="effort-section-help">한 능력치는 최대 252, 총합은 최대 510까지 투자됩니다. 4 포인트마다 실제 능력치가 +1 증가합니다.</p>
-            {record.pokemonEffort.length === 0 ? (
+            {effortRows.length === 0 ? (
               <div className="empty-record-box">아직 성장 데이터가 없습니다. 배틀에 참여한 포켓몬부터 포인트가 쌓입니다.</div>
             ) : (
-              <div className="effort-list">
-                {record.pokemonEffort.map((row) => (
-                  <article key={row.pokemonId} className={`effort-card ${row.unspentEffort > 0 ? "is-investable" : ""}`}>
-                    <div className="effort-card-head">
-                      <div className="effort-pokemon-head">
-                        <div className="effort-thumb-wrap">
-                          <img className="effort-thumb" src={effortThumbnails[row.pokemonId]} alt={row.pokemonName} />
-                        </div>
-                        <div>
-                          <h4>{row.pokemonName}</h4>
-                          <p>도감번호 #{row.pokemonId}</p>
-                        </div>
-                      </div>
-                      {row.unspentEffort > 0 && <span className="effort-ready-badge">투자 가능</span>}
-                    </div>
-                    <div className="effort-grid">
-                      {EFFORT_STAT_OPTIONS.map((stat) => (
-                        <div key={`${row.pokemonId}-${stat.value}`} className="effort-stat-item">
-                          <span>{stat.label}</span>
-                          <strong>{row.ev[stat.value]} (보너스 +{row.statBonus[stat.value]})</strong>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="effort-summary">
-                      <span>총 투자: {row.totalEffort}/510</span>
-                      <span>남은 포인트: {row.unspentEffort}</span>
-                      <span>참여 횟수: {row.battles}회</span>
-                    </div>
-                    <div className="effort-invest-row">
-                      <select
-                        value={effortStatByPokemon[row.pokemonId] || "attack"}
-                        onChange={(event) =>
-                          setEffortStatByPokemon((prev) => ({
-                            ...prev,
-                            [row.pokemonId]: event.target.value as EffortStatKey,
-                          }))
-                        }
-                      >
-                        {EFFORT_STAT_OPTIONS.map((stat) => (
-                          <option key={`${row.pokemonId}-${stat.value}-option`} value={stat.value}>{stat.label}</option>
-                        ))}
-                      </select>
-                      <input
-                        type="number"
-                        min={1}
-                        max={252}
-                        value={effortAmountByPokemon[row.pokemonId] || 4}
-                        onChange={(event) =>
-                          setEffortAmountByPokemon((prev) => ({
-                            ...prev,
-                            [row.pokemonId]: Number(event.target.value),
-                          }))
-                        }
-                      />
-                      <button
-                        onClick={() => handleInvestEffort(row.pokemonId, row.pokemonName)}
-                        disabled={isLoading || row.unspentEffort <= 0}
-                      >
-                        {isLoading ? "투자 중..." : "투자"}
-                      </button>
-                    </div>
-                  </article>
-                ))}
+              <div className="effort-box-wrap">
+                <div className="effort-box-grid">
+                  {currentRows.map((row) => (
+                    <button
+                      type="button"
+                      key={row.pokemonId}
+                      className={`effort-box-cell ${row.unspentEffort > 0 ? "is-investable" : ""}`}
+                      onClick={() => setSelectedPokemonId(row.pokemonId)}
+                      aria-label={`${row.pokemonName} 상세보기`}
+                    >
+                      <img className="effort-box-thumb" src={effortThumbnails[row.pokemonId]} alt={row.pokemonName} />
+                    </button>
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div className="effort-box-pagination">
+                    <button
+                      type="button"
+                      onClick={() => setBoxPage((prev) => Math.max(prev - 1, 0))}
+                      disabled={boxPage === 0}
+                    >
+                      &lt;
+                    </button>
+                    <span>{boxPage + 1} / {totalPages}</span>
+                    <button
+                      type="button"
+                      onClick={() => setBoxPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                      disabled={boxPage >= totalPages - 1}
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -308,6 +319,91 @@ function MyPage() {
         <button onClick={() => navigate("/leaderboard")}>리더보드 보기</button>
         <button onClick={() => navigate("/")}>메인으로</button>
       </div>
+
+      {selectedRow && (
+        <div className="effort-modal-overlay" onClick={() => setSelectedPokemonId(null)}>
+          <div className="effort-modal-card" onClick={(event) => event.stopPropagation()}>
+            <div className="effort-modal-head">
+              <div className="effort-pokemon-head">
+                <div className="effort-thumb-wrap">
+                  <img className="effort-thumb" src={effortThumbnails[selectedRow.pokemonId]} alt={selectedRow.pokemonName} />
+                </div>
+                <div>
+                  <h4>{selectedRow.pokemonName}</h4>
+                  <p>도감번호 #{selectedRow.pokemonId}</p>
+                </div>
+              </div>
+              <button type="button" className="effort-modal-close" onClick={() => setSelectedPokemonId(null)}>닫기</button>
+            </div>
+
+            <div className="effort-grid">
+              {EFFORT_STAT_OPTIONS.map((stat) => (
+                <div key={`${selectedRow.pokemonId}-${stat.value}`} className="effort-stat-item">
+                  <span>{stat.label}</span>
+                  <strong>{selectedRow.ev[stat.value]} (보너스 +{selectedRow.statBonus[stat.value]})</strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="effort-summary">
+              <span>총 투자: {selectedRow.totalEffort}/510</span>
+              <span>남은 포인트: {selectedRow.unspentEffort}</span>
+              <span>참여 횟수: {selectedRow.battles}회</span>
+            </div>
+
+            <div className="effort-invest-row">
+              <select
+                value={effortStatByPokemon[selectedRow.pokemonId] || "attack"}
+                onChange={(event) =>
+                  setEffortStatByPokemon((prev) => ({
+                    ...prev,
+                    [selectedRow.pokemonId]: event.target.value as EffortStatKey,
+                  }))
+                }
+              >
+                {EFFORT_STAT_OPTIONS.map((stat) => (
+                  <option key={`${selectedRow.pokemonId}-${stat.value}-option`} value={stat.value}>{stat.label}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                min={1}
+                max={252}
+                value={effortAmountByPokemon[selectedRow.pokemonId] || 4}
+                onChange={(event) =>
+                  setEffortAmountByPokemon((prev) => ({
+                    ...prev,
+                    [selectedRow.pokemonId]: Number(event.target.value),
+                  }))
+                }
+              />
+              <button
+                onClick={() => handleInvestEffort(selectedRow.pokemonId, selectedRow.pokemonName)}
+                disabled={isLoading || selectedRow.unspentEffort <= 0}
+              >
+                {isLoading ? "투자 중..." : "투자"}
+              </button>
+            </div>
+
+            <div className="effort-moves">
+              <h5>사용 기술</h5>
+              {selectedMoves.length === 0 ? (
+                <p>기술 정보가 없습니다.</p>
+              ) : (
+                <ul>
+                  {selectedMoves.map((move) => (
+                    <li key={`${selectedRow.pokemonId}-${move.name}`}>
+                      <strong>{move.name}</strong>
+                      <span>{move.type} / {move.category}</span>
+                      <span>위력 {move.power} · 명중 {move.accuracy} · PP {move.pp}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

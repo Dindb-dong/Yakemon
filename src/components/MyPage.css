@@ -256,30 +256,104 @@
 }
 
 .effort-list {
+  display: none;
+}
+
+.effort-box-wrap {
+  border: 2px solid #6e53b4;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #6e57bb 0%, #5d48a5 100%);
+  padding: 0.58rem;
+}
+
+.effort-box-grid {
   display: grid;
-  gap: 0.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.32rem;
 }
 
-.effort-card {
-  border: 2px solid #7b63c3;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #7a62c5 0%, #614bad 100%);
+.effort-box-cell {
+  aspect-ratio: 1 / 1;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background: rgba(38, 23, 86, 0.42);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.effort-box-cell.is-investable {
+  border-color: #ffd84f;
+  box-shadow: 0 0 0 1px rgba(255, 216, 79, 0.32);
+}
+
+.effort-box-cell:hover {
+  filter: brightness(1.08);
+}
+
+.effort-box-thumb {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.effort-box-pagination {
+  margin-top: 0.55rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.62rem;
   color: #f4f0ff;
-  padding: 0.6rem;
-  box-shadow: 0 4px 0 rgba(58, 42, 98, 0.75);
+  font-weight: 700;
+  font-size: 0.82rem;
 }
 
-.effort-card.is-investable {
-  border-color: #f7d84e;
-  box-shadow: 0 0 0 2px rgba(247, 216, 78, 0.28), 0 6px 0 rgba(70, 52, 14, 0.65);
+.effort-box-pagination button {
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  border-radius: 8px;
+  background: rgba(26, 18, 58, 0.45);
+  color: #fff;
+  font-weight: 700;
+  width: 34px;
+  height: 30px;
+  cursor: pointer;
 }
 
-.effort-card-head {
+.effort-box-pagination button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.effort-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4500;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.9rem;
+}
+
+.effort-modal-card {
+  width: min(760px, 100%);
+  max-height: 84vh;
+  overflow-y: auto;
+  border: 3px solid #6a4fb3;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f7f2ff 0%, #ece3ff 100%);
+  padding: 0.75rem;
+}
+
+.effort-modal-head {
   display: flex;
   justify-content: space-between;
-  gap: 0.6rem;
   align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
 }
 
 .effort-pokemon-head {
@@ -289,88 +363,77 @@
 }
 
 .effort-thumb-wrap {
-  width: 42px;
-  height: 42px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  width: 46px;
+  height: 46px;
+  border: 2px solid #7d64c1;
   border-radius: 8px;
-  background: rgba(36, 24, 73, 0.35);
+  background: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .effort-thumb {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
   image-rendering: pixelated;
 }
 
-.effort-card-head h4 {
-  margin: 0;
-  font-size: 0.98rem;
-}
-
-.effort-card-head p {
-  margin: 0;
-  font-size: 0.74rem;
-  color: rgba(244, 240, 255, 0.82);
-}
-
-.effort-ready-badge {
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #f7d84e, #d9a923);
-  color: #3d2b03;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.68rem;
-  font-weight: 800;
+.effort-modal-close {
+  border: 2px solid #2d240f;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #8f99aa, #677183);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.36rem 0.65rem;
+  cursor: pointer;
 }
 
 .effort-grid {
-  margin-top: 0.45rem;
+  margin-top: 0.36rem;
   display: grid;
-  gap: 0.32rem;
+  gap: 0.36rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .effort-stat-item {
-  border: 1px solid rgba(255, 255, 255, 0.42);
+  border: 1px solid #c8b076;
   border-radius: 8px;
-  background: rgba(20, 11, 47, 0.24);
-  padding: 0.3rem 0.38rem;
+  background: #fff8e4;
+  padding: 0.4rem 0.5rem;
   display: flex;
   justify-content: space-between;
-  gap: 0.34rem;
-  font-size: 0.72rem;
+  gap: 0.5rem;
+  font-size: 0.8rem;
 }
 
 .effort-stat-item strong {
-  color: #fff5c8;
+  color: #274f89;
 }
 
 .effort-summary {
-  margin-top: 0.4rem;
+  margin-top: 0.5rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  color: rgba(244, 240, 255, 0.9);
+  gap: 0.5rem;
+  font-size: 0.79rem;
+  color: #5f4c24;
 }
 
 .effort-invest-row {
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
   display: flex;
-  gap: 0.32rem;
+  gap: 0.45rem;
 }
 
 .effort-invest-row select,
 .effort-invest-row input {
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid #aa9258;
   border-radius: 8px;
-  padding: 0.34rem 0.38rem;
-  font-size: 0.74rem;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 0.42rem 0.5rem;
+  font-size: 0.82rem;
 }
 
 .effort-invest-row select {
@@ -378,16 +441,16 @@
 }
 
 .effort-invest-row input {
-  width: 72px;
+  width: 84px;
 }
 
 .effort-invest-row button {
   border: 2px solid #2d240f;
   border-radius: 10px;
   color: #fff;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  padding: 0.36rem 0.64rem;
+  padding: 0.45rem 0.8rem;
   background: linear-gradient(180deg, #49a060, #2f7b47);
   cursor: pointer;
 }
@@ -396,6 +459,34 @@
   background: #9c9a93;
   border-color: #7f7c75;
   cursor: not-allowed;
+}
+
+.effort-moves {
+  margin-top: 0.7rem;
+  border: 2px solid #b9a5ec;
+  border-radius: 10px;
+  background: #faf7ff;
+  padding: 0.5rem;
+}
+
+.effort-moves h5 {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+}
+
+.effort-moves ul {
+  margin: 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.effort-moves li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  font-size: 0.78rem;
 }
 
 @media (max-width: 640px) {
@@ -418,5 +509,17 @@
 
   .effort-invest-row input {
     width: 100%;
+  }
+
+  .effort-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .effort-box-grid {
+    gap: 0.22rem;
+  }
+
+  .effort-modal-card {
+    padding: 0.6rem;
   }
 }
