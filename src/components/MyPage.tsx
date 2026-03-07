@@ -54,9 +54,22 @@ function MyPage() {
   const catalogById = useMemo(() => {
     const map = new Map<number, { moves: MoveInfo[] }>();
     allPokemonCatalog.forEach((pokemon) => {
-      if (!map.has(pokemon.id)) {
-        map.set(pokemon.id, { moves: pokemon.moves });
+      const existing = map.get(pokemon.id);
+      if (!existing) {
+        map.set(pokemon.id, { moves: [...pokemon.moves] });
+        return;
       }
+
+      const moveNameSet = new Set(existing.moves.map((move) => move.name));
+      pokemon.moves.forEach((move) => {
+        if (!moveNameSet.has(move.name)) {
+          existing.moves.push(move);
+          moveNameSet.add(move.name);
+        }
+      });
+    });
+    map.forEach((value) => {
+      value.moves.sort((a, b) => a.name.localeCompare(b.name, "ko"));
     });
     return map;
   }, [allPokemonCatalog]);
